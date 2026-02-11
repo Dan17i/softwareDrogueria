@@ -53,6 +53,27 @@ CREATE TABLE IF NOT EXISTS suppliers (
 
 CREATE INDEX IF NOT EXISTS idx_suppliers_active ON suppliers(active);
 
+-- Tabla: Productos (MUST be created before order_items and goods_receipt_items)
+CREATE TABLE IF NOT EXISTS products (
+    id BIGSERIAL PRIMARY KEY,
+    code VARCHAR(50) NOT NULL UNIQUE,
+    name VARCHAR(200) NOT NULL,
+    description VARCHAR(500),
+    price NUMERIC(10, 2) NOT NULL,
+    stock INTEGER NOT NULL DEFAULT 0,
+    min_stock INTEGER NOT NULL DEFAULT 10,
+    category VARCHAR(100),
+    active BOOLEAN NOT NULL DEFAULT true,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP,
+    
+    CONSTRAINT idx_products_code UNIQUE (code)
+);
+
+CREATE INDEX IF NOT EXISTS idx_products_active ON products(active);
+CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
+CREATE INDEX IF NOT EXISTS idx_products_stock ON products(stock);
+
 -- Tabla: Órdenes de Compra
 CREATE TABLE IF NOT EXISTS orders (
     id BIGSERIAL PRIMARY KEY,
@@ -98,26 +119,6 @@ CREATE TABLE IF NOT EXISTS order_items (
 
 CREATE INDEX IF NOT EXISTS idx_order_items_order ON order_items(order_id);
 
--- Tabla: Productos
-CREATE TABLE IF NOT EXISTS products (
-    id BIGSERIAL PRIMARY KEY,
-    code VARCHAR(50) NOT NULL UNIQUE,
-    name VARCHAR(200) NOT NULL,
-    description VARCHAR(500),
-    price NUMERIC(10, 2) NOT NULL,
-    stock INTEGER NOT NULL DEFAULT 0,
-    min_stock INTEGER NOT NULL DEFAULT 10,
-    category VARCHAR(100),
-    active BOOLEAN NOT NULL DEFAULT true,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP,
-    
-    CONSTRAINT idx_products_code UNIQUE (code)
-);
-
-CREATE INDEX IF NOT EXISTS idx_products_active ON products(active);
-CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
-CREATE INDEX IF NOT EXISTS idx_products_stock ON products(stock);
 
 -- Tabla: Recepción de Mercancía (Goods Receipt)
 CREATE TABLE IF NOT EXISTS goods_receipts (

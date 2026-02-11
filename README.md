@@ -125,6 +125,54 @@ La API estará disponible en: `http://localhost:8080/api`
 | PATCH | `/api/goods-receipts/{id}/reject` | Rechazar recepción (no actualiza stock) |
 | DELETE | `/api/goods-receipts/{id}` | Eliminar recepción (solo PENDING) |
 
+### Roles y Autorización
+
+El sistema ahora incluye una definición de roles en `domain.model.Role` para control de acceso y autorización.
+
+- Roles disponibles (enum `Role`):
+  - `ADMIN` — Administrador del sistema (acceso completo).
+  - `MANAGER` — Gerente de ventas (reportes, gestión avanzada).
+  - `SALES` — Representante de ventas (crear/gestionar órdenes y clientes).
+  - `WAREHOUSE` — Personal de almacén (gestión de inventario y recepciones).
+  - `USER` — Usuario estándar (permisos limitados).
+
+Buenas prácticas y notas de implementación:
+
+- El `Role` se persiste en la entidad `UserEntity` como `EnumType.STRING`.
+- Para mapear a Spring Security, usamos la convención `ROLE_<ROLE_NAME>` al construir `GrantedAuthority`. Por ejemplo:
+  - `ROLE_ADMIN`, `ROLE_MANAGER`, etc.
+- Se recomienda usar el helper `toAuthority()` o `"ROLE_" + role.name()` al construir autoridades.
+- No se recomienda almacenar la definición de roles en texto plano en múltiples lugares; centraliza la lógica en `domain.model.Role`.
+- Para internacionalización utiliza claves (i18n) en lugar de descripciones literales en el enum.
+
+Autenticación y JWT
+
+- El proyecto incluye utilidades para JWT en `infrastructure.security.JwtUtils`.
+- Configuración recomendable para desarrollo: establecer la variable de entorno `APP_JWT_SECRET` con una clave segura (mínimo 32 bytes). Ejemplo (PowerShell):
+
+```powershell
+$env:APP_JWT_SECRET = 'a-very-long-dev-secret-with-at-least-32-chars-123456'
+mvn spring-boot:run
+```
+
+- Para producción, almacena secretos en un gestor (Vault, KeyVault) y no en `application.yml`.
+- Endpoints de autenticación (próximamente):
+  - `POST /api/auth/register` — Registro de usuario
+  - `POST /api/auth/login` — Inicio de sesión (devuelve JWT)
+  - Endpoints protegidos deben recibir `Authorization: Bearer <token>`
+
+Creación de usuario administrador inicial (dev)
+
+Puedes crear un admin manualmente en base de datos o añadir un script de inicialización. Ejemplo SQL mínimo (H2/Postgres):
+
+```sql
+INSERT INTO users (username, email, password, role, active, created_at)
+VALUES ('admin', 'admin@example.com', '<bcrypt-hash>', 'ADMIN', true, CURRENT_TIMESTAMP);
+```
+
+Usa BCrypt para generar el hash de la contraseña (por ejemplo con `PasswordEncoder` de Spring Security).
+
+
 ### Ejemplos de Uso
 
 **Crear un producto:**
