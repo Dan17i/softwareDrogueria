@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: drogueria-bellavista
+  
+  datasource:
+    url: jdbc:postgresql://localhost:5432/drogueria_db
+    username: postgres
+    password: password
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    time-zone: America/Bogota
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+logging:
+  level:
+    com.drogueria.bellavista: DEBUG
+    org.springframework.web: INFO
+    org.hibernate: INFO
