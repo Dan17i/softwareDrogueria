@@ -60,7 +60,7 @@ INSERT INTO products (code, name, description, price, stock, min_stock, category
 INSERT INTO orders (order_number, customer_id, customer_code, customer_name, supplier_id, supplier_code, supplier_name, status, total, notes, order_date, expected_delivery_date, actual_delivery_date, created_at, updated_at)
 SELECT o.order_number, c.id, c.code, c.name, s.id, s.code, s.name, o.status, o.total, o.notes, o.order_date, o.expected_delivery_date, o.actual_delivery_date, o.created_at, o.updated_at
 FROM (
-  SELECT 'ORD-2024-001' as order_number, 'PENDING' as status, 940000.00 as total, 'Reabastecimiento mensual' as notes, NOW() as order_date, DATE_ADD(NOW(), INTERVAL 5 DAY) as expected_delivery_date, NULL as actual_delivery_date, NOW() as created_at, NOW() as updated_at
+  SELECT 'ORD-2024-001' as order_number, 'PENDING' as status, 940000.00 as total, 'Reabastecimiento mensual' as notes, NOW() as order_date, DATEADD('DAY', 5, CURRENT_TIMESTAMP()) as expected_delivery_date, NULL as actual_delivery_date, NOW() as created_at, NOW() as updated_at
 ) o, (SELECT id, code, name FROM customers WHERE code = 'CLI001') c, (SELECT id, code, name FROM suppliers WHERE code = 'SUP001') s;
 
 -- Agregar items a la Orden 1
@@ -165,7 +165,7 @@ ORDER BY oi.code;
 INSERT INTO goods_receipts (receipt_number, order_id, order_number, supplier_id, supplier_name, status, notes, expected_delivery_date, created_at, updated_at)
 SELECT gr.receipt_number, o.id, o.order_number, o.supplier_id, o.supplier_name, gr.status, gr.notes, gr.expected_delivery_date, gr.created_at, gr.updated_at
 FROM orders o, (
-  SELECT 'GR-202400001' as receipt_number, 'RECEIVED' as status, 'Recepción completa de medicamentos y vitaminas' as notes, DATE_ADD(NOW(), INTERVAL 5 DAY) as expected_delivery_date, DATE_SUB(NOW(), INTERVAL 2 DAY) as created_at, DATE_SUB(NOW(), INTERVAL 1 DAY) as updated_at
+  SELECT 'GR-202400001' as receipt_number, 'RECEIVED' as status, 'Recepción completa de medicamentos y vitaminas' as notes, DATEADD('DAY', 5, CURRENT_TIMESTAMP()) as expected_delivery_date, DATE_SUB(NOW(), INTERVAL 2 DAY) as created_at, DATE_SUB(NOW(), INTERVAL 1 DAY) as updated_at
 ) gr
 WHERE o.order_number = 'ORD-2024-003';
 
@@ -181,7 +181,7 @@ WHERE gr.receipt_number = 'GR-202400001'
 INSERT INTO goods_receipts (receipt_number, order_id, order_number, supplier_id, supplier_name, status, notes, expected_delivery_date, created_at, updated_at)
 SELECT gr.receipt_number, o.id, o.order_number, o.supplier_id, o.supplier_name, gr.status, gr.notes, gr.expected_delivery_date, gr.created_at, gr.updated_at
 FROM orders o, (
-  SELECT 'GR-202400002' as receipt_number, 'PARTIALLY_RECEIVED' as status, 'Recepción parcial - Falta MED001' as notes, DATE_ADD(NOW(), INTERVAL 5 DAY) as expected_delivery_date, NOW() as created_at, NOW() as updated_at
+  SELECT 'GR-202400002' as receipt_number, 'PARTIALLY_RECEIVED' as status, 'Recepción parcial - Falta MED001' as notes, DATEADD('DAY', 5, CURRENT_TIMESTAMP()) as expected_delivery_date, NOW() as created_at, NOW() as updated_at
 ) gr
 WHERE o.order_number = 'ORD-2024-001';
 
