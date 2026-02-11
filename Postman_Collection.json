@@ -221,5 +221,65 @@
         }
       ]
     }
+    ,
+    {
+      "name": "Goods Receipts",
+      "item": [
+        {
+          "name": "Create Goods Receipt",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": 3,\n  \"items\": [\n    {\n      \"productId\": 1,\n      \"productCode\": \"MED001\",\n      \"productName\": \"Acetaminofén 500mg\",\n      \"orderedQuantity\": 10,\n      \"receivedQuantity\": 10\n    }\n  ],\n  \"notes\": \"Recepción inicial\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/goods-receipts", "host": ["{{base_url}}"], "path": ["goods-receipts"] }
+          }
+        },
+        {
+          "name": "Get Goods Receipt by ID",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/goods-receipts/1", "host": ["{{base_url}}"], "path": ["goods-receipts","1"] } }
+        },
+        {
+          "name": "Get Goods Receipt by Number",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/goods-receipts/number/GR-202400001", "host": ["{{base_url}}"], "path": ["goods-receipts","number","GR-202400001"] } }
+        },
+        {
+          "name": "Get Goods Receipts by Order",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/goods-receipts/order/3", "host": ["{{base_url}}"], "path": ["goods-receipts","order","3"] } }
+        },
+        {
+          "name": "Get Goods Receipts by Supplier",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/goods-receipts/supplier/2", "host": ["{{base_url}}"], "path": ["goods-receipts","supplier","2"] } }
+        },
+        {
+          "name": "Get Goods Receipts by Status",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/goods-receipts/status/PENDING", "host": ["{{base_url}}"], "path": ["goods-receipts","status","PENDING"] } }
+        },
+        {
+          "name": "Get Pending Goods Receipts",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/goods-receipts/pending", "host": ["{{base_url}}"], "path": ["goods-receipts","pending"] } }
+        },
+        {
+          "name": "Get All Goods Receipts",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/goods-receipts", "host": ["{{base_url}}"], "path": ["goods-receipts"] } }
+        },
+        {
+          "name": "Receive Goods Receipt",
+          "request": { "method": "PATCH", "header": [], "url": { "raw": "{{base_url}}/goods-receipts/1/receive", "host": ["{{base_url}}"], "path": ["goods-receipts","1","receive"] } }
+        },
+        {
+          "name": "Reject Goods Receipt",
+          "request": { "method": "PATCH", "header": [], "url": { "raw": "{{base_url}}/goods-receipts/1/reject?reason=damaged", "host": ["{{base_url}}"], "path": ["goods-receipts","1","reject"], "query": [{ "key": "reason", "value": "damaged" }] } }
+        },
+        {
+          "name": "Delete Goods Receipt",
+          "request": { "method": "DELETE", "header": [], "url": { "raw": "{{base_url}}/goods-receipts/1", "host": ["{{base_url}}"], "path": ["goods-receipts","1"] } }
+        }
+      ]
+    }
   ]
 }

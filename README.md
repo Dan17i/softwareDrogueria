@@ -110,6 +110,21 @@ La API estará disponible en: `http://localhost:8080/api`
 | PATCH | `/api/products/{id}/toggle-status` | Activar/Desactivar |
 | DELETE | `/api/products/{id}` | Eliminar producto |
 
+### Recepciones de Mercancía (Goods Receipt)
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| POST | `/api/goods-receipts` | Crear recepción de mercancía vinculada a una orden |
+| GET | `/api/goods-receipts/{id}` | Obtener recepción por ID |
+| GET | `/api/goods-receipts/number/{receiptNumber}` | Obtener por número de recepción |
+| GET | `/api/goods-receipts/order/{orderId}` | Listar recepciones de una orden |
+| GET | `/api/goods-receipts/supplier/{supplierId}` | Listar recepciones de un proveedor |
+| GET | `/api/goods-receipts/status/{status}` | Filtrar por estado (PENDING, RECEIVED, ...) |
+| GET | `/api/goods-receipts/pending` | Listar recepciones pendientes |
+| PATCH | `/api/goods-receipts/{id}/receive` | Confirmar recepción y actualizar stock |
+| PATCH | `/api/goods-receipts/{id}/reject` | Rechazar recepción (no actualiza stock) |
+| DELETE | `/api/goods-receipts/{id}` | Eliminar recepción (solo PENDING) |
+
 ### Ejemplos de Uso
 
 **Crear un producto:**
@@ -182,6 +197,8 @@ mvn test
 # Ejecutar tests con coverage
 mvn test jacoco:report
 ```
+
+Se han añadido pruebas unitarias básicas para `GoodsReceiptService` en `src/test/java/com/drogueria/bellavista/domain/service/GoodsReceiptServiceTest.java`.
 
 ## 📝 Estructura de Carpetas Completa
 
