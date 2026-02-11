@@ -154,4 +154,8 @@ public class AuthService implements UserDetailsService {
             throw new UsernameNotFoundException("User not found: " + username);
         }
     }
+
+    public User getUserByUsername(String username) {
+        return userService.getUserByUsername(username);
+    }
 }
