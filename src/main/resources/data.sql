@@ -81,7 +81,7 @@ ORDER BY oi.code;
 INSERT INTO orders (order_number, customer_id, customer_code, customer_name, supplier_id, supplier_code, supplier_name, status, total, notes, order_date, expected_delivery_date, actual_delivery_date, created_at, updated_at)
 SELECT o.order_number, c.id, c.code, c.name, s.id, s.code, s.name, o.status, o.total, o.notes, o.order_date, o.expected_delivery_date, o.actual_delivery_date, o.created_at, o.updated_at
 FROM (
-  SELECT 'ORD-2024-002' as order_number, 'PENDING' as status, 228000.00 as total, 'Orden de farmacia del barrio' as notes, NOW() as order_date, DATE_ADD(NOW(), INTERVAL 3 DAY) as expected_delivery_date, NULL as actual_delivery_date, NOW() as created_at, NOW() as updated_at
+  SELECT 'ORD-2024-002' as order_number, 'PENDING' as status, 228000.00 as total, 'Orden de farmacia del barrio' as notes, NOW() as order_date, DATEADD('DAY', 3, NOW()) as expected_delivery_date, NULL as actual_delivery_date, NOW() as created_at, NOW() as updated_at
 ) o, (SELECT id, code, name FROM customers WHERE code = 'CLI002') c, (SELECT id, code, name FROM suppliers WHERE code = 'SUP002') s;
 
 -- Agregar items a la Orden 2
@@ -102,7 +102,7 @@ ORDER BY oi.code;
 INSERT INTO orders (order_number, customer_id, customer_code, customer_name, supplier_id, supplier_code, supplier_name, status, total, notes, order_date, expected_delivery_date, actual_delivery_date, created_at, updated_at)
 SELECT o.order_number, c.id, c.code, c.name, s.id, s.code, s.name, o.status, o.total, o.notes, o.order_date, o.expected_delivery_date, o.actual_delivery_date, o.created_at, o.updated_at
 FROM (
-  SELECT 'ORD-2024-003' as order_number, 'COMPLETED' as status, 580000.00 as total, 'Orden completada - Distribuidora Nacional' as notes, DATE_SUB(NOW(), INTERVAL 7 DAY) as order_date, DATE_SUB(NOW(), INTERVAL 4 DAY) as expected_delivery_date, DATE_SUB(NOW(), INTERVAL 2 DAY) as actual_delivery_date, DATE_SUB(NOW(), INTERVAL 7 DAY) as created_at, DATE_SUB(NOW(), INTERVAL 2 DAY) as updated_at
+  SELECT 'ORD-2024-003' as order_number, 'COMPLETED' as status, 580000.00 as total, 'Orden completada - Distribuidora Nacional' as notes, DATEADD('DAY', -7, NOW()) as order_date, DATE_SUB(NOW(), INTERVAL 4 DAY) as expected_delivery_date, DATE_SUB(NOW(), INTERVAL 2 DAY) as actual_delivery_date, DATEADD('DAY', -7, NOW()) as created_at, DATE_SUB(NOW(), INTERVAL 2 DAY) as updated_at
 ) o, (SELECT id, code, name FROM customers WHERE code = 'CLI003') c, (SELECT id, code, name FROM suppliers WHERE code = 'SUP003') s;
 
 -- Agregar items a la Orden 3
@@ -198,7 +198,7 @@ WHERE gr.receipt_number = 'GR-202400002'
 INSERT INTO goods_receipts (receipt_number, order_id, order_number, supplier_id, supplier_name, status, notes, expected_delivery_date, created_at, updated_at)
 SELECT gr.receipt_number, o.id, o.order_number, o.supplier_id, o.supplier_name, gr.status, gr.notes, gr.expected_delivery_date, gr.created_at, gr.updated_at
 FROM orders o, (
-  SELECT 'GR-202400003' as receipt_number, 'PENDING' as status, 'Recepción en espera de confirmación' as notes, DATE_ADD(NOW(), INTERVAL 3 DAY) as expected_delivery_date, NOW() as created_at, NOW() as updated_at
+  SELECT 'GR-202400003' as receipt_number, 'PENDING' as status, 'Recepción en espera de confirmación' as notes, DATEADD('DAY', 3, NOW()) as expected_delivery_date, NOW() as created_at, NOW() as updated_at
 ) gr
 WHERE o.order_number = 'ORD-2024-002';
 
