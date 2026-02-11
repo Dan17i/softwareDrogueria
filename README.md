@@ -32,7 +32,7 @@ src/main/java/com/drogueria/bellavista/
 
 ## 🚀 Tecnologías
 
-- **Java 17**
+- **Java 21**
 - **Spring Boot 3.2.2**
 - **Spring Data JPA**
 - **PostgreSQL** (producción)
