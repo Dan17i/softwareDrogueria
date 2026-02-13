@@ -1,32 +1,26 @@
 spring:
   application:
     name: drogueria-bellavista
-  
+
   datasource:
-    url: jdbc:h2:mem:testdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password: 
-  
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
-  
+    url: jdbc:postgresql://localhost:5433/drogueria_bellavista
+    username: postgres
+    password: "JUNIORDIAZ"
+    driver-class-name: org.postgresql.Driver
+
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: validate
     show-sql: true
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.H2Dialect
-  
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
   sql:
     init:
-      mode: always
-      data-locations: classpath:data.sql
-  
+      mode: never
+
   jackson:
     serialization:
       write-dates-as-timestamps: false
