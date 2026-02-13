@@ -12,6 +12,7 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+    defer-datasource-initialization: true  # ¡ESTA LÍNEA ES LA CLAVE!
     properties:
       hibernate:
         format_sql: true
@@ -20,6 +21,8 @@ spring:
   sql:
     init:
       mode: always
+      # Opcional: puedes especificar explícitamente los archivos
+      data-locations: classpath:data.sql
 
   jackson:
     serialization:
