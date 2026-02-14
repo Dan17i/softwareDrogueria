@@ -83,12 +83,12 @@ spring:
 mvn clean install
 ```
 4. # Levantar servicios con Docker Compose
-```
+``` bash
 docker compose up -d
 ```
 
 5. # Verificar que PostgreSQL esté corriendo
-```
+``` bash
 docker ps
 ```
 
