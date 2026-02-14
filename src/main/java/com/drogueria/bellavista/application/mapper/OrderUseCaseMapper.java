@@ -9,16 +9,41 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;
-
 /**
- * Mapper - Convierte entre OrderDTO (Request/Response) ↔ Order (Dominio)
+ * Mapper de casos de uso para órdenes de compra.
+ * <p>
+ * Responsable de convertir entre los DTOs utilizados por la capa de aplicación
+ * y las entidades del dominio {@link Order}.
+ * </p>
+ *
+ * <p>
+ * Durante la conversión a dominio, este mapper consulta el
+ * {@link ProductService} para enriquecer los ítems con datos reales del producto
+ * (código, nombre, precio). Esto evita confiar en información enviada por el cliente
+ * y garantiza consistencia con el catálogo del sistema.
+ * </p>
+ *
+ * Forma parte de la capa de aplicación dentro de la arquitectura hexagonal.
  */
 @Component
 @RequiredArgsConstructor
 public class OrderUseCaseMapper {
     
     private final ProductService productService;
-    
+    /**
+     * Convierte un DTO de creación en una entidad de dominio {@link Order}.
+     * <p>
+     * Además de mapear los campos básicos, este método:
+     * <ul>
+     *   <li>Obtiene cada {@link Product} desde el servicio de dominio</li>
+     *   <li>Construye los {@link OrderItem} con datos confiables</li>
+     *   <li>Calcula subtotales por ítem</li>
+     *   <li>Agrega los ítems a la orden</li>
+     * </ul>
+     *
+     * @param request DTO enviado desde la API
+     * @return instancia de {@link Order} lista para procesamiento en dominio
+     */
     public Order toDomain(OrderDTO.CreateRequest request) {
         if (request == null) return null;
         
@@ -48,7 +73,13 @@ public class OrderUseCaseMapper {
         
         return order;
     }
-    
+    /**
+     * Convierte una entidad de dominio {@link Order}
+     * en su DTO de respuesta para la API.
+     *
+     * @param domain entidad proveniente del dominio
+     * @return DTO {@link OrderDTO.Response} listo para exposición
+     */
     public OrderDTO.Response toResponse(Order domain) {
         if (domain == null) return null;
         
@@ -74,7 +105,13 @@ public class OrderUseCaseMapper {
             .updatedAt(domain.getUpdatedAt())
             .build();
     }
-    
+    /**
+     * Convierte un {@link OrderItem} del dominio
+     * en su DTO de respuesta.
+     *
+     * @param item ítem perteneciente a la orden
+     * @return DTO {@link OrderDTO.OrderItemResponse}
+     */
     private OrderDTO.OrderItemResponse itemToResponse(OrderItem item) {
         return OrderDTO.OrderItemResponse.builder()
             .id(item.getId())

@@ -3,16 +3,32 @@ package com.drogueria.bellavista.application.mapper;
 import com.drogueria.bellavista.application.dto.CustomerDTO;
 import com.drogueria.bellavista.domain.model.Customer;
 import org.springframework.stereotype.Component;
-
 /**
- * Mapper - Convierte entre CustomerDTO (Request/Response) ↔ Customer (Dominio)
- * Capa de aplicación
+ * Mapper de casos de uso para clientes.
+ * <p>
+ * Se encarga de convertir entre los DTOs utilizados por la capa de aplicación
+ * y la entidad de dominio {@link Customer}.
+ * </p>
+ *
+ * <p>
+ * Responsabilidades:
+ * <ul>
+ *     <li>Transformar DTOs de entrada en objetos del dominio.</li>
+ *     <li>Transformar entidades del dominio en DTOs de salida.</li>
+ *     <li>Mantener aislado el dominio de detalles de transporte (API).</li>
+ * </ul>
+ * </p>
+ *
+ * Forma parte de la capa de aplicación dentro de la arquitectura hexagonal.
  */
 @Component
 public class CustomerUseCaseMapper {
-    
     /**
-     * Convierte CreateRequest → Customer (Dominio)
+     * Convierte un DTO de creación en una entidad de dominio.
+     *
+     * @param request DTO con los datos para crear un cliente
+     * @return instancia de {@link Customer} con los valores del request,
+     *         o {@code null} si el request es nulo
      */
     public Customer toDomain(CustomerDTO.CreateRequest request) {
         if (request == null) {
@@ -33,9 +49,12 @@ public class CustomerUseCaseMapper {
             .creditLimit(request.getCreditLimit())
             .build();
     }
-    
     /**
-     * Convierte UpdateRequest → Customer (Dominio)
+     * Convierte un DTO de actualización en una entidad de dominio.
+     *
+     * @param request DTO con los datos para actualizar un cliente
+     * @return instancia de {@link Customer} con los valores del request,
+     *         o {@code null} si el request es nulo
      */
     public Customer toDomain(CustomerDTO.UpdateRequest request) {
         if (request == null) {
@@ -57,9 +76,12 @@ public class CustomerUseCaseMapper {
             .active(request.getActive())
             .build();
     }
-    
     /**
-     * Convierte Customer (Dominio) → Response DTO
+     * Convierte una entidad del dominio en un DTO de respuesta.
+     *
+     * @param domain entidad {@link Customer} proveniente del dominio
+     * @return DTO {@link CustomerDTO.Response} listo para ser expuesto en la API,
+     *         o {@code null} si el dominio es nulo
      */
     public CustomerDTO.Response toResponse(Customer domain) {
         if (domain == null) {
