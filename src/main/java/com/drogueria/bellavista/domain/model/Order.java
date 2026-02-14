@@ -29,6 +29,7 @@ public class Order {
     private String supplierName;
     private String status; // PENDING, COMPLETED, CANCELLED
     private BigDecimal total;
+    @Builder.Default
     private List<OrderItem> items = new ArrayList<>();
     private String notes;
     private LocalDateTime orderDate;
