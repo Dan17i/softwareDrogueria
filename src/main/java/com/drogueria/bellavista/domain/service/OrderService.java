@@ -14,9 +14,21 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-
 /**
- * Servicio de dominio - Casos de uso de Órdenes
+ * Servicio de dominio encargado de la gestión del ciclo de vida de las órdenes.
+ *
+ * <p>Responsabilidades principales:</p>
+ * <ul>
+ *     <li>Crear órdenes validando cliente, productos, stock y crédito</li>
+ *     <li>Consultar órdenes por distintos criterios</li>
+ *     <li>Gestionar cambios de estado (completar, cancelar)</li>
+ *     <li>Aplicar efectos colaterales de negocio:
+ *          actualización de stock y saldo del cliente</li>
+ * </ul>
+ *
+ * <p>Este servicio contiene lógica crítica del negocio. Las operaciones que
+ * modifican estado se ejecutan dentro de una transacción para garantizar
+ * consistencia entre inventario, órdenes y crédito del cliente.</p>
  */
 @Service
 @RequiredArgsConstructor
@@ -26,13 +38,29 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final CustomerService customerService;
     private final ProductService productService;
-    
     /**
-     * Crear nueva orden
-     * Validaciones críticas:
-     * - Cliente existe y está activo
-     * - Cliente tiene crédito disponible
-     * - Productos existen y tienen stock
+     * Crea una nueva orden de venta.
+     *
+     * <p>Validaciones realizadas:</p>
+     * <ul>
+     *     <li>El cliente debe existir y estar activo</li>
+     *     <li>La orden debe contener al menos un ítem</li>
+     *     <li>Los productos deben existir, estar disponibles y tener stock suficiente</li>
+     *     <li>Se recalcula el total de la orden</li>
+     *     <li>El cliente debe tener crédito disponible</li>
+     * </ul>
+     *
+     * <p>Efectos de negocio:</p>
+     * <ul>
+     *     <li>Se genera un número único de orden</li>
+     *     <li>Se reduce el stock de los productos</li>
+     *     <li>Se incrementa el saldo pendiente del cliente</li>
+     * </ul>
+     *
+     * @param order orden a registrar
+     * @return orden guardada
+     * @throws ResourceNotFoundException si el cliente no existe
+     * @throws BusinessException si se incumple alguna regla de negocio
      */
     public Order createOrder(Order order) {
         // Validar cliente
@@ -97,68 +125,75 @@ public class OrderService {
         
         return savedOrder;
     }
-    
     /**
-     * Obtener orden por ID
+     * Obtiene una orden por su identificador.
+     *
+     * @param id ID de la orden
+     * @return orden encontrada
+     * @throws ResourceNotFoundException si no existe
      */
     @Transactional(readOnly = true)
     public Order getOrderById(Long id) {
         return orderRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Order", "id", id));
     }
-    
     /**
-     * Obtener orden por número
+     * Obtiene una orden por su número único.
+     *
+     * @param orderNumber número de orden
+     * @return orden encontrada
+     * @throws ResourceNotFoundException si no existe
      */
     @Transactional(readOnly = true)
     public Order getOrderByOrderNumber(String orderNumber) {
         return orderRepository.findByOrderNumber(orderNumber)
             .orElseThrow(() -> new ResourceNotFoundException("Order", "orderNumber", orderNumber));
     }
-    
     /**
-     * Listar todas las órdenes
+     * Obtiene todas las órdenes registradas.
      */
     @Transactional(readOnly = true)
     public List<Order> getAllOrders() {
         return orderRepository.findAll();
     }
-    
     /**
-     * Listar órdenes por cliente
+     * Obtiene las órdenes asociadas a un cliente.
+     *
+     * @param customerId ID del cliente
+     * @return lista de órdenes del cliente
      */
     @Transactional(readOnly = true)
     public List<Order> getOrdersByCustomerId(Long customerId) {
         customerService.getCustomerById(customerId); // Validar que existe
         return orderRepository.findByCustomerId(customerId);
     }
-    
     /**
-     * Listar órdenes por estado
+     * Obtiene órdenes filtradas por estado.
      */
     @Transactional(readOnly = true)
     public List<Order> getOrdersByStatus(String status) {
         return orderRepository.findByStatus(status);
     }
-    
     /**
-     * Listar órdenes pendientes de un cliente
+     * Obtiene las órdenes pendientes de un cliente.
      */
     @Transactional(readOnly = true)
     public List<Order> getPendingOrdersByCustomerId(Long customerId) {
         return orderRepository.findByCustomerIdAndStatus(customerId, "PENDING");
     }
-    
     /**
-     * Listar órdenes por rango de fechas
+     * Obtiene órdenes dentro de un rango de fechas.
      */
     @Transactional(readOnly = true)
     public List<Order> getOrdersByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
         return orderRepository.findByDateRange(startDate, endDate);
     }
-    
     /**
-     * Completar orden
+     * Marca una orden como completada.
+     *
+     * @param orderId ID de la orden
+     * @return orden actualizada
+     * @throws ResourceNotFoundException si no existe
      */
     public Order completeOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
@@ -167,9 +202,19 @@ public class OrderService {
         order.complete();
         return orderRepository.save(order);
     }
-    
     /**
-     * Cancelar orden (reversión de operaciones)
+     * Cancela una orden.
+     *
+     * <p>Si la orden estaba en estado PENDING se revierten
+     * los efectos de negocio:</p>
+     * <ul>
+     *     <li>Se devuelve el stock a los productos</li>
+     *     <li>Se reduce el saldo pendiente del cliente</li>
+     * </ul>
+     *
+     * @param orderId ID de la orden
+     * @return orden cancelada
+     * @throws ResourceNotFoundException si no existe
      */
     public Order cancelOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
@@ -188,10 +233,12 @@ public class OrderService {
         order.cancel();
         return orderRepository.save(order);
     }
-    
     /**
-     * Generar número de orden único
+     * Genera un número único de orden.
+     *
+     * @return identificador único de orden
      */
+
     private String generateOrderNumber() {
         return "ORD-" + System.currentTimeMillis() + "-" + UUID.randomUUID().toString().substring(0, 4).toUpperCase();
     }

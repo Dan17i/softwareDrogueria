@@ -10,10 +10,19 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
 /**
- * Servicio de dominio - Casos de uso de Productos
- * Contiene toda la lógica de negocio de productos
+ * Servicio de dominio encargado de la gestión de productos.
+ *
+ * <p>Centraliza la lógica de negocio relacionada con:</p>
+ * <ul>
+ *     <li>Creación y actualización de productos</li>
+ *     <li>Consultas por distintos criterios</li>
+ *     <li>Control de stock</li>
+ *     <li>Activación, desactivación y eliminación</li>
+ * </ul>
+ *
+ * <p>Las operaciones que modifican estado se ejecutan dentro de una
+ * transacción para garantizar consistencia en inventario.</p>
  */
 @Service
 @RequiredArgsConstructor
@@ -21,9 +30,18 @@ import java.util.List;
 public class ProductService {
     
     private final ProductRepository productRepository;
-    
     /**
-     * Crear un nuevo producto
+     * Crea un nuevo producto en el sistema.
+     *
+     * <p>Reglas de negocio:</p>
+     * <ul>
+     *     <li>El código del producto debe ser único</li>
+     *     <li>Se establecen valores iniciales por defecto</li>
+     * </ul>
+     *
+     * @param product producto a registrar
+     * @return producto guardado
+     * @throws BusinessException si el código ya existe
      */
     public Product createProduct(Product product) {
         // Validar que no exista un producto con el mismo código
@@ -38,9 +56,20 @@ public class ProductService {
         
         return productRepository.save(product);
     }
-    
     /**
-     * Actualizar un producto existente
+     * Actualiza un producto existente.
+     *
+     * <p>Reglas de negocio:</p>
+     * <ul>
+     *     <li>El producto debe existir</li>
+     *     <li>El código debe seguir siendo único</li>
+     * </ul>
+     *
+     * @param id identificador del producto
+     * @param productData datos nuevos del producto
+     * @return producto actualizado
+     * @throws ResourceNotFoundException si no existe
+     * @throws BusinessException si el código ya está en uso
      */
     public Product updateProduct(Long id, Product productData) {
         Product existingProduct = productRepository.findById(id)
@@ -65,85 +94,100 @@ public class ProductService {
         
         return productRepository.save(existingProduct);
     }
-    
     /**
-     * Obtener producto por ID
+     * Obtiene un producto por su ID.
+     *
+     * @param id identificador del producto
+     * @return producto encontrado
+     * @throws ResourceNotFoundException si no existe
      */
     @Transactional(readOnly = true)
     public Product getProductById(Long id) {
         return productRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
     }
-    
     /**
-     * Obtener producto por código
+     * Obtiene un producto por su código.
+     *
+     * @param code código del producto
+     * @return producto encontrado
+     * @throws ResourceNotFoundException si no existe
      */
     @Transactional(readOnly = true)
     public Product getProductByCode(String code) {
         return productRepository.findByCode(code)
             .orElseThrow(() -> new ResourceNotFoundException("Product", "code", code));
     }
-    
     /**
-     * Listar todos los productos
+     * Lista todos los productos registrados.
      */
     @Transactional(readOnly = true)
     public List<Product> getAllProducts() {
         return productRepository.findAll();
     }
-    
     /**
-     * Listar productos activos
+     * Lista únicamente los productos activos.
      */
     @Transactional(readOnly = true)
     public List<Product> getActiveProducts() {
         return productRepository.findAllActive();
     }
-    
     /**
-     * Listar productos por categoría
+     * Obtiene productos filtrados por categoría.
+     *
+     * @param category categoría del producto
      */
     @Transactional(readOnly = true)
     public List<Product> getProductsByCategory(String category) {
         return productRepository.findByCategory(category);
     }
-    
     /**
-     * Buscar productos por nombre
+     * Busca productos cuyo nombre contenga el texto indicado.
+     *
+     * @param name texto de búsqueda
      */
     @Transactional(readOnly = true)
     public List<Product> searchProductsByName(String name) {
         return productRepository.findByNameContaining(name);
     }
-    
     /**
-     * Obtener productos que necesitan reabastecimiento
+     * Obtiene los productos que necesitan reabastecimiento,
+     * normalmente aquellos con stock menor o igual al mínimo.
      */
     @Transactional(readOnly = true)
     public List<Product> getProductsNeedingRestock() {
         return productRepository.findProductsNeedingRestock();
     }
-    
     /**
-     * Reducir stock de un producto
+     * Reduce el stock de un producto.
+     *
+     * @param productId ID del producto
+     * @param quantity cantidad a descontar
+     * @return producto actualizado
      */
     public Product reduceStock(Long productId, Integer quantity) {
         Product product = getProductById(productId);
         product.reduceStock(quantity);
         return productRepository.save(product);
     }
-    
     /**
-     * Aumentar stock de un producto
+     * Aumenta el stock de un producto.
+     *
+     * @param productId ID del producto
+     * @param quantity cantidad a agregar
+     * @return producto actualizado
      */
+
     public Product increaseStock(Long productId, Integer quantity) {
         Product product = getProductById(productId);
         product.increaseStock(quantity);
         return productRepository.save(product);
     }
-    
     /**
-     * Activar/Desactivar producto
+     * Cambia el estado activo/inactivo del producto.
+     *
+     * @param productId ID del producto
+     * @return producto actualizado
      */
     public Product toggleProductStatus(Long productId) {
         Product product = getProductById(productId);
@@ -151,9 +195,11 @@ public class ProductService {
         product.setUpdatedAt(LocalDateTime.now());
         return productRepository.save(product);
     }
-    
     /**
-     * Eliminar producto
+     * Elimina un producto del sistema.
+     *
+     * @param id ID del producto
+     * @throws ResourceNotFoundException si no existe
      */
     public void deleteProduct(Long id) {
         if (!productRepository.findById(id).isPresent()) {
@@ -161,10 +207,14 @@ public class ProductService {
         }
         productRepository.deleteById(id);
     }
-    
     /**
-     * Reducir stock (uso interno desde OrderService)
-     * NO inicia transacción porque ya está en una
+     * Reduce el stock de forma interna.
+     *
+     * <p>Este método está pensado para ser usado por otros servicios
+     * dentro de la misma transacción (por ejemplo, órdenes o recepciones).</p>
+     *
+     * @param productId ID del producto
+     * @param quantity cantidad a descontar
      */
     protected void reduceStockInternal(Long productId, Integer quantity) {
         Product product = productRepository.findById(productId)
@@ -172,10 +222,14 @@ public class ProductService {
         product.reduceStock(quantity);
         productRepository.save(product);
     }
-    
     /**
-     * Aumentar stock (uso interno desde OrderService)
-     * NO inicia transacción porque ya está en una
+     * Aumenta el stock de forma interna.
+     *
+     * <p>Utilizado por otros servicios de dominio dentro de una transacción
+     * existente para mantener consistencia del inventario.</p>
+     *
+     * @param productId ID del producto
+     * @param quantity cantidad a agregar
      */
     protected void increaseStockInternal(Long productId, Integer quantity) {
         Product product = productRepository.findById(productId)

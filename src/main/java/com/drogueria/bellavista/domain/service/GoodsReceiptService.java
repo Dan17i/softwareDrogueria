@@ -14,14 +14,19 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-
 /**
- * Servicio de Recepción de Mercancía
- * LÓGICA CRÍTICA:
- * - Crear recepción vinculada a una orden
- * - Validar que productos y cantidades coincidan
- * - Al recibir: actualizar stock de productos
- * - Si se rechaza: limpiar cambios
+ * Servicio de dominio encargado de la gestión de recepciones de mercancía.
+ *
+ * <p>Responsabilidades principales:</p>
+ * <ul>
+ *     <li>Crear recepciones vinculadas a órdenes de compra</li>
+ *     <li>Validar coherencia entre productos, estado de orden y cantidades</li>
+ *     <li>Actualizar el stock de productos al confirmar recepción</li>
+ *     <li>Permitir rechazo de recepciones sin afectar inventario</li>
+ * </ul>
+ *
+ * <p>Este servicio contiene lógica crítica del negocio, por lo que las operaciones
+ * que modifican datos están protegidas con transacciones.</p>
  */
 @Service
 @RequiredArgsConstructor
@@ -30,10 +35,22 @@ public class GoodsReceiptService {
     private final GoodsReceiptRepository goodsReceiptRepository;
     private final OrderService orderService;
     private final ProductService productService;
-    
     /**
-     * LÓGICA CRÍTICA: Crear recepción de mercancía
-     * Validaciones complejas entre Order y Productos
+     * Crea una nueva recepción de mercancía asociada a una orden.
+     *
+     * <p>Validaciones realizadas:</p>
+     * <ul>
+     *     <li>La orden debe existir</li>
+     *     <li>La orden debe estar en estado COMPLETED</li>
+     *     <li>No debe existir otra recepción ya marcada como RECEIVED</li>
+     *     <li>Todos los productos deben existir y estar activos</li>
+     *     <li>Las cantidades recibidas no deben exceder las ordenadas</li>
+     * </ul>
+     *
+     * @param goodsReceipt objeto de recepción a registrar
+     * @return recepción guardada en base de datos
+     * @throws ResourceNotFoundException si la orden o un producto no existe
+     * @throws BusinessException si alguna regla de negocio se incumple
      */
     @Transactional
     public GoodsReceipt createGoodsReceipt(GoodsReceipt goodsReceipt) {
@@ -94,10 +111,20 @@ public class GoodsReceiptService {
         
         return saved;
     }
-    
     /**
-     * Recibir mercancía - LÓGICA CRÍTICA
-     * Actualiza stock de productos atomicamente
+     * Confirma la recepción de mercancía y actualiza el stock de productos.
+     *
+     * <p>Reglas:</p>
+     * <ul>
+     *     <li>Solo puede ejecutarse si la recepción está en estado PENDING</li>
+     *     <li>Debe contener al menos un item</li>
+     *     <li>El stock se incrementa de forma atómica por producto</li>
+     * </ul>
+     *
+     * @param goodsReceiptId identificador de la recepción
+     * @return recepción actualizada con estado final
+     * @throws ResourceNotFoundException si la recepción no existe
+     * @throws BusinessException si el estado no permite recibirla
      */
     @Transactional
     public GoodsReceipt receiveGoodsReceipt(Long goodsReceiptId) {
@@ -129,9 +156,15 @@ public class GoodsReceiptService {
         
         return goodsReceiptRepository.save(goodsReceipt);
     }
-    
     /**
-     * Rechazar recepción - No modifica stock si aún está PENDING
+     * Marca una recepción como rechazada.
+     *
+     * <p>No afecta inventario si la recepción aún no ha sido confirmada.</p>
+     *
+     * @param goodsReceiptId identificador de la recepción
+     * @return recepción actualizada
+     * @throws ResourceNotFoundException si no existe
+     * @throws BusinessException si ya fue recibida previamente
      */
     @Transactional
     public GoodsReceipt rejectGoodsReceipt(Long goodsReceiptId) {
@@ -149,62 +182,66 @@ public class GoodsReceiptService {
         
         return goodsReceiptRepository.save(goodsReceipt);
     }
-    
     /**
-     * Obtener recepción por ID
+     * Obtiene una recepción por su identificador.
+     *
+     * @param id ID de la recepción
+     * @return recepción encontrada
+     * @throws ResourceNotFoundException si no existe
      */
     public GoodsReceipt getGoodsReceiptById(Long id) {
         return goodsReceiptRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Goods receipt not found with ID: " + id));
     }
-    
     /**
-     * Obtener por número de recepción
+     * Obtiene una recepción por su número único.
+     *
+     * @param receiptNumber número de recepción
+     * @return recepción encontrada
+     * @throws ResourceNotFoundException si no existe
      */
     public GoodsReceipt getGoodsReceiptByNumber(String receiptNumber) {
         return goodsReceiptRepository.findByReceiptNumber(receiptNumber)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Goods receipt not found with number: " + receiptNumber));
     }
-    
     /**
-     * Obtener recepciones de una orden
+     * Lista todas las recepciones asociadas a una orden.
      */
     public List<GoodsReceipt> getGoodsReceiptsByOrder(Long orderId) {
         return goodsReceiptRepository.findByOrderId(orderId);
     }
-    
     /**
-     * Obtener recepciones de un proveedor
+     * Lista todas las recepciones asociadas a un proveedor.
      */
     public List<GoodsReceipt> getGoodsReceiptsBySupplier(Long supplierId) {
         return goodsReceiptRepository.findBySupplierId(supplierId);
     }
-    
     /**
-     * Obtener recepciones pendientes
+     * Obtiene todas las recepciones pendientes.
      */
     public List<GoodsReceipt> getPendingGoodsReceipts() {
         return goodsReceiptRepository.findPendingReceipts();
     }
-    
     /**
-     * Obtener por estado
+     * Obtiene recepciones filtradas por estado.
      */
     public List<GoodsReceipt> getGoodsReceiptsByStatus(String status) {
         return goodsReceiptRepository.findByStatus(status);
     }
-    
     /**
-     * Obtener todas
+     * Obtiene todas las recepciones registradas.
      */
     public List<GoodsReceipt> getAllGoodsReceipts() {
         return goodsReceiptRepository.findAll();
     }
-    
     /**
-     * Eliminar
+     * Elimina una recepción si aún no ha sido confirmada.
+     *
+     * @param id identificador de la recepción
+     * @throws ResourceNotFoundException si no existe
+     * @throws BusinessException si la recepción ya fue recibida
      */
     @Transactional
     public void deleteGoodsReceipt(Long id) {
