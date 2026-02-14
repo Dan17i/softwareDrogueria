@@ -66,7 +66,8 @@ public class CustomerEntity {
     
     @Column(name = "pending_balance", precision = 12, scale = 2)
     private BigDecimal pendingBalance;
-    
+
+    @Builder.Default
     @Column(nullable = false)
     private Boolean active = true;
     

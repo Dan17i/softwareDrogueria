@@ -60,7 +60,8 @@ public class SupplierEntity {
     
     @Column(name = "average_payment_delay", precision = 5, scale = 2)
     private BigDecimal averagePaymentDelay;
-    
+
+    @Builder.Default
     @Column(nullable = false)
     private Boolean active = true;
     

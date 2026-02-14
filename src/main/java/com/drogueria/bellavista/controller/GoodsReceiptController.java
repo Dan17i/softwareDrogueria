@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  * Controller: REST endpoints para Goods Receipt (Recepción de Mercancía)
  */
 @RestController
-@RequestMapping("/api/goods-receipts")
+@RequestMapping("/goods-receipts")
 @RequiredArgsConstructor
 public class GoodsReceiptController {
     

@@ -18,7 +18,7 @@ import java.util.List;
 @Table(name = "orders", indexes = {
     @Index(name = "idx_order_number", columnList = "order_number", unique = true),
     @Index(name = "idx_customer_id", columnList = "customer_id"),
-    @Index(name = "idx_status", columnList = "status"),
+    @Index(name = "idx_orders_status", columnList = "status"), // <-- nombre nuevo y único
     @Index(name = "idx_order_date", columnList = "order_date")
 })
 @Data

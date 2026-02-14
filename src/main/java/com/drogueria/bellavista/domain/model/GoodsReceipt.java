@@ -27,6 +27,7 @@ public class GoodsReceipt {
     private String supplierCode;
     private String supplierName;
     private String status; // PENDING, RECEIVED, PARTIALLY_RECEIVED, REJECTED
+    @Builder.Default
     private List<GoodsReceiptItem> items = new ArrayList<>();
     private String notes;
     private LocalDateTime receiptDate;

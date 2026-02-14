@@ -82,8 +82,17 @@ spring:
 ```bash
 mvn clean install
 ```
+4. # Levantar servicios con Docker Compose
+``` bash
+docker compose up -d
+```
 
-4. **Ejecutar la aplicación**
+5. # Verificar que PostgreSQL esté corriendo
+``` bash
+docker ps
+```
+
+6. **Ejecutar la aplicación**
 ```bash
 mvn spring-boot:run
 ```
