@@ -12,10 +12,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
 /**
- * Controlador REST - Productos
- * Puerto de entrada (Input Adapter)
+ * Controlador REST para la gestión de productos.
+ * <p>
+ * Expone endpoints para crear, actualizar, consultar, buscar, ajustar stock,
+ * activar/desactivar y eliminar productos. Actúa como puerto de entrada (Input Adapter)
+ * en la arquitectura hexagonal, delegando la lógica de negocio a {@link ProductService}.
+ * </p>
  */
 @RestController
 @RequestMapping("/products")
@@ -25,10 +28,12 @@ public class ProductController {
     
     private final ProductService productService;
     private final ProductUseCaseMapper mapper;
-    
     /**
-     * Crear un nuevo producto
-     * POST /api/products
+     * Crea un nuevo producto.
+     * POST /products
+     *
+     * @param request DTO con los datos del producto a crear
+     * @return {@link ResponseEntity} con {@link ProductDTO.Response} del producto creado
      */
     @PostMapping
     public ResponseEntity<ProductDTO.Response> createProduct(
@@ -40,10 +45,13 @@ public class ProductController {
         
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-    
     /**
-     * Actualizar un producto existente
-     * PUT /api/products/{id}
+     * Actualiza un producto existente.
+     * PUT /products/{id}
+     *
+     * @param id ID del producto a actualizar
+     * @param request DTO con los datos a actualizar
+     * @return {@link ResponseEntity} con {@link ProductDTO.Response} del producto actualizado
      */
     @PutMapping("/{id}")
     public ResponseEntity<ProductDTO.Response> updateProduct(
@@ -56,10 +64,12 @@ public class ProductController {
         
         return ResponseEntity.ok(response);
     }
-    
     /**
-     * Obtener un producto por ID
-     * GET /api/products/{id}
+     * Obtiene un producto por su ID.
+     * GET /products/{id}
+     *
+     * @param id ID del producto
+     * @return {@link ResponseEntity} con {@link ProductDTO.Response} del producto
      */
     @GetMapping("/{id}")
     public ResponseEntity<ProductDTO.Response> getProductById(@PathVariable Long id) {
@@ -67,10 +77,12 @@ public class ProductController {
         ProductDTO.Response response = mapper.toResponse(product);
         return ResponseEntity.ok(response);
     }
-    
     /**
-     * Obtener un producto por código
-     * GET /api/products/code/{code}
+     * Obtiene un producto por su código.
+     * GET /products/code/{code}
+     *
+     * @param code Código único del producto
+     * @return {@link ResponseEntity} con {@link ProductDTO.Response} del producto
      */
     @GetMapping("/code/{code}")
     public ResponseEntity<ProductDTO.Response> getProductByCode(@PathVariable String code) {
@@ -78,10 +90,12 @@ public class ProductController {
         ProductDTO.Response response = mapper.toResponse(product);
         return ResponseEntity.ok(response);
     }
-    
     /**
-     * Listar todos los productos
-     * GET /api/products
+     * Lista todos los productos.
+     * GET /products
+     *
+     * @param active (Opcional) Filtrar solo productos activos si es true
+     * @return {@link ResponseEntity} con lista de {@link ProductDTO.Response}
      */
     @GetMapping
     public ResponseEntity<List<ProductDTO.Response>> getAllProducts(
@@ -97,10 +111,12 @@ public class ProductController {
         
         return ResponseEntity.ok(response);
     }
-    
     /**
-     * Buscar productos por nombre
-     * GET /api/products/search?name=xxx
+     * Busca productos por nombre.
+     * GET /products/search?name=xxx
+     *
+     * @param name Nombre (o parte del nombre) del producto a buscar
+     * @return {@link ResponseEntity} con lista de {@link ProductDTO.Response} que coinciden
      */
     @GetMapping("/search")
     public ResponseEntity<List<ProductDTO.Response>> searchProducts(
@@ -113,10 +129,12 @@ public class ProductController {
         
         return ResponseEntity.ok(response);
     }
-    
     /**
-     * Listar productos por categoría
-     * GET /api/products/category/{category}
+     * Lista productos por categoría.
+     * GET /products/category/{category}
+     *
+     * @param category Categoría del producto
+     * @return {@link ResponseEntity} con lista de {@link ProductDTO.Response}
      */
     @GetMapping("/category/{category}")
     public ResponseEntity<List<ProductDTO.Response>> getProductsByCategory(
@@ -129,10 +147,11 @@ public class ProductController {
         
         return ResponseEntity.ok(response);
     }
-    
     /**
-     * Obtener productos que necesitan reabastecimiento
-     * GET /api/products/restock-needed
+     * Obtiene productos que necesitan reabastecimiento.
+     * GET /products/restock-needed
+     *
+     * @return {@link ResponseEntity} con lista de {@link ProductDTO.Response}
      */
     @GetMapping("/restock-needed")
     public ResponseEntity<List<ProductDTO.Response>> getProductsNeedingRestock() {
@@ -143,10 +162,14 @@ public class ProductController {
         
         return ResponseEntity.ok(response);
     }
-    
+
     /**
-     * Reducir stock de un producto
-     * POST /api/products/{id}/reduce-stock
+     * Reduce el stock de un producto.
+     * POST /products/{id}/reduce-stock
+     *
+     * @param id ID del producto
+     * @param adjustment DTO con cantidad a reducir
+     * @return {@link ResponseEntity} con {@link ProductDTO.Response} actualizado
      */
     @PostMapping("/{id}/reduce-stock")
     public ResponseEntity<ProductDTO.Response> reduceStock(
@@ -158,10 +181,13 @@ public class ProductController {
         
         return ResponseEntity.ok(response);
     }
-    
     /**
-     * Aumentar stock de un producto
-     * POST /api/products/{id}/increase-stock
+     * Aumenta el stock de un producto.
+     * POST /products/{id}/increase-stock
+     *
+     * @param id ID del producto
+     * @param adjustment DTO con cantidad a aumentar
+     * @return {@link ResponseEntity} con {@link ProductDTO.Response} actualizado
      */
     @PostMapping("/{id}/increase-stock")
     public ResponseEntity<ProductDTO.Response> increaseStock(
@@ -173,10 +199,12 @@ public class ProductController {
         
         return ResponseEntity.ok(response);
     }
-    
     /**
-     * Activar/Desactivar producto
-     * PATCH /api/products/{id}/toggle-status
+     * Activa o desactiva un producto.
+     * PATCH /products/{id}/toggle-status
+     *
+     * @param id ID del producto
+     * @return {@link ResponseEntity} con {@link ProductDTO.Response} actualizado
      */
     @PatchMapping("/{id}/toggle-status")
     public ResponseEntity<ProductDTO.Response> toggleProductStatus(@PathVariable Long id) {
@@ -184,10 +212,12 @@ public class ProductController {
         ProductDTO.Response response = mapper.toResponse(product);
         return ResponseEntity.ok(response);
     }
-    
     /**
-     * Eliminar un producto
-     * DELETE /api/products/{id}
+     * Elimina un producto.
+     * DELETE /products/{id}
+     *
+     * @param id ID del producto a eliminar
+     * @return {@link ResponseEntity} vacío con status NO_CONTENT
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {

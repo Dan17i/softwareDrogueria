@@ -14,9 +14,13 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
-
 /**
- * Controlador REST - Órdenes de Compra
+ * Controlador REST para la gestión de órdenes de compra (Orders).
+ * <p>
+ * Expone endpoints para crear, consultar, listar, completar, cancelar y buscar órdenes de compra.
+ * Funciona como adaptador de entrada en la arquitectura hexagonal, delegando la lógica de negocio
+ * a {@link OrderService}.
+ * </p>
  */
 @RestController
 @RequestMapping("/orders")
@@ -26,14 +30,18 @@ public class OrderController {
     
     private final OrderService orderService;
     private final OrderUseCaseMapper mapper;
-    
     /**
-     * Crear nueva orden
-     * POST /orders
+     * Crea una nueva orden de compra.
+     * <p>
      * Validaciones automáticas:
-     * - Cliente existe y está activo
-     * - Productos existen y tienen stock
-     * - Cliente tiene crédito disponible
+     * <ul>
+     *   <li>Cliente existe y está activo</li>
+     *   <li>Productos existen y tienen stock suficiente</li>
+     *   <li>Cliente tiene crédito disponible</li>
+     * </ul>
+     *
+     * @param request DTO con los datos de la orden a crear
+     * @return {@link ResponseEntity} con {@link OrderDTO.Response} de la orden creada
      */
     @PostMapping
     public ResponseEntity<OrderDTO.Response> createOrder(
@@ -42,30 +50,35 @@ public class OrderController {
         Order createdOrder = orderService.createOrder(order);
         return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toResponse(createdOrder));
     }
-    
+
     /**
-     * Obtener orden por ID
-     * GET /orders/{id}
+     * Obtiene una orden por su ID.
+     *
+     * @param id Identificador de la orden
+     * @return {@link ResponseEntity} con {@link OrderDTO.Response} de la orden
      */
     @GetMapping("/{id}")
     public ResponseEntity<OrderDTO.Response> getOrderById(@PathVariable Long id) {
         Order order = orderService.getOrderById(id);
         return ResponseEntity.ok(mapper.toResponse(order));
     }
-    
+
     /**
-     * Obtener orden por número
-     * GET /orders/number/{orderNumber}
+     * Obtiene una orden por su número de orden.
+     *
+     * @param orderNumber Número único de la orden
+     * @return {@link ResponseEntity} con {@link OrderDTO.Response} de la orden
      */
     @GetMapping("/number/{orderNumber}")
     public ResponseEntity<OrderDTO.Response> getOrderByOrderNumber(@PathVariable String orderNumber) {
         Order order = orderService.getOrderByOrderNumber(orderNumber);
         return ResponseEntity.ok(mapper.toResponse(order));
     }
-    
+
     /**
-     * Listar todas las órdenes
-     * GET /orders
+     * Lista todas las órdenes de compra.
+     *
+     * @return {@link ResponseEntity} con lista de {@link OrderDTO.Response}
      */
     @GetMapping
     public ResponseEntity<List<OrderDTO.Response>> getAllOrders() {
@@ -75,10 +88,11 @@ public class OrderController {
             .collect(Collectors.toList());
         return ResponseEntity.ok(responses);
     }
-    
     /**
-     * Listar órdenes por cliente
-     * GET /orders/customer/{customerId}
+     * Lista las órdenes de un cliente específico.
+     *
+     * @param customerId ID del cliente
+     * @return {@link ResponseEntity} con lista de {@link OrderDTO.Response} del cliente
      */
     @GetMapping("/customer/{customerId}")
     public ResponseEntity<List<OrderDTO.Response>> getOrdersByCustomerId(@PathVariable Long customerId) {
@@ -88,10 +102,11 @@ public class OrderController {
             .collect(Collectors.toList());
         return ResponseEntity.ok(responses);
     }
-    
     /**
-     * Listar órdenes por estado
-     * GET /orders/status/{status}
+     * Lista órdenes por estado (PENDING, COMPLETED, CANCELLED, etc.).
+     *
+     * @param status Estado de la orden
+     * @return {@link ResponseEntity} con lista de {@link OrderDTO.Response}
      */
     @GetMapping("/status/{status}")
     public ResponseEntity<List<OrderDTO.Response>> getOrdersByStatus(@PathVariable String status) {
@@ -101,10 +116,11 @@ public class OrderController {
             .collect(Collectors.toList());
         return ResponseEntity.ok(responses);
     }
-    
     /**
-     * Listar órdenes pendientes de un cliente
-     * GET /orders/customer/{customerId}/pending
+     * Lista las órdenes pendientes de un cliente específico.
+     *
+     * @param customerId ID del cliente
+     * @return {@link ResponseEntity} con lista de {@link OrderDTO.Response} pendientes
      */
     @GetMapping("/customer/{customerId}/pending")
     public ResponseEntity<List<OrderDTO.Response>> getPendingOrdersByCustomerId(@PathVariable Long customerId) {
@@ -114,34 +130,43 @@ public class OrderController {
             .collect(Collectors.toList());
         return ResponseEntity.ok(responses);
     }
-    
     /**
-     * Completar orden
-     * PATCH /orders/{id}/complete
-     * Cambia estado a COMPLETED y marca la fecha de entrega
+     * Completa una orden de compra.
+     * <p>
+     * Cambia el estado a COMPLETED y marca la fecha de entrega.
+     *
+     * @param id ID de la orden
+     * @return {@link ResponseEntity} con {@link OrderDTO.Response} de la orden completada
      */
     @PatchMapping("/{id}/complete")
     public ResponseEntity<OrderDTO.Response> completeOrder(@PathVariable Long id) {
         Order order = orderService.completeOrder(id);
         return ResponseEntity.ok(mapper.toResponse(order));
     }
-    
     /**
-     * Cancelar orden
-     * PATCH /orders/{id}/cancel
-     * Revierte:
-     * - Stock de productos
-     * - Saldo pendiente del cliente
+     * Cancela una orden de compra.
+     * <p>
+     * Revierte los efectos de la orden:
+     * <ul>
+     *   <li>Stock de productos</li>
+     *   <li>Saldo pendiente del cliente</li>
+     * </ul>
+     *
+     * @param id ID de la orden
+     * @return {@link ResponseEntity} con {@link OrderDTO.Response} de la orden cancelada
      */
     @PatchMapping("/{id}/cancel")
     public ResponseEntity<OrderDTO.Response> cancelOrder(@PathVariable Long id) {
         Order order = orderService.cancelOrder(id);
         return ResponseEntity.ok(mapper.toResponse(order));
     }
-    
+
     /**
-     * Buscar órdenes por rango de fechas
-     * GET /orders/search?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD
+     * Busca órdenes por rango de fechas.
+     *
+     * @param startDate Fecha inicial en formato YYYY-MM-DD
+     * @param endDate Fecha final en formato YYYY-MM-DD
+     * @return {@link ResponseEntity} con lista de {@link OrderDTO.Response} que cumplen el rango
      */
     @GetMapping("/search")
     public ResponseEntity<List<OrderDTO.Response>> searchOrdersByDateRange(

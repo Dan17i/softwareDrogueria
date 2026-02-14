@@ -16,9 +16,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
 /**
- * Controller: REST endpoints para Goods Receipt (Recepción de Mercancía)
+ * Controlador REST para la gestión de recepciones de mercancía (Goods Receipt).
+ * <p>
+ * Proporciona endpoints para crear, consultar, actualizar el estado y eliminar recepciones de mercancía.
+ * Este controlador actúa como adaptador de entrada en la arquitectura hexagonal,
+ * delegando la lógica de negocio a {@link GoodsReceiptService}, {@link OrderService} y {@link SupplierService}.
+ * </p>
  */
 @RestController
 @RequestMapping("/goods-receipts")
@@ -29,9 +33,12 @@ public class GoodsReceiptController {
     private final OrderService orderService;
     private final SupplierService supplierService;
     private final GoodsReceiptUseCaseMapper mapper;
-    
     /**
-     * POST /api/goods-receipts - Crear nueva recepción de mercancía
+     * Crea una nueva recepción de mercancía.
+     *
+     * @param request DTO con la información de la recepción a crear
+     * @return {@link ResponseEntity} con {@link GoodsReceiptDTO.Response} de la recepción creada
+     * @throws ResourceNotFoundException si no existe la orden o el proveedor asociado
      */
     @PostMapping
     public ResponseEntity<GoodsReceiptDTO.Response> createGoodsReceipt(
@@ -48,9 +55,12 @@ public class GoodsReceiptController {
         
         return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toResponse(createdReceipt));
     }
-    
     /**
-     * GET /api/goods-receipts/{id} - Obtener recepción por ID
+     * Obtiene una recepción de mercancía por su ID.
+     *
+     * @param id Identificador de la recepción
+     * @return {@link ResponseEntity} con {@link GoodsReceiptDTO.Response}
+     * @throws ResourceNotFoundException si no se encuentra la recepción
      */
     @GetMapping("/{id}")
     public ResponseEntity<GoodsReceiptDTO.Response> getGoodsReceiptById(@PathVariable Long id) {
@@ -59,9 +69,13 @@ public class GoodsReceiptController {
         
         return ResponseEntity.ok(mapper.toResponse(receipt));
     }
-    
+
     /**
-     * GET /api/goods-receipts/number/{receiptNumber} - Obtener por número de recepción
+     * Obtiene una recepción de mercancía por su número de recepción.
+     *
+     * @param receiptNumber Número único de la recepción
+     * @return {@link ResponseEntity} con {@link GoodsReceiptDTO.Response}
+     * @throws ResourceNotFoundException si no se encuentra la recepción
      */
     @GetMapping("/number/{receiptNumber}")
     public ResponseEntity<GoodsReceiptDTO.Response> getGoodsReceiptByNumber(@PathVariable String receiptNumber) {
@@ -70,9 +84,12 @@ public class GoodsReceiptController {
         
         return ResponseEntity.ok(mapper.toResponse(receipt));
     }
-    
     /**
-     * GET /api/goods-receipts/order/{orderId} - Obtener recepciones de una orden
+     * Obtiene todas las recepciones asociadas a una orden.
+     *
+     * @param orderId ID de la orden
+     * @return {@link ResponseEntity} con lista de {@link GoodsReceiptDTO.Response}
+     * @throws ResourceNotFoundException si la orden no existe
      */
     @GetMapping("/order/{orderId}")
     public ResponseEntity<List<GoodsReceiptDTO.Response>> getGoodsReceiptsByOrder(@PathVariable Long orderId) {
@@ -84,9 +101,13 @@ public class GoodsReceiptController {
             .map(mapper::toResponse)
             .collect(Collectors.toList()));
     }
-    
+
     /**
-     * GET /api/goods-receipts/supplier/{supplierId} - Obtener recepciones de un proveedor
+     * Obtiene todas las recepciones asociadas a un proveedor.
+     *
+     * @param supplierId ID del proveedor
+     * @return {@link ResponseEntity} con lista de {@link GoodsReceiptDTO.Response}
+     * @throws ResourceNotFoundException si el proveedor no existe
      */
     @GetMapping("/supplier/{supplierId}")
     public ResponseEntity<List<GoodsReceiptDTO.Response>> getGoodsReceiptsBySupplier(@PathVariable Long supplierId) {
@@ -98,9 +119,11 @@ public class GoodsReceiptController {
             .map(mapper::toResponse)
             .collect(Collectors.toList()));
     }
-    
     /**
-     * GET /api/goods-receipts/status/{status} - Obtener recepciones por estado
+     * Obtiene recepciones por estado.
+     *
+     * @param status Estado de la recepción (PENDING, RECEIVED, REJECTED)
+     * @return {@link ResponseEntity} con lista de {@link GoodsReceiptDTO.Response}
      */
     @GetMapping("/status/{status}")
     public ResponseEntity<List<GoodsReceiptDTO.Response>> getGoodsReceiptsByStatus(@PathVariable String status) {
@@ -109,9 +132,10 @@ public class GoodsReceiptController {
             .map(mapper::toResponse)
             .collect(Collectors.toList()));
     }
-    
     /**
-     * GET /api/goods-receipts/pending - Obtener recepciones pendientes
+     * Obtiene todas las recepciones pendientes.
+     *
+     * @return {@link ResponseEntity} con lista de {@link GoodsReceiptDTO.Response} pendientes
      */
     @GetMapping("/pending")
     public ResponseEntity<List<GoodsReceiptDTO.Response>> getPendingGoodsReceipts() {
@@ -120,9 +144,10 @@ public class GoodsReceiptController {
             .map(mapper::toResponse)
             .collect(Collectors.toList()));
     }
-    
     /**
-     * GET /api/goods-receipts - Obtener todas las recepciones
+     * Obtiene todas las recepciones de mercancía.
+     *
+     * @return {@link ResponseEntity} con lista completa de {@link GoodsReceiptDTO.Response}
      */
     @GetMapping
     public ResponseEntity<List<GoodsReceiptDTO.Response>> getAllGoodsReceipts() {
@@ -131,10 +156,13 @@ public class GoodsReceiptController {
             .map(mapper::toResponse)
             .collect(Collectors.toList()));
     }
-    
     /**
-     * PATCH /api/goods-receipts/{id}/receive - Confirmar recepción de mercancía
-     * Actualiza stock de producto y cambia status de la recepción
+     * Confirma la recepción de mercancía y actualiza el stock de los productos.
+     *
+     * @param id ID de la recepción
+     * @return {@link ResponseEntity} con {@link GoodsReceiptDTO.Response} de la recepción recibida
+     * @throws ResourceNotFoundException si la recepción no existe
+     * @throws BusinessException si la recepción no está en estado PENDING
      */
     @PatchMapping("/{id}/receive")
     public ResponseEntity<GoodsReceiptDTO.Response> receiveGoodsReceipt(@PathVariable Long id) {
@@ -148,10 +176,14 @@ public class GoodsReceiptController {
         GoodsReceipt receivedReceipt = goodsReceiptService.receiveGoodsReceipt(id);
         return ResponseEntity.ok(mapper.toResponse(receivedReceipt));
     }
-    
     /**
-     * PATCH /api/goods-receipts/{id}/reject - Rechazar recepción de mercancía
-     * Cambia status a REJECTED sin afectar stock
+     * Rechaza una recepción de mercancía. No afecta el stock.
+     *
+     * @param id ID de la recepción
+     * @param reason Razón opcional del rechazo
+     * @return {@link ResponseEntity} con {@link GoodsReceiptDTO.Response} de la recepción rechazada
+     * @throws ResourceNotFoundException si la recepción no existe
+     * @throws BusinessException si la recepción no está en estado PENDING
      */
     @PatchMapping("/{id}/reject")
     public ResponseEntity<GoodsReceiptDTO.Response> rejectGoodsReceipt(
@@ -168,10 +200,13 @@ public class GoodsReceiptController {
         GoodsReceipt rejectedReceipt = goodsReceiptService.rejectGoodsReceipt(id);
         return ResponseEntity.ok(mapper.toResponse(rejectedReceipt));
     }
-    
     /**
-     * DELETE /api/goods-receipts/{id} - Eliminar recepción de mercancía
-     * Solo se pueden eliminar recepciones en estado PENDING
+     * Elimina una recepción de mercancía. Solo se pueden eliminar recepciones en estado PENDING.
+     *
+     * @param id ID de la recepción
+     * @return {@link ResponseEntity} vacío con HTTP 204
+     * @throws ResourceNotFoundException si la recepción no existe
+     * @throws BusinessException si la recepción no está en estado PENDING
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteGoodsReceipt(@PathVariable Long id) {
