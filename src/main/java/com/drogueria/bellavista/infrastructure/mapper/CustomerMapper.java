@@ -3,15 +3,45 @@ package com.drogueria.bellavista.infrastructure.mapper;
 import com.drogueria.bellavista.domain.model.Customer;
 import com.drogueria.bellavista.infrastructure.persistence.CustomerEntity;
 import org.springframework.stereotype.Component;
-
 /**
- * Mapper - Convierte entre CustomerEntity (BD) ↔ Customer (Dominio)
+ * <h2>CustomerMapper</h2>
+ *
+ * <p>
+ * Componente encargado de realizar la conversión entre:
+ * </p>
+ *
+ * <ul>
+ *     <li>{@link CustomerEntity} → Representación de persistencia (Base de Datos)</li>
+ *     <li>{@link Customer} → Modelo de dominio</li>
+ * </ul>
+ *
+ * <p>
+ * Este mapper forma parte de la capa de infraestructura dentro de la
+ * arquitectura hexagonal (Ports & Adapters), permitiendo mantener el
+ * desacoplamiento entre el dominio y los detalles de persistencia.
+ * </p>
+ *
+ * <p>
+ * Su responsabilidad principal es transformar datos entre ambas capas
+ * sin introducir lógica de negocio, garantizando así el principio
+ * de responsabilidad única (SRP).
+ * </p>
+ * @author Daniel Jurado & equipo de desarrollo
+ * @since 1.0
  */
 @Component
 public class CustomerMapper {
-    
     /**
-     * Convierte CustomerEntity (BD) → Customer (Dominio)
+     * Convierte una entidad de persistencia {@link CustomerEntity}
+     * en un modelo de dominio {@link Customer}.
+     *
+     * <p>
+     * Si la entidad recibida es {@code null}, se retorna {@code null}
+     * para evitar {@link NullPointerException}.
+     * </p>
+     *
+     * @param entity entidad obtenida desde la base de datos
+     * @return objeto del dominio equivalente o {@code null} si la entidad es nula
      */
     public Customer toDomain(CustomerEntity entity) {
         if (entity == null) {
@@ -37,9 +67,17 @@ public class CustomerMapper {
             .updatedAt(entity.getUpdatedAt())
             .build();
     }
-    
     /**
-     * Convierte Customer (Dominio) → CustomerEntity (BD)
+     * Convierte un modelo de dominio {@link Customer}
+     * en una entidad de persistencia {@link CustomerEntity}.
+     *
+     * <p>
+     * Si el objeto de dominio recibido es {@code null}, se retorna {@code null}
+     * para evitar errores en la capa de persistencia.
+     * </p>
+     *
+     * @param domain objeto del dominio a convertir
+     * @return entidad lista para ser persistida o {@code null} si el dominio es nulo
      */
     public CustomerEntity toEntity(Customer domain) {
         if (domain == null) {
