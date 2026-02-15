@@ -37,7 +37,6 @@ public class AuthResponseDTO {
     /**
      * Identificador único del usuario autenticado.
      */
-
     private Long userId;
     /**
      * Nombre de usuario utilizado para iniciar sesión.
