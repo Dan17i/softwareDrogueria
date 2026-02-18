@@ -5,6 +5,7 @@ import com.drogueria.bellavista.application.dto.LoginRequestDTO;
 import com.drogueria.bellavista.application.dto.RegisterRequestDTO;
 import com.drogueria.bellavista.application.dto.UserResponseDTO;
 import com.drogueria.bellavista.application.service.AuthService;
+import com.drogueria.bellavista.domain.model.Role;
 import com.drogueria.bellavista.domain.model.User;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -53,4 +54,18 @@ public class AuthController {
 
         return ResponseEntity.ok(resp);
     }
+
+    @PostMapping("/dev-create-admin")
+    public String createAdmin() {
+        authService.registerUserWithRole(
+                "admin",
+                "admin@bellavista.com",
+                "admin123",
+                "Admin",
+                "Sistema",
+                Role.ADMIN
+        );
+        return "Admin creado correctamente";
+    }
+
 }

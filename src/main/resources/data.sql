@@ -48,18 +48,3 @@ INSERT INTO order_items (order_id, product_id, product_code, product_name, unit_
 SELECT o.id, p.id, p.code, p.name, p.price, 100, p.price * 100
 FROM orders o, products p
 WHERE o.order_number = 'ORD-2024-001' AND p.code = 'MED001' LIMIT 1;
-
--- ============================================
--- USUARIOS INICIALES
--- ============================================
-
--- Usuario Administrador (Password: Admin123456)
--- Usuario Admin (Contraseña exacta: admin123)
--- Usuario de emergencia (Contraseña: password123)
-DELETE FROM users WHERE username = 'admin';
-INSERT INTO users (username, email, password, first_name, last_name, role, active, created_at)
-VALUES ('admin', 'admin@drogueria.com', '$2a$10$8.UnVuG9HHgffUDAlk8q6uyzREX7fmmqWdBW7SxyA9HdnbdEeMKHi', 'Admin', 'Sistema', 'ADMIN', true, NOW());
-
--- Usuario Vendedor (Password: Vendedor123)
-INSERT INTO users (username, email, password, first_name, last_name, role, active, created_at)
-VALUES ('vendedor1', 'vendedor1@drogueria.com', '$2a$10$rI8.Nc/5153JYjGOLlOSH.JwHLvqT5z8QwJvLpGJKvH0v8P8sVIXq', 'Carlos', 'Vendedor', 'USER', true, NOW());
