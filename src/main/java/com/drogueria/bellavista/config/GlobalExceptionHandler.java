@@ -1,5 +1,6 @@
 package com.drogueria.bellavista.config;
 
+import com.drogueria.bellavista.exception.AuthenticationException;
 import com.drogueria.bellavista.exception.BusinessException;
 import com.drogueria.bellavista.exception.ResourceNotFoundException;
 import lombok.AllArgsConstructor;
@@ -133,4 +134,17 @@ public class GlobalExceptionHandler {
         
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
+    /**
+     * Maneja AuthenticationException
+     */
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleAuthenticationException(AuthenticationException ex) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.UNAUTHORIZED.value(),
+                "Unauthorized",
+                ex.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    }
+
 }
