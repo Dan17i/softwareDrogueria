@@ -128,8 +128,15 @@ public class ProductService {
      * Reducir stock de un producto
      */
     public Product reduceStock(Long productId, Integer quantity) {
+        if (quantity == null || quantity <= 0) {
+            throw new BusinessException("La cantidad debe ser mayor a 0");
+        }
         Product product = getProductById(productId);
-        product.reduceStock(quantity);
+        try {
+            product.reduceStock(quantity);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            throw new BusinessException(e.getMessage());
+        }
         return productRepository.save(product);
     }
     
@@ -137,8 +144,15 @@ public class ProductService {
      * Aumentar stock de un producto
      */
     public Product increaseStock(Long productId, Integer quantity) {
+        if (quantity == null || quantity <= 0) {
+            throw new BusinessException("La cantidad debe ser mayor a 0");
+        }
         Product product = getProductById(productId);
-        product.increaseStock(quantity);
+        try {
+            product.increaseStock(quantity);
+        } catch (IllegalArgumentException e) {
+            throw new BusinessException(e.getMessage());
+        }
         return productRepository.save(product);
     }
     
@@ -169,7 +183,11 @@ public class ProductService {
     protected void reduceStockInternal(Long productId, Integer quantity) {
         Product product = productRepository.findById(productId)
             .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
-        product.reduceStock(quantity);
+        try {
+            product.reduceStock(quantity);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            throw new BusinessException(e.getMessage());
+        }
         productRepository.save(product);
     }
     
@@ -180,7 +198,11 @@ public class ProductService {
     protected void increaseStockInternal(Long productId, Integer quantity) {
         Product product = productRepository.findById(productId)
             .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
-        product.increaseStock(quantity);
+        try {
+            product.increaseStock(quantity);
+        } catch (IllegalArgumentException e) {
+            throw new BusinessException(e.getMessage());
+        }
         productRepository.save(product);
     }
 }
