@@ -5,14 +5,14 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5433/drogueria_bellavista
     username: postgres
-    password: "JUNIORDIAZ"
+    password: JUNIORDIAZ
     driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
-    defer-datasource-initialization: true  # ¡ESTA LÍNEA ES LA CLAVE!
+    defer-datasource-initialization: false
     properties:
       hibernate:
         format_sql: true
@@ -20,9 +20,7 @@ spring:
 
   sql:
     init:
-      mode: always
-      # Opcional: puedes especificar explícitamente los archivos
-      data-locations: classpath:data.sql
+      mode: never
 
   jackson:
     serialization:
@@ -34,8 +32,7 @@ server:
   servlet:
     context-path: /api
 
-logging:
-  level:
-    com.drogueria.bellavista: DEBUG
-    org.springframework.web: INFO
-    org.hibernate: INFO
+app:
+  jwt:
+    secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+    expiration: 86400000

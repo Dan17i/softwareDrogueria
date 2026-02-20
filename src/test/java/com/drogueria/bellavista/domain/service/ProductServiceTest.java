@@ -151,8 +151,8 @@ class ProductServiceTest {
         when(productRepository.findById(1L)).thenReturn(Optional.of(sampleProduct));
         
         // When & Then
-        IllegalStateException exception = assertThrows(
-            IllegalStateException.class,
+        BusinessException exception = assertThrows(
+            BusinessException.class,
             () -> productService.reduceStock(1L, 150)
         );
         

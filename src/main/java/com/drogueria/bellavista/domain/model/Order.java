@@ -55,6 +55,7 @@ public class Order {
     public void recalculateTotal() {
         this.total = this.items.stream()
             .map(OrderItem::getSubtotal)
+            .filter(sub -> sub != null)
             .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
     
@@ -62,6 +63,7 @@ public class Order {
      * Validar si orden puede ser completada
      */
     public boolean canBeCompleted() {
+        if (this.status == null || this.total == null) return false;
         return "PENDING".equals(this.status) && this.total.signum() > 0 && !this.items.isEmpty();
     }
     

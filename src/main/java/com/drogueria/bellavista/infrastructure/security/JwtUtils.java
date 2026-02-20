@@ -39,6 +39,9 @@ public class JwtUtils {
     // Minimum secret length for HS256 is 32 bytes recommended
     private static final int MIN_SECRET_BYTES = 32;
 
+    // Cached signing key to avoid recreating it on every call
+    private SecretKey signingKey;
+
     /**
      * Generate JWT token from authentication.
      * Token contains username as subject and expiration time.
@@ -135,7 +138,7 @@ public class JwtUtils {
      * Get signing key for JWT operations.
      */
     private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+        return signingKey;
     }
 
     @PostConstruct
@@ -145,13 +148,16 @@ public class JwtUtils {
             log.error(msg);
             throw new IllegalStateException(msg);
         }
+        byte[] secretBytes = decodeSecret(jwtSecret);
 
-        byte[] secretBytes = jwtSecret.getBytes(StandardCharsets.UTF_8);
         if (secretBytes.length < MIN_SECRET_BYTES) {
             String msg = String.format("JWT secret is too short (%d bytes). Must be at least %d bytes.", secretBytes.length, MIN_SECRET_BYTES);
             log.error(msg);
             throw new IllegalStateException(msg);
         }
+
+        // Initialize and cache signing key
+        this.signingKey = Keys.hmacShaKeyFor(secretBytes);
 
         log.debug("JWT configuration validated: secret length={} bytes, expirationMs={}", secretBytes.length, jwtExpirationMs);
     }
@@ -165,5 +171,27 @@ public class JwtUtils {
             return authorizationHeader.substring(7);
         }
         return null;
+    }
+
+    /**
+     * Decode secret string which may be provided as a hex string or as a raw string.
+     * If the value contains only hex chars and has even length, decode hex; otherwise return UTF-8 bytes.
+     */
+    private byte[] decodeSecret(String secret) {
+        String s = secret.trim();
+        if (s.matches("^[0-9a-fA-F]+$") && (s.length() % 2 == 0)) {
+            try {
+                int len = s.length();
+                byte[] data = new byte[len / 2];
+                for (int i = 0; i < len; i += 2) {
+                    data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
+                            + Character.digit(s.charAt(i+1), 16));
+                }
+                return data;
+            } catch (Exception e) {
+                log.debug("Failed to decode JWT secret as hex, falling back to UTF-8 bytes: {}", e.getMessage());
+            }
+        }
+        return secret.getBytes(StandardCharsets.UTF_8);
     }
 }

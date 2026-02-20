@@ -7,6 +7,8 @@ import com.drogueria.bellavista.domain.repository.OrderRepository;
 import com.drogueria.bellavista.exception.BusinessException;
 import com.drogueria.bellavista.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +24,12 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Transactional
 public class OrderService {
-    
+    private static final Logger log = LoggerFactory.getLogger(OrderService.class);
+
+    private static final String STATUS_PENDING = "PENDING";
+    private static final String STATUS_COMPLETED = "COMPLETED";
+    private static final String STATUS_CANCELLED = "CANCELLED";
+
     private final OrderRepository orderRepository;
     private final CustomerService customerService;
     private final ProductService productService;
@@ -35,6 +42,7 @@ public class OrderService {
      * - Productos existen y tienen stock
      */
     public Order createOrder(Order order) {
+        log.info("Creating order for customerId={}", order.getCustomerId());
         // Validar cliente
         Customer customer = customerService.getCustomerById(order.getCustomerId());
         if (!customer.getActive()) {
@@ -79,7 +87,7 @@ public class OrderService {
         
         // Establecer valores
         order.setOrderNumber(generateOrderNumber());
-        order.setStatus("PENDING");
+        order.setStatus(STATUS_PENDING);
         order.setOrderDate(LocalDateTime.now());
         order.setCreatedAt(LocalDateTime.now());
         order.setUpdatedAt(LocalDateTime.now());
@@ -163,8 +171,9 @@ public class OrderService {
     public Order completeOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new ResourceNotFoundException("Order", "id", orderId));
-        
         order.complete();
+        order.setStatus(STATUS_COMPLETED);
+        log.info("Completing order id={}", orderId);
         return orderRepository.save(order);
     }
     
@@ -174,8 +183,7 @@ public class OrderService {
     public Order cancelOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new ResourceNotFoundException("Order", "id", orderId));
-        
-        if ("PENDING".equals(order.getStatus())) {
+        if (STATUS_PENDING.equals(order.getStatus())) {
             // Revertir stock
             order.getItems().forEach(item -> {
                 productService.increaseStockInternal(item.getProductId(), item.getQuantity());
@@ -186,6 +194,8 @@ public class OrderService {
         }
         
         order.cancel();
+        order.setStatus(STATUS_CANCELLED);
+        log.info("Cancelled order id={}", orderId);
         return orderRepository.save(order);
     }
     

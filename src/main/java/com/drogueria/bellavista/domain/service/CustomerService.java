@@ -153,8 +153,11 @@ public class CustomerService {
     public Customer increasePendingBalance(Long customerId, BigDecimal amount) {
         Customer customer = customerRepository.findById(customerId)
             .orElseThrow(() -> new ResourceNotFoundException("Customer", "id", customerId));
-        
-        customer.increasePendingBalance(amount);
+        try {
+            customer.increasePendingBalance(amount);
+        } catch (IllegalArgumentException e) {
+            throw new BusinessException(e.getMessage());
+        }
         return customerRepository.save(customer);
     }
     
@@ -164,8 +167,11 @@ public class CustomerService {
     public Customer reducePendingBalance(Long customerId, BigDecimal amount) {
         Customer customer = customerRepository.findById(customerId)
             .orElseThrow(() -> new ResourceNotFoundException("Customer", "id", customerId));
-        
-        customer.reducePendingBalance(amount);
+        try {
+            customer.reducePendingBalance(amount);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            throw new BusinessException(e.getMessage());
+        }
         return customerRepository.save(customer);
     }
     
