@@ -12,14 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
-/**
- * Controlador REST para la gestión de clientes.
- * <p>
- * Proporciona endpoints para crear, actualizar, consultar y gestionar el estado de los clientes.
- * Este controlador actúa como adaptador de entrada en la arquitectura hexagonal,
- * delegando la lógica de negocio al {@link CustomerService}.
- * </p>
- */
+
 @RestController
 @RequestMapping("/customers")  // ← CAMBIADO
 @RequiredArgsConstructor
@@ -28,12 +21,6 @@ public class CustomerController {
 
     private final CustomerService customerService;
     private final CustomerUseCaseMapper mapper;
-    /**
-     * Crea un nuevo cliente.
-     *
-     * @param request DTO con la información del cliente a crear
-     * @return {@link ResponseEntity} con {@link CustomerDTO.Response} del cliente creado
-     */
 
     @PostMapping
     public ResponseEntity<CustomerDTO.Response> createCustomer(
@@ -45,13 +32,7 @@ public class CustomerController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-    /**
-     * Actualiza los datos de un cliente existente.
-     *
-     * @param id      Identificador del cliente
-     * @param request DTO con la información actualizada del cliente
-     * @return {@link ResponseEntity} con {@link CustomerDTO.Response} del cliente actualizado
-     */
+
     @PutMapping("/{id}")
     public ResponseEntity<CustomerDTO.Response> updateCustomer(
             @PathVariable Long id,
@@ -63,47 +44,28 @@ public class CustomerController {
 
         return ResponseEntity.ok(response);
     }
-    /**
-     * Obtiene un cliente por su ID.
-     *
-     * @param id Identificador del cliente
-     * @return {@link ResponseEntity} con {@link CustomerDTO.Response} del cliente
-     */
+
     @GetMapping("/{id}")
     public ResponseEntity<CustomerDTO.Response> getCustomerById(@PathVariable Long id) {
         Customer customer = customerService.getCustomerById(id);
         CustomerDTO.Response response = mapper.toResponse(customer);
         return ResponseEntity.ok(response);
     }
-    /**
-     * Obtiene un cliente por su código único.
-     *
-     * @param code Código del cliente
-     * @return {@link ResponseEntity} con {@link CustomerDTO.Response} del cliente
-     */
+
     @GetMapping("/code/{code}")
     public ResponseEntity<CustomerDTO.Response> getCustomerByCode(@PathVariable String code) {
         Customer customer = customerService.getCustomerByCode(code);
         CustomerDTO.Response response = mapper.toResponse(customer);
         return ResponseEntity.ok(response);
     }
-    /**
-     * Obtiene un cliente por su correo electrónico.
-     *
-     * @param email Email del cliente
-     * @return {@link ResponseEntity} con {@link CustomerDTO.Response} del cliente
-     */
+
     @GetMapping("/email/{email}")
     public ResponseEntity<CustomerDTO.Response> getCustomerByEmail(@PathVariable String email) {
         Customer customer = customerService.getCustomerByEmail(email);
         CustomerDTO.Response response = mapper.toResponse(customer);
         return ResponseEntity.ok(response);
     }
-    /**
-     * Obtiene todos los clientes.
-     *
-     * @return {@link ResponseEntity} con lista de {@link CustomerDTO.Response} de todos los clientes
-     */
+
     @GetMapping
     public ResponseEntity<List<CustomerDTO.Response>> getAllCustomers() {
         List<Customer> customers = customerService.getAllCustomers();
@@ -112,11 +74,7 @@ public class CustomerController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(responses);
     }
-    /**
-     * Obtiene todos los clientes activos.
-     *
-     * @return {@link ResponseEntity} con lista de {@link CustomerDTO.Response} de clientes activos
-     */
+
     @GetMapping("/status/active")
     public ResponseEntity<List<CustomerDTO.Response>> getActiveCustomers() {
         List<Customer> customers = customerService.getActiveCustomers();
@@ -125,12 +83,7 @@ public class CustomerController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(responses);
     }
-    /**
-     * Obtiene clientes filtrados por tipo.
-     *
-     * @param customerType Tipo de cliente
-     * @return {@link ResponseEntity} con lista de {@link CustomerDTO.Response} filtrados por tipo
-     */
+
     @GetMapping("/type/{customerType}")
     public ResponseEntity<List<CustomerDTO.Response>> getCustomersByType(
             @PathVariable String customerType) {
@@ -141,11 +94,7 @@ public class CustomerController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(responses);
     }
-    /**
-     * Obtiene clientes morosos.
-     *
-     * @return {@link ResponseEntity} con lista de {@link CustomerDTO.Response} de clientes morosos
-     */
+
     @GetMapping("/status/morosos")
     public ResponseEntity<List<CustomerDTO.Response>> getMorosos() {
         List<Customer> customers = customerService.getMorosos();
@@ -154,24 +103,14 @@ public class CustomerController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(responses);
     }
-    /**
-     * Desactiva un cliente.
-     *
-     * @param id Identificador del cliente
-     * @return {@link ResponseEntity} con {@link CustomerDTO.Response} del cliente desactivado
-     */
+
     @PatchMapping("/{id}/deactivate")
     public ResponseEntity<CustomerDTO.Response> deactivateCustomer(@PathVariable Long id) {
         Customer customer = customerService.deactivateCustomer(id);
         CustomerDTO.Response response = mapper.toResponse(customer);
         return ResponseEntity.ok(response);
     }
-    /**
-     * Activa un cliente.
-     *
-     * @param id Identificador del cliente
-     * @return {@link ResponseEntity} con {@link CustomerDTO.Response} del cliente activado
-     */
+
     @PatchMapping("/{id}/activate")
     public ResponseEntity<CustomerDTO.Response> activateCustomer(@PathVariable Long id) {
         Customer customer = customerService.activateCustomer(id);
@@ -179,13 +118,6 @@ public class CustomerController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Verifica si un cliente tiene crédito disponible para un monto específico.
-     *
-     * @param id     Identificador del cliente
-     * @param amount Monto a evaluar
-     * @return {@link ResponseEntity} con un booleano indicando si tiene crédito disponible
-     */
     @GetMapping("/{id}/credit-available/{amount}")
     public ResponseEntity<Boolean> hasCreditAvailable(
             @PathVariable Long id,
@@ -194,12 +126,7 @@ public class CustomerController {
         boolean hasCredit = customerService.hasCreditAvailable(id, amount);
         return ResponseEntity.ok(hasCredit);
     }
-    /**
-     * Obtiene el balance de un cliente, incluyendo límite de crédito, balance pendiente y crédito disponible.
-     *
-     * @param id Identificador del cliente
-     * @return {@link ResponseEntity} con {@link BalanceInfo} del cliente
-     */
+
     @GetMapping("/{id}/balance")
     public ResponseEntity<BalanceInfo> getCustomerBalance(@PathVariable Long id) {
         Customer customer = customerService.getCustomerById(id);
@@ -216,9 +143,7 @@ public class CustomerController {
 
         return ResponseEntity.ok(balanceInfo);
     }
-    /**
-     * DTO interno para representar la información de balance de un cliente.
-     */
+
     @lombok.Data
     @lombok.Builder
     @lombok.NoArgsConstructor

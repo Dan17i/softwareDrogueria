@@ -9,36 +9,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;
+
 /**
- * Mapper de casos de uso para recepciones de mercancía.
- * <p>
- * Responsable de transformar los DTOs utilizados por la capa de aplicación
- * en entidades del dominio {@link GoodsReceipt} y viceversa.
- * </p>
- *
- * <p>
- * Este mapper necesita información adicional del {@link Order} y del
- * {@link Supplier} para completar los datos del dominio durante la creación,
- * ya que el request no contiene toda la información derivada del pedido.
- * </p>
- *
- * Forma parte de la capa de aplicación dentro de la arquitectura hexagonal.
+ * Mapper: Convierte entre DTOs y Modelos de Dominio de Goods Receipt
  */
 @Component
 @RequiredArgsConstructor
 public class GoodsReceiptUseCaseMapper {
+    
     /**
-     * Convierte un DTO de creación en una entidad de dominio {@link GoodsReceipt}.
-     * <p>
-     * El número de recepción se genera en el servicio, por lo que aquí se deja nulo.
-     * Se utilizan los datos del pedido y del proveedor para completar la información
-     * derivada que no viene en el request.
-     * </p>
-     *
-     * @param request   DTO con los datos enviados desde la API
-     * @param order     pedido asociado a la recepción
-     * @param supplier  proveedor asociado al pedido
-     * @return instancia de {@link GoodsReceipt} lista para persistencia
+     * Convierte CreateRequest a GoodsReceipt (Domain Model)
+     * Requiere información del Order para completar datos
      */
     public GoodsReceipt toDomain(GoodsReceiptDTO.CreateRequest request, Order order, Supplier supplier) {
         GoodsReceipt receipt = GoodsReceipt.builder()
@@ -59,11 +40,9 @@ public class GoodsReceiptUseCaseMapper {
         
         return receipt;
     }
+    
     /**
-     * Convierte un item del request en una entidad de dominio {@link GoodsReceiptItem}.
-     *
-     * @param request DTO del item recibido desde la API
-     * @return instancia de {@link GoodsReceiptItem} con los valores del request
+     * Convierte GoodsReceiptItemRequest a GoodsReceiptItem (Domain Model)
      */
     public GoodsReceiptItem itemRequestToDomain(GoodsReceiptDTO.GoodsReceiptItemRequest request) {
         return GoodsReceiptItem.builder()
@@ -74,12 +53,9 @@ public class GoodsReceiptUseCaseMapper {
             .receivedQuantity(request.getReceivedQuantity())
             .build();
     }
+    
     /**
-     * Convierte una entidad de dominio {@link GoodsReceipt}
-     * en un DTO de respuesta para la API.
-     *
-     * @param receipt entidad proveniente del dominio
-     * @return DTO {@link GoodsReceiptDTO.Response} listo para exposición
+     * Convierte GoodsReceipt (Domain Model) a Response DTO
      */
     public GoodsReceiptDTO.Response toResponse(GoodsReceipt receipt) {
         return GoodsReceiptDTO.Response.builder()
@@ -101,12 +77,9 @@ public class GoodsReceiptUseCaseMapper {
                 .collect(Collectors.toList()))
             .build();
     }
+    
     /**
-     * Convierte un item del dominio {@link GoodsReceiptItem}
-     * en su DTO de respuesta.
-     *
-     * @param item entidad del dominio
-     * @return DTO {@link GoodsReceiptDTO.GoodsReceiptItemResponse}
+     * Convierte GoodsReceiptItem a GoodsReceiptItemResponse DTO
      */
     public GoodsReceiptDTO.GoodsReceiptItemResponse itemToResponse(GoodsReceiptItem item) {
         return GoodsReceiptDTO.GoodsReceiptItemResponse.builder()

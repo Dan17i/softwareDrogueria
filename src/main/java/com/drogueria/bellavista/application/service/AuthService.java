@@ -19,18 +19,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.Collections;
+
 /**
- * Servicio de aplicación encargado de la autenticación de usuarios.
- *
- * <p>Este servicio actúa como orquestador entre la capa de seguridad,
- * el dominio y la generación de tokens JWT. Proporciona funcionalidades
- * para registro de usuarios, validación de credenciales, generación de
- * tokens y consulta del usuario autenticado.</p>
- *
- * <p>También implementa {@link UserDetailsService} para integrarse con
- * el mecanismo de autenticación de Spring Security.</p>
- *
- * <p>Forma parte de la capa de aplicación dentro de la arquitectura hexagonal.</p>
+ * Authentication service handling user login, registration and token management.
+ * Integrates with Spring Security and JWT token generation.
  */
 @Service
 @Transactional
@@ -39,64 +31,30 @@ public class AuthService implements UserDetailsService {
     private final UserService userService;
     private final JwtUtils jwtUtils;
     private final PasswordEncoder passwordEncoder;
-    /**
-     * Constructor con inyección de dependencias.
-     *
-     * @param userService servicio de dominio para gestión de usuarios
-     * @param jwtUtils utilidades para generación y validación de JWT
-     * @param passwordEncoder codificador de contraseñas
-     */
+
     public AuthService(UserService userService, JwtUtils jwtUtils, PasswordEncoder passwordEncoder) {
         this.userService = userService;
         this.jwtUtils = jwtUtils;
         this.passwordEncoder = passwordEncoder;
     }
+
     /**
-     * Registra un nuevo usuario con rol por defecto USER.
-     *
-     * @param username nombre de usuario
-     * @param email correo electrónico
-     * @param password contraseña en texto plano
-     * @param firstName nombre
-     * @param lastName apellido
-     * @return usuario creado en el dominio
+     * Register new user in the system.
      */
     public User registerUser(String username, String email, String password, String firstName, String lastName) {
         return userService.createUser(username, email, password, firstName, lastName, Role.USER);
     }
 
     /**
-     * Registra un nuevo usuario con un rol específico.
-     * Usado normalmente por administradores.
-     *
-     * @param username nombre de usuario
-     * @param email correo electrónico
-     * @param password contraseña
-     * @param firstName nombre
-     * @param lastName apellido
-     * @param role rol asignado
-     * @return usuario creado
+     * Register new user with specific role (admin only).
      */
     public User registerUserWithRole(String username, String email, String password, String firstName, String lastName, Role role) {
         return userService.createUser(username, email, password, firstName, lastName, role);
     }
 
     /**
-     * Autentica un usuario validando sus credenciales y genera un token JWT.
-     *
-     * <p>Este método:
-     * <ul>
-     *     <li>Busca el usuario por username</li>
-     *     <li>Verifica que esté activo</li>
-     *     <li>Valida la contraseña</li>
-     *     <li>Actualiza el último login</li>
-     *     <li>Genera el token JWT</li>
-     * </ul>
-     *
-     * @param username nombre de usuario
-     * @param password contraseña en texto plano
-     * @return token JWT generado
-     * @throws AuthenticationException si las credenciales no son válidas
+     * Authenticate user and generate JWT token.
+     * Validates credentials and updates last login timestamp.
      */
     public String authenticateUser(String username, String password) {
         try {
@@ -126,30 +84,21 @@ public class AuthService implements UserDetailsService {
     }
 
     /**
-     * Valida si un token JWT es correcto y no ha expirado.
-     *
-     * @param token token JWT
-     * @return true si es válido, false en caso contrario
+     * Validate JWT token.
      */
     public boolean validateToken(String token) {
         return jwtUtils.validateToken(token);
     }
 
     /**
-     * Extrae el username contenido dentro del token JWT.
-     *
-     * @param token token JWT
-     * @return nombre de usuario contenido en el token
+     * Extract username from JWT token.
      */
     public String getUsernameFromToken(String token) {
         return jwtUtils.getUsernameFromToken(token);
     }
 
     /**
-     * Obtiene el usuario autenticado actualmente desde el contexto de seguridad.
-     *
-     * @return usuario autenticado en el sistema
-     * @throws AuthenticationException si no hay usuario autenticado
+     * Get current authenticated user from security context.
      */
     public User getCurrentUser() {
         SecurityContext context = SecurityContextHolder.getContext();
@@ -164,33 +113,22 @@ public class AuthService implements UserDetailsService {
     }
 
     /**
-     * Verifica si un username está disponible para registro.
-     *
-     * @param username nombre de usuario
-     * @return true si está disponible
+     * Check if username is available for registration.
      */
     public boolean isUsernameAvailable(String username) {
         return userService.isUsernameAvailable(username);
     }
+
     /**
-     * Verifica si un email está disponible para registro.
-     *
-     * @param email correo electrónico
-     * @return true si está disponible
+     * Check if email is available for registration.
      */
     public boolean isEmailAvailable(String email) {
         return userService.isEmailAvailable(email);
     }
+
     /**
-     * Implementación requerida por Spring Security para cargar los datos
-     * del usuario durante el proceso de autenticación.
-     *
-     * <p>Convierte el usuario del dominio en un {@link UserDetails}
-     * compatible con Spring Security.</p>
-     *
-     * @param username nombre de usuario
-     * @return detalles del usuario para Spring Security
-     * @throws UsernameNotFoundException si el usuario no existe
+     * Spring Security UserDetailsService implementation.
+     * Loads user details for authentication.
      */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -216,12 +154,7 @@ public class AuthService implements UserDetailsService {
             throw new UsernameNotFoundException("User not found: " + username);
         }
     }
-    /**
-     * Obtiene un usuario por su username.
-     *
-     * @param username nombre de usuario
-     * @return usuario del dominio
-     */
+
     public User getUserByUsername(String username) {
         return userService.getUserByUsername(username);
     }

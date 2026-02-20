@@ -11,15 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+
 /**
- * Servicio de dominio responsable de la lógica de negocio asociada a los clientes.
- *
- * <p>Este servicio encapsula los casos de uso del dominio relacionados con:
- * creación, actualización, consulta, control de crédito y gestión del estado
- * de los clientes.</p>
- *
- * <p>Garantiza las invariantes del dominio, como unicidad de código, email
- * y documento, así como el manejo del saldo pendiente y validación de crédito.</p>
+ * Servicio de dominio - Casos de uso de Clientes
  */
 @Service
 @RequiredArgsConstructor
@@ -27,20 +21,9 @@ import java.util.List;
 public class CustomerService {
     
     private final CustomerRepository customerRepository;
+    
     /**
-     * Crea un nuevo cliente en el sistema.
-     *
-     * <p>Valida:
-     * <ul>
-     *     <li>Unicidad del código</li>
-     *     <li>Unicidad del email (si se proporciona)</li>
-     *     <li>Unicidad del documento</li>
-     * </ul>
-     * Además establece valores iniciales del cliente.</p>
-     *
-     * @param customer entidad cliente a crear
-     * @return cliente persistido
-     * @throws BusinessException si se violan reglas de negocio
+     * Crear un nuevo cliente
      */
     public Customer createCustomer(Customer customer) {
         // Validar que no exista un cliente con el mismo código
@@ -66,17 +49,9 @@ public class CustomerService {
         
         return customerRepository.save(customer);
     }
+    
     /**
-     * Actualiza la información de un cliente existente.
-     *
-     * <p>Valida que el código y el email sigan siendo únicos en caso
-     * de haber sido modificados.</p>
-     *
-     * @param id identificador del cliente
-     * @param customerData nuevos datos del cliente
-     * @return cliente actualizado
-     * @throws ResourceNotFoundException si el cliente no existe
-     * @throws BusinessException si se violan reglas de unicidad
+     * Actualizar un cliente existente
      */
     public Customer updateCustomer(Long id, Customer customerData) {
         Customer existingCustomer = customerRepository.findById(id)
@@ -112,115 +87,96 @@ public class CustomerService {
         
         return customerRepository.save(existingCustomer);
     }
+    
     /**
-     * Obtiene un cliente por su identificador.
-     *
-     * @param id identificador del cliente
-     * @return cliente encontrado
-     * @throws ResourceNotFoundException si no existe
+     * Obtener cliente por ID
      */
     @Transactional(readOnly = true)
     public Customer getCustomerById(Long id) {
         return customerRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Customer", "id", id));
     }
+    
     /**
-     * Obtiene un cliente por su código único.
-     *
-     * @param code código del cliente
-     * @return cliente encontrado
-     * @throws ResourceNotFoundException si no existe
+     * Obtener cliente por código
      */
     @Transactional(readOnly = true)
     public Customer getCustomerByCode(String code) {
         return customerRepository.findByCode(code)
             .orElseThrow(() -> new ResourceNotFoundException("Customer", "code", code));
     }
+    
     /**
-     * Obtiene un cliente por su email.
-     *
-     * @param email correo electrónico
-     * @return cliente encontrado
-     * @throws ResourceNotFoundException si no existe
+     * Obtener cliente por email
      */
     @Transactional(readOnly = true)
     public Customer getCustomerByEmail(String email) {
         return customerRepository.findByEmail(email)
             .orElseThrow(() -> new ResourceNotFoundException("Customer", "email", email));
     }
+    
     /**
-     * Retorna todos los clientes registrados.
-     *
-     * @return lista de clientes
+     * Listar todos los clientes
      */
     @Transactional(readOnly = true)
     public List<Customer> getAllCustomers() {
         return customerRepository.findAll();
     }
+    
     /**
-     * Retorna únicamente los clientes activos.
-     *
-     * @return lista de clientes activos
+     * Listar clientes activos
      */
     @Transactional(readOnly = true)
     public List<Customer> getActiveCustomers() {
         return customerRepository.findAllActive();
     }
+    
     /**
-     * Obtiene clientes filtrados por tipo.
-     *
-     * @param customerType tipo de cliente
-     * @return lista filtrada
+     * Listar clientes por tipo
      */
     @Transactional(readOnly = true)
     public List<Customer> getCustomersByType(String customerType) {
         return customerRepository.findByCustomerType(customerType);
     }
+    
     /**
-     * Retorna los clientes con saldo pendiente vencido o alto riesgo.
-     *
-     * @return lista de clientes morosos
+     * Listar clientes morosos
      */
     @Transactional(readOnly = true)
     public List<Customer> getMorosos() {
         return customerRepository.findMorosos();
     }
+    
     /**
-     * Incrementa el saldo pendiente del cliente.
-     * Se utiliza cuando el cliente realiza una compra a crédito.
-     *
-     * @param customerId identificador del cliente
-     * @param amount monto a aumentar
-     * @return cliente actualizado
+     * Aumentar saldo pendiente (cuando hace una compra)
      */
     public Customer increasePendingBalance(Long customerId, BigDecimal amount) {
         Customer customer = customerRepository.findById(customerId)
             .orElseThrow(() -> new ResourceNotFoundException("Customer", "id", customerId));
-        
-        customer.increasePendingBalance(amount);
+        try {
+            customer.increasePendingBalance(amount);
+        } catch (IllegalArgumentException e) {
+            throw new BusinessException(e.getMessage());
+        }
         return customerRepository.save(customer);
     }
+    
     /**
-     * Reduce el saldo pendiente del cliente.
-     * Se utiliza cuando el cliente realiza un pago.
-     *
-     * @param customerId identificador del cliente
-     * @param amount monto a reducir
-     * @return cliente actualizado
+     * Reducir saldo pendiente (cuando hace un pago)
      */
     public Customer reducePendingBalance(Long customerId, BigDecimal amount) {
         Customer customer = customerRepository.findById(customerId)
             .orElseThrow(() -> new ResourceNotFoundException("Customer", "id", customerId));
-        
-        customer.reducePendingBalance(amount);
+        try {
+            customer.reducePendingBalance(amount);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            throw new BusinessException(e.getMessage());
+        }
         return customerRepository.save(customer);
     }
+    
     /**
-     * Verifica si el cliente tiene crédito disponible para una compra.
-     *
-     * @param customerId identificador del cliente
-     * @param amount monto a validar
-     * @return true si puede comprar, false si supera el límite
+     * Validar si tiene crédito disponible
      */
     @Transactional(readOnly = true)
     public boolean hasCreditAvailable(Long customerId, BigDecimal amount) {
@@ -229,11 +185,9 @@ public class CustomerService {
         
         return customer.hasCreditAvailable(amount);
     }
+    
     /**
-     * Desactiva un cliente en el sistema.
-     *
-     * @param id identificador del cliente
-     * @return cliente actualizado
+     * Desactivar cliente
      */
     public Customer deactivateCustomer(Long id) {
         Customer customer = customerRepository.findById(id)
@@ -244,11 +198,9 @@ public class CustomerService {
         
         return customerRepository.save(customer);
     }
+    
     /**
-     * Activa nuevamente un cliente.
-     *
-     * @param id identificador del cliente
-     * @return cliente actualizado
+     * Activar cliente
      */
     public Customer activateCustomer(Long id) {
         Customer customer = customerRepository.findById(id)

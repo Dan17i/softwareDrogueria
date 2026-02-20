@@ -218,6 +218,30 @@ curl -X POST http://localhost:8080/api/products/1/reduce-stock \
 
 ## 🏛️ Principios de Arquitectura Hexagonal
 
+## 🧪 Ejecutar pruebas de integración
+
+Se incluyen pruebas de integración que usan Testcontainers para levantar una base de datos PostgreSQL aislada y validar el flujo de autenticación + creación de pedido.
+
+Requisitos:
+- Docker disponible (Testcontainers descarga y arranca contenedores).
+- Maven.
+
+Comando para ejecutar la prueba de integración específica:
+
+```bash
+mvn -Dtest=AuthOrderIntegrationTest test
+```
+
+O ejecutar todo el conjunto de tests:
+
+```bash
+mvn test
+```
+
+Notas:
+- Si no quieres usar Docker, ejecuta las pruebas con una configuración de H2/local (requiere ajustar perfiles para tests).
+- Las pruebas usará la imagen `postgres:15-alpine` por defecto y crearán una base de datos efímera.
+
 ### 1. **Dominio (Core)**
 - Contiene la lógica de negocio pura
 - No tiene dependencias externas (frameworks, librerías)

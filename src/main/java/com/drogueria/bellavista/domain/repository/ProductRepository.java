@@ -4,97 +4,61 @@ import com.drogueria.bellavista.domain.model.Product;
 
 import java.util.List;
 import java.util.Optional;
+
 /**
- * <h2>Puerto de Salida (Output Port) - ProductRepository</h2>
- *
- * <p>
- * Define el contrato que debe implementar cualquier mecanismo de persistencia
- * relacionado con la entidad {@link Product}.
- * </p>
- *
- * <p>
- * Esta interfaz pertenece a la capa de dominio y no depende de ningún
- * framework o tecnología específica. Actúa como un <b>puerto de salida</b>
- * dentro de la arquitectura hexagonal (Ports & Adapters), permitiendo
- * desacoplar la lógica de negocio de la infraestructura.
- * </p>
- *
- * <p>
- * Las implementaciones concretas deben ubicarse en la capa de infraestructura.
- * </p>
- * @author Daniel Jurado & equipo de desarrollo
- * @since 1.0
+ * Puerto de salida (Output Port) - Repositorio de Productos
+ * Define el contrato que debe implementar la infraestructura
+ * No tiene dependencias de frameworks, solo del dominio
  */
 public interface ProductRepository {
+    
     /**
-     * Guarda o actualiza un producto en el sistema.
-     *
-     * @param product entidad a persistir
-     * @return producto persistido con posibles datos actualizados
+     * Guardar un producto
      */
     Product save(Product product);
+    
     /**
-     * Busca un producto por su identificador único.
-     *
-     * @param id identificador del producto
-     * @return {@link Optional} con el producto si existe,
-     *         o vacío si no se encuentra
+     * Buscar producto por ID
      */
     Optional<Product> findById(Long id);
+    
     /**
-     * Busca un producto por su código único.
-     *
-     * @param code código del producto
-     * @return {@link Optional} con el producto si existe,
-     *         o vacío si no se encuentra
+     * Buscar producto por código
      */
     Optional<Product> findByCode(String code);
+    
     /**
-     * Obtiene todos los productos registrados en el sistema.
-     *
-     * @return lista completa de productos
+     * Listar todos los productos
      */
     List<Product> findAll();
+    
     /**
-     * Obtiene únicamente los productos activos.
-     *
-     * @return lista de productos con estado activo
+     * Listar productos activos
      */
     List<Product> findAllActive();
+    
     /**
-     * Obtiene productos filtrados por categoría.
-     *
-     * @param category categoría del producto
-     * @return lista de productos que pertenecen a la categoría indicada
+     * Listar productos por categoría
      */
     List<Product> findByCategory(String category);
+    
     /**
-     * Obtiene productos que requieren reabastecimiento,
-     * generalmente cuando el stock es menor o igual al stock mínimo definido.
-     *
-     * @return lista de productos que necesitan reposición
+     * Listar productos que necesitan reabastecimiento
      */
     List<Product> findProductsNeedingRestock();
+    
     /**
-     * Busca productos cuyo nombre contenga el texto indicado
-     * (búsqueda parcial).
-     *
-     * @param name texto a buscar dentro del nombre del producto
-     * @return lista de productos que coinciden con el criterio
+     * Buscar productos por nombre (búsqueda parcial)
      */
     List<Product> findByNameContaining(String name);
+    
     /**
-     * Elimina un producto por su identificador.
-     *
-     * @param id identificador del producto
+     * Eliminar producto
      */
     void deleteById(Long id);
+    
     /**
-     * Verifica si ya existe un producto con el código indicado.
-     *
-     * @param code código del producto
-     * @return {@code true} si existe,
-     *         {@code false} en caso contrario
+     * Verificar si existe un producto con el código dado
      */
     boolean existsByCode(String code);
 }
