@@ -2,6 +2,8 @@
 
 Sistema de gestión para droguería construido con Spring Boot siguiendo arquitectura hexagonal (Clean Architecture).
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Dan17i/softwareDrogueria)
+
 ## 🏗️ Arquitectura
 
 El proyecto sigue el patrón de Arquitectura Hexagonal (Ports & Adapters):
