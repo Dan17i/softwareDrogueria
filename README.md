@@ -1,5 +1,4 @@
 
-```markdown
 # Droguería Bella vista - Backend
 
 Sistema de gestión para droguería construido con Spring Boot siguiendo arquitectura hexagonal (Clean Architecture).
@@ -10,7 +9,6 @@ Sistema de gestión para droguería construido con Spring Boot siguiendo arquite
 
 El proyecto sigue el patrón de Arquitectura Hexagonal (Ports & Adapters):
 ```
-
 src/main/java/com/drogueria/bellavista/
 │
 ├── domain/                          # Capa de Dominio (Lógica de Negocio)
@@ -58,7 +56,7 @@ src/main/java/com/drogueria/bellavista/
 1. **Clonar el repositorio**
 ```
 bash
-git clone <repository-url>
+git clone https://github.com/Dan17i/softwareDrogueria.git
 cd softwareDrogueria
 ```
 2. **Configurar la base de datos**
@@ -83,21 +81,30 @@ h2:
 console:
 enabled: true
 ```
+
 3. **Compilar el proyecto**
 ```
-bash
-mvn clean install
-```
+bash mvn clean install
+``` 
+
 4. **Levantar servicios con Docker Compose**
+
+El proyecto incluye un `docker-compose.yml` que levanta PostgreSQL en el puerto `5433`. El `application.yml` ya viene configurado para conectarse a ese contenedor, por lo que **no necesitas editar ningún archivo** para el entorno de desarrollo:
+
 ```
-bash
-docker compose up -d
-```
+bash docker compose up -d
+``` 
+
 5. **Verificar que PostgreSQL esté corriendo**
 ```
-bash
 docker ps
 ```
+Las credenciales en application.yml (postgres / JUNIORDIAZ, puerto 5433) están pensadas para desarrollo local junto con Docker Compose. Para producción, reemplázalas usando variables de entorno:
+
+> export SPRING_DATASOURCE_URL=jdbc:postgresql://<host>:5432/<db>
+> export SPRING_DATASOURCE_USERNAME=<usuario>
+> export SPRING_DATASOURCE_PASSWORD=<contraseña_segura>
+
 6. **Configurar el secreto JWT**
 
 Establece la variable de entorno `APP_JWT_SECRET` con una clave segura (mínimo 32 caracteres). Ejemplo (PowerShell):
