@@ -1,9 +1,6 @@
 package com.drogueria.bellavista.controller;
 
-import com.drogueria.bellavista.application.dto.AuthResponseDTO;
-import com.drogueria.bellavista.application.dto.LoginRequestDTO;
-import com.drogueria.bellavista.application.dto.RegisterRequestDTO;
-import com.drogueria.bellavista.application.dto.UserResponseDTO;
+import com.drogueria.bellavista.application.dto.*;
 import com.drogueria.bellavista.application.service.AuthService;
 import com.drogueria.bellavista.domain.model.Role;
 import com.drogueria.bellavista.domain.model.User;
