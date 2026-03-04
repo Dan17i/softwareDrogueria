@@ -9,6 +9,7 @@ import com.drogueria.bellavista.domain.model.Role;
 import com.drogueria.bellavista.domain.model.User;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -65,5 +66,27 @@ public class AuthController {
         );
         return "Admin creado correctamente";
     }
+    @PostMapping("/admin/create-user")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UserResponseDTO> createUserWithRole(@Valid @RequestBody RegisterWithRoleRequestDTO req) {
+        User created = authService.registerUserWithRole(
+                req.getUsername(),
+                req.getEmail(),
+                req.getPassword(),
+                req.getFirstName(),
+                req.getLastName(),
+                req.getRole()
+        );
 
+        UserResponseDTO resp = UserResponseDTO.builder()
+                .id(created.getId())
+                .username(created.getUsername())
+                .email(created.getEmail())
+                .firstName(created.getFirstName())
+                .lastName(created.getLastName())
+                .role(created.getRole().name())
+                .build();
+
+        return ResponseEntity.ok(resp);
+    }
 }
