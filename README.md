@@ -1,405 +1,345 @@
-# Droguería Bellavista - Backend
+# 🏥 Droguería Bellavista - Backend API
 
-Sistema de gestión para droguería construido con Spring Boot siguiendo arquitectura hexagonal (Clean Architecture).
+Sistema de gestión para droguería construido con **Spring Boot 3.2.2** y **Java 21**, siguiendo arquitectura hexagonal (Clean Architecture).
 
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Dan17i/softwareDrogueria)
+[![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://openjdk.org/projects/jdk/21/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.2-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue.svg)](https://www.postgresql.org/)
+[![Tests](https://img.shields.io/badge/Tests-85%20passed-success.svg)]()
+[![Deploy](https://img.shields.io/badge/Deploy-Render-purple.svg)](https://drogueria-bellavista-api.onrender.com/api/actuator/health)
 
-## 🏗️ Arquitectura
+---
 
-El proyecto sigue el patrón de Arquitectura Hexagonal (Ports & Adapters):
+## 📋 Tabla de Contenidos
+
+- [Demo en Producción](#-demo-en-producción)
+- [Tecnologías](#-tecnologías)
+- [Arquitectura](#-arquitectura)
+- [Instalación Local](#-instalación-local)
+- [Configuración](#-configuración)
+- [API Endpoints](#-api-endpoints)
+- [Seguridad](#-seguridad)
+- [Testing](#-testing)
+- [Despliegue](#-despliegue)
+- [Estructura del Proyecto](#-estructura-del-proyecto)
+- [Contribución](#-contribución)
+
+---
+
+## 🌐 Demo en Producción
+
+La API está desplegada y disponible en:
 
 ```
-src/main/java/com/drogueria/bellavista/
-│
-├── domain/                          # Capa de Dominio (Lógica de Negocio)
-│   ├── model/                       # Entidades de dominio
-│   ├── repository/                  # Puertos de salida (interfaces)
-│   └── service/                     # Servicios de dominio (lógica de negocio pura)
-│
-├── application/                     # Capa de Aplicación (Orquestación)
-│   ├── dto/                         # DTOs para la API
-│   ├── mapper/                      # Mappers DTO ↔ Domain
-│   └── service/                     # Servicios de aplicación (e.g. AuthService)
-│
-├── infrastructure/                  # Capa de Infraestructura (Detalles técnicos)
-│   ├── persistence/                 # Entidades JPA y repositorios Spring Data
-│   ├── adapter/                     # Adaptadores que implementan los puertos de dominio
-│   ├── mapper/                      # Mappers Entity ↔ Domain
-│   └── security/                    # Filtros y utilidades JWT
-│
-├── controller/                      # Controladores REST (Puertos de entrada)
-├── config/                          # Configuraciones (Security, CORS, PasswordEncoder)
-└── exception/                       # Excepciones personalizadas
+https://drogueria-bellavista-api.onrender.com/api
 ```
+
+### Endpoints públicos para probar:
+
+| Endpoint | URL |
+|----------|-----|
+| Health Check | [/api/actuator/health](https://drogueria-bellavista-api.onrender.com/api/actuator/health) |
+| Registro | POST `/api/auth/register` |
+| Login | POST `/api/auth/login` |
+
+> ⚠️ **Nota**: El plan gratuito de Render apaga la app tras 15 min de inactividad. El primer request puede tardar ~30-60 segundos.
+
+---
 
 ## 🚀 Tecnologías
 
-- **Java 21**
-- **Spring Boot 3.2.2**
-- **Spring Security** (JWT con `JwtAuthenticationFilter` + `JwtUtils`)
-- **Spring Data JPA**
-- **PostgreSQL** (producción)
-- **H2** (desarrollo/testing)
-- **Lombok**
-- **Maven**
-- **Testcontainers** (pruebas de integración)
+| Categoría | Tecnología |
+|-----------|------------|
+| **Lenguaje** | Java 21 |
+| **Framework** | Spring Boot 3.2.2 |
+| **Seguridad** | Spring Security + JWT |
+| **Persistencia** | Spring Data JPA |
+| **Base de Datos** | PostgreSQL 15 (prod) / H2 (dev) |
+| **Build** | Maven |
+| **Testing** | JUnit 5, Testcontainers |
+| **Contenedores** | Docker |
+| **Deploy** | Render |
 
 ---
 
-## 📦 Instalación
+## 🏗️ Arquitectura
 
-### 🔧 Prerrequisitos
+El proyecto implementa **Arquitectura Hexagonal** (Ports & Adapters):
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      CONTROLLERS                             │
+│                   (Adaptadores de Entrada)                   │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+┌─────────────────────────▼───────────────────────────────────┐
+│                      APPLICATION                             │
+│              (DTOs, Mappers, Servicios de App)               │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+┌─────────────────────────▼───────────────────────────────────┐
+│                        DOMAIN                                │
+│            (Modelos, Servicios, Puertos/Interfaces)          │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+┌─────────────────────────▼───────────────────────────────────┐
+│                    INFRASTRUCTURE                            │
+│         (JPA Entities, Repositories, Security, Adapters)     │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Principios aplicados:
+
+- ✅ **Independencia de frameworks**: El dominio no depende de Spring
+- ✅ **Testeable**: Fácil de hacer unit tests sin infraestructura
+- ✅ **Mantenible**: Separación clara de responsabilidades
+- ✅ **Flexible**: Fácil cambiar BD o exponer otra API
+- ✅ **Escalable**: Cada capa puede evolucionar independientemente
+
+---
+
+## 💻 Instalación Local
+
+### Prerrequisitos
 
 - Java 21
 - Maven 3.8+
-- Docker (para PostgreSQL con Docker Compose o para Testcontainers)
+- Docker (para PostgreSQL)
 
----
+### Pasos
 
-### 🚀 Ejecución en Desarrollo
-
-**1️⃣ Clonar el repositorio**
+**1. Clonar el repositorio**
 
 ```bash
 git clone https://github.com/Dan17i/softwareDrogueria.git
 cd softwareDrogueria
 ```
 
-**2️⃣ Levantar la base de datos (PostgreSQL)**
-
-El proyecto incluye un `docker-compose.yml` que levanta PostgreSQL en el puerto 5433.
+**2. Levantar PostgreSQL con Docker**
 
 ```bash
 docker compose up -d
 ```
 
-Verificar que esté corriendo:
+**3. Configurar variable de entorno JWT**
 
 ```bash
-docker ps
-```
-
-**3️⃣ Configurar el secreto JWT (obligatorio)**
-
-El proyecto requiere la variable de entorno `APP_JWT_SECRET` (mínimo 32 caracteres).
-
-*Windows (PowerShell)*
-```powershell
+# Windows (PowerShell)
 $env:APP_JWT_SECRET="dev-secret-key-with-at-least-32-characters"
-```
 
-*Linux / macOS*
-```bash
+# Linux / macOS
 export APP_JWT_SECRET="dev-secret-key-with-at-least-32-characters"
 ```
 
-**4️⃣ Ejecutar la aplicación (perfil `dev`)**
+**4. Ejecutar la aplicación**
 
-*Windows (PowerShell)*
-```powershell
-mvn spring-boot:run -Dspring-boot.run.profiles=dev
-```
-
-*Linux / macOS*
 ```bash
 mvn spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
-La API estará disponible en: `http://localhost:8080/api`
+**5. Verificar**
+
+Abrir: http://localhost:8080/api/actuator/health
 
 ---
 
-### 🚀 Ejecución en Producción
+## ⚙️ Configuración
 
-El perfil `prod` utiliza variables de entorno para la conexión a base de datos y seguridad.
+### Perfiles disponibles
 
-**🔐 Variables requeridas**
+| Perfil | Base de Datos | Uso |
+|--------|---------------|-----|
+| `dev` | PostgreSQL (localhost:5433) | Desarrollo local |
+| `prod` | PostgreSQL (Render) | Producción |
 
-| Variable | Descripción |
-|----------|-------------|
-| `SPRING_DATASOURCE_URL` | URL de conexión JDBC |
-| `SPRING_DATASOURCE_USERNAME` | Usuario de la base de datos |
-| `SPRING_DATASOURCE_PASSWORD` | Contraseña de la base de datos |
-| `APP_JWT_SECRET` | Clave secreta para JWT (mín. 32 caracteres) |
+### Variables de entorno
 
-*Windows (PowerShell)*
-```powershell
-$env:SPRING_DATASOURCE_URL="jdbc:postgresql://host:5432/db"
-$env:SPRING_DATASOURCE_USERNAME="usuario"
-$env:SPRING_DATASOURCE_PASSWORD="password"
-$env:APP_JWT_SECRET="secure-production-secret-with-32-chars"
-
-mvn spring-boot:run -Dspring-boot.run.profiles=prod
-```
-
-*Linux / macOS*
-```bash
-export SPRING_DATASOURCE_URL="jdbc:postgresql://host:5432/db"
-export SPRING_DATASOURCE_USERNAME="usuario"
-export SPRING_DATASOURCE_PASSWORD="password"
-export APP_JWT_SECRET="secure-production-secret-with-32-chars"
-
-mvn spring-boot:run -Dspring-boot.run.profiles=prod
-```
-
-> ⚠️ **Nota de seguridad**: Para producción, almacena los secretos en un gestor seguro (Vault, Azure KeyVault, AWS Secrets Manager) y nunca en `application.yml`.
+| Variable | Descripción | Requerida |
+|----------|-------------|-----------|
+| `APP_JWT_SECRET` | Clave secreta para JWT (mín. 32 caracteres) | ✅ Sí |
+| `SPRING_DATASOURCE_URL` | URL de conexión JDBC | Solo en prod |
+| `SPRING_DATASOURCE_USERNAME` | Usuario de BD | Solo en prod |
+| `SPRING_DATASOURCE_PASSWORD` | Contraseña de BD | Solo en prod |
+| `PORT` | Puerto del servidor | Solo en prod |
 
 ---
 
 ## 📚 API Endpoints
 
-### Autenticación
-
-| Método | Endpoint | Descripción | Auth requerida |
-|--------|----------|-------------|----------------|
-| POST | `/api/auth/register` | Registrar nuevo usuario | No |
-| POST | `/api/auth/login` | Iniciar sesión (devuelve JWT) | No |
-| POST | `/api/auth/dev-create-admin` | Crear usuario admin (**solo desarrollo**) | No |
-
-**Registro:**
-```bash
-curl -X POST http://localhost:8080/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "juan123",
-    "email": "juan@test.com",
-    "password": "12345678",
-    "firstName": "Juan",
-    "lastName": "Perez"
-  }'
-```
-
-**Login:**
-```bash
-curl -X POST http://localhost:8080/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "juan123",
-    "password": "12345678"
-  }'
-```
-
-Los endpoints protegidos deben incluir el token en cada request:
-```
-Authorization: Bearer <token>
-```
-
----
-
-### Productos
+### Autenticación (públicos)
 
 | Método | Endpoint | Descripción |
 |--------|----------|-------------|
+| POST | `/api/auth/register` | Registrar usuario |
+| POST | `/api/auth/login` | Iniciar sesión |
+
+### Productos (protegidos)
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET | `/api/products` | Listar todos |
+| GET | `/api/products/{id}` | Obtener por ID |
+| GET | `/api/products/code/{code}` | Obtener por código |
 | POST | `/api/products` | Crear producto |
 | PUT | `/api/products/{id}` | Actualizar producto |
-| GET | `/api/products/{id}` | Obtener producto por ID |
-| GET | `/api/products/code/{code}` | Obtener producto por código |
-| GET | `/api/products` | Listar todos los productos |
-| GET | `/api/products?active=true` | Listar productos activos |
-| GET | `/api/products/search?name=xxx` | Buscar por nombre |
-| GET | `/api/products/category/{category}` | Listar por categoría |
-| GET | `/api/products/restock-needed` | Productos con stock bajo |
+| DELETE | `/api/products/{id}` | Eliminar producto |
 | POST | `/api/products/{id}/reduce-stock` | Reducir stock |
 | POST | `/api/products/{id}/increase-stock` | Aumentar stock |
-| PATCH | `/api/products/{id}/toggle-status` | Activar/Desactivar producto |
-| DELETE | `/api/products/{id}` | Eliminar producto |
+| PATCH | `/api/products/{id}/toggle-status` | Cambiar estado |
 
----
-
-### Clientes
+### Clientes (protegidos)
 
 | Método | Endpoint | Descripción |
 |--------|----------|-------------|
+| GET | `/api/customers` | Listar todos |
+| GET | `/api/customers/{id}` | Obtener por ID |
 | POST | `/api/customers` | Crear cliente |
 | PUT | `/api/customers/{id}` | Actualizar cliente |
-| GET | `/api/customers/{id}` | Obtener cliente por ID |
-| GET | `/api/customers` | Listar todos los clientes |
 | DELETE | `/api/customers/{id}` | Eliminar cliente |
 
----
-
-### Proveedores
+### Proveedores (protegidos)
 
 | Método | Endpoint | Descripción |
 |--------|----------|-------------|
+| GET | `/api/suppliers` | Listar todos |
+| GET | `/api/suppliers/{id}` | Obtener por ID |
 | POST | `/api/suppliers` | Crear proveedor |
 | PUT | `/api/suppliers/{id}` | Actualizar proveedor |
-| GET | `/api/suppliers/{id}` | Obtener proveedor por ID |
-| GET | `/api/suppliers` | Listar todos los proveedores |
 | DELETE | `/api/suppliers/{id}` | Eliminar proveedor |
 
----
-
-### Órdenes
+### Órdenes (protegidos)
 
 | Método | Endpoint | Descripción |
 |--------|----------|-------------|
+| GET | `/api/orders` | Listar todas |
+| GET | `/api/orders/{id}` | Obtener por ID |
 | POST | `/api/orders` | Crear orden |
 | PUT | `/api/orders/{id}` | Actualizar orden |
-| GET | `/api/orders/{id}` | Obtener orden por ID |
-| GET | `/api/orders` | Listar todas las órdenes |
 | DELETE | `/api/orders/{id}` | Eliminar orden |
 
----
-
-### Recepciones de Mercancía (Goods Receipt)
+### Recepción de Mercancía (protegidos)
 
 | Método | Endpoint | Descripción |
 |--------|----------|-------------|
-| POST | `/api/goods-receipts` | Crear recepción vinculada a una orden |
-| GET | `/api/goods-receipts/{id}` | Obtener recepción por ID |
-| GET | `/api/goods-receipts/number/{receiptNumber}` | Obtener por número de recepción |
-| GET | `/api/goods-receipts/order/{orderId}` | Listar recepciones de una orden |
-| GET | `/api/goods-receipts/supplier/{supplierId}` | Listar recepciones de un proveedor |
-| GET | `/api/goods-receipts/status/{status}` | Filtrar por estado (`PENDING`, `RECEIVED`, ...) |
-| GET | `/api/goods-receipts/pending` | Listar recepciones pendientes |
-| PATCH | `/api/goods-receipts/{id}/receive` | Confirmar recepción y actualizar stock |
-| PATCH | `/api/goods-receipts/{id}/reject` | Rechazar recepción (no actualiza stock) |
-| DELETE | `/api/goods-receipts/{id}` | Eliminar recepción (solo si está `PENDING`) |
-
----
-
-### Ejemplos de Uso
-
-**Crear un producto:**
-```bash
-curl -X POST http://localhost:8080/api/products \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <token>" \
-  -d '{
-    "code": "MED001",
-    "name": "Acetaminofén 500mg",
-    "description": "Analgésico y antipirético",
-    "price": 5000,
-    "stock": 100,
-    "minStock": 20,
-    "category": "Medicamentos"
-  }'
-```
-
-**Listar productos:**
-```bash
-curl http://localhost:8080/api/products \
-  -H "Authorization: Bearer <token>"
-```
-
-**Reducir stock:**
-```bash
-curl -X POST http://localhost:8080/api/products/1/reduce-stock \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <token>" \
-  -d '{"quantity": 5}'
-```
+| GET | `/api/goods-receipts` | Listar todas |
+| GET | `/api/goods-receipts/{id}` | Obtener por ID |
+| POST | `/api/goods-receipts` | Crear recepción |
+| PATCH | `/api/goods-receipts/{id}/receive` | Confirmar recepción |
+| PATCH | `/api/goods-receipts/{id}/reject` | Rechazar recepción |
 
 ---
 
 ## 🔐 Seguridad
 
-El proyecto tiene Spring Security completamente integrado con autenticación basada en JWT.
+### Autenticación JWT
 
-### Componentes de seguridad
+Todos los endpoints protegidos requieren el header:
 
-| Componente | Ubicación | Descripción |
-|------------|-----------|-------------|
-| `JwtUtils` | `infrastructure.security` | Generación y validación de tokens JWT |
-| `JwtAuthenticationFilter` | `infrastructure.security` | Filtro que intercepta y valida el JWT en cada request |
-| `SecurityConfig` | `config` | Configuración de cadena de filtros y rutas públicas/protegidas |
-| `PasswordEncoderConfig` | `config` | Bean de `BCryptPasswordEncoder` |
-| `AuthService` | `application.service` | Orquesta registro, login y creación del admin |
+```
+Authorization: Bearer <token>
+```
 
-### Roles disponibles (`domain.model.Role`)
+### Flujo de autenticación
+
+```
+1. POST /api/auth/register  →  Crear cuenta
+2. POST /api/auth/login     →  Obtener token JWT
+3. Usar token en headers    →  Acceder a endpoints protegidos
+```
+
+### Roles disponibles
 
 | Rol | Descripción |
 |-----|-------------|
-| `ADMIN` | Administrador del sistema (acceso completo) |
-| `MANAGER` | Gerente (reportes y gestión avanzada) |
-| `SALES` | Representante de ventas (órdenes y clientes) |
-| `WAREHOUSE` | Almacén (inventario y recepciones de mercancía) |
-| `USER` | Usuario estándar (permisos limitados) |
+| `ADMIN` | Acceso completo |
+| `MANAGER` | Reportes y gestión |
+| `SALES` | Ventas y clientes |
+| `WAREHOUSE` | Inventario |
+| `USER` | Acceso básico |
 
-- El rol se persiste en `UserEntity` como `EnumType.STRING`.
-- Al construir `GrantedAuthority` se usa la convención `ROLE_<ROLE_NAME>` (ej. `ROLE_ADMIN`).
+### Ejemplo de uso
 
-### Crear usuario administrador inicial
-
-**Opción 1 — Endpoint de desarrollo:**
 ```bash
-curl -X POST http://localhost:8080/api/auth/dev-create-admin
-```
+# 1. Registrar
+curl -X POST https://drogueria-bellavista-api.onrender.com/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","email":"admin@test.com","password":"password123","firstName":"Admin","lastName":"User"}'
 
-**Opción 2 — SQL directo (H2 / PostgreSQL):**
-```sql
-INSERT INTO users (username, email, password, role, active, created_at)
-VALUES ('admin', 'admin@example.com', '<bcrypt-hash>', 'ADMIN', true, CURRENT_TIMESTAMP);
-```
+# 2. Login
+curl -X POST https://drogueria-bellavista-api.onrender.com/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"password123"}'
 
-> Genera el hash con `BCryptPasswordEncoder` de Spring Security.
+# 3. Usar token
+curl https://drogueria-bellavista-api.onrender.com/api/products \
+  -H "Authorization: Bearer <tu-token>"
+```
 
 ---
 
 ## 🧪 Testing
 
-### Ejecutar todos los tests
-```bash
-mvn test
-```
+### Resumen de cobertura
 
-### Ejecutar tests con reporte de cobertura
+| Tipo | Tests | Estado |
+|------|-------|--------|
+| Unit Tests (Servicios) | 58 | ✅ |
+| SecurityIntegrationTest | 11 | ✅ |
+| ProductIntegrationTest | 15 | ✅ |
+| AuthOrderIntegrationTest | 1 | ✅ |
+| **Total** | **85** | ✅ |
+
+### Ejecutar tests
+
 ```bash
+# Todos los tests
+mvn test
+
+# Test específico
+mvn -Dtest=SecurityIntegrationTest test
+
+# Con reporte de cobertura
 mvn test jacoco:report
 ```
 
-### Ejecutar prueba de integración específica
-```bash
-mvn -Dtest=AuthOrderIntegrationTest test
+### Tests de integración
+
+Utilizan **Testcontainers** con PostgreSQL 15 para simular el entorno de producción.
+
+---
+
+## 🚀 Despliegue
+
+### Plataforma: Render
+
+La aplicación está desplegada en [Render](https://render.com) con:
+
+- **Web Service**: Docker container con JRE 21
+- **Base de datos**: PostgreSQL 15
+
+### Archivos de configuración
+
+| Archivo | Descripción |
+|---------|-------------|
+| `Dockerfile` | Build multi-stage con Maven + JRE Alpine |
+| `render.yaml` | Blueprint para despliegue automático |
+
+### URL de producción
+
+```
+https://drogueria-bellavista-api.onrender.com/api
 ```
 
-Las pruebas de integración utilizan **Testcontainers** para levantar una instancia de PostgreSQL aislada (`postgres:15-alpine`) y validar el flujo completo de autenticación + creación de pedido.
+### Desplegar cambios
 
-> Si no tienes Docker disponible, ejecuta las pruebas con el perfil H2.
-
-Se incluyen pruebas unitarias para `GoodsReceiptService` en:
-`src/test/java/com/drogueria/bellavista/domain/service/GoodsReceiptServiceTest.java`
+Los cambios en la rama `main` se despliegan automáticamente.
 
 ---
 
-## 🏛️ Principios de Arquitectura Hexagonal
-
-### 1. Dominio (Core)
-- Contiene la lógica de negocio pura
-- No tiene dependencias externas (frameworks, librerías)
-- Define interfaces (puertos) para comunicación hacia afuera
-
-### 2. Aplicación
-- Orquesta los casos de uso
-- Convierte entre DTO y modelos de dominio
-- Maneja validaciones de entrada
-
-### 3. Infraestructura
-- Implementa los puertos definidos en el dominio
-- Maneja detalles técnicos (BD, seguridad, API externas)
-- Adaptadores de persistencia JPA y filtros de seguridad
-
-### 4. Controladores (Adaptadores de Entrada)
-- Exponen la API REST
-- Convierten requests HTTP a llamadas de dominio
-
----
-
-## 🔍 Ventajas de esta Arquitectura
-
-✅ **Independencia de frameworks**: El dominio no depende de Spring  
-✅ **Testeable**: Fácil de hacer unit tests sin infraestructura  
-✅ **Mantenible**: Separación clara de responsabilidades  
-✅ **Flexible**: Fácil cambiar BD o exponer otra API  
-✅ **Escalable**: Cada capa puede evolucionar independientemente
-
----
-
-## 📝 Estructura de Carpetas Completa
+## 📁 Estructura del Proyecto
 
 <details>
-<summary>Ver estructura completa del proyecto</summary>
+<summary>Click para expandir</summary>
 
 ```
 softwareDrogueria/
@@ -407,123 +347,38 @@ softwareDrogueria/
 │   ├── main/
 │   │   ├── java/com/drogueria/bellavista/
 │   │   │   ├── domain/
-│   │   │   │   ├── model/
-│   │   │   │   │   ├── Customer.java
-│   │   │   │   │   ├── GoodsReceipt.java
-│   │   │   │   │   ├── GoodsReceiptItem.java
-│   │   │   │   │   ├── Order.java
-│   │   │   │   │   ├── OrderItem.java
-│   │   │   │   │   ├── Product.java
-│   │   │   │   │   ├── Role.java
-│   │   │   │   │   ├── Supplier.java
-│   │   │   │   │   └── User.java
-│   │   │   │   ├── repository/
-│   │   │   │   │   ├── CustomerRepository.java
-│   │   │   │   │   ├── GoodsReceiptRepository.java
-│   │   │   │   │   ├── OrderRepository.java
-│   │   │   │   │   ├── ProductRepository.java
-│   │   │   │   │   ├── SupplierRepository.java
-│   │   │   │   │   └── UserRepository.java
-│   │   │   │   └── service/
-│   │   │   │       ├── CustomerService.java
-│   │   │   │       ├── GoodsReceiptService.java
-│   │   │   │       ├── OrderService.java
-│   │   │   │       ├── ProductService.java
-│   │   │   │       ├── SupplierService.java
-│   │   │   │       └── UserService.java
+│   │   │   │   ├── model/          # Entidades de dominio
+│   │   │   │   ├── repository/     # Puertos (interfaces)
+│   │   │   │   └── service/        # Lógica de negocio
 │   │   │   │
 │   │   │   ├── application/
-│   │   │   │   ├── dto/
-│   │   │   │   │   ├── AuthResponseDTO.java
-│   │   │   │   │   ├── CustomerDTO.java
-│   │   │   │   │   ├── GoodsReceiptDTO.java
-│   │   │   │   │   ├── LoginRequestDTO.java
-│   │   │   │   │   ├── OrderDTO.java
-│   │   │   │   │   ├── ProductDTO.java
-│   │   │   │   │   ├── RegisterRequestDTO.java
-│   │   │   │   │   ├── SupplierDTO.java
-│   │   │   │   │   └── UserResponseDTO.java
-│   │   │   │   ├── mapper/
-│   │   │   │   │   ├── CustomerUseCaseMapper.java
-│   │   │   │   │   ├── GoodsReceiptUseCaseMapper.java
-│   │   │   │   │   ├── OrderUseCaseMapper.java
-│   │   │   │   │   ├── ProductUseCaseMapper.java
-│   │   │   │   │   └── SupplierUseCaseMapper.java
-│   │   │   │   └── service/
-│   │   │   │       └── AuthService.java
+│   │   │   │   ├── dto/            # Data Transfer Objects
+│   │   │   │   ├── mapper/         # Mappers DTO ↔ Domain
+│   │   │   │   └── service/        # Servicios de aplicación
 │   │   │   │
 │   │   │   ├── infrastructure/
-│   │   │   │   ├── persistence/
-│   │   │   │   │   ├── CustomerEntity.java
-│   │   │   │   │   ├── GoodsReceiptEntity.java
-│   │   │   │   │   ├── GoodsReceiptItemEntity.java
-│   │   │   │   │   ├── JpaCustomerRepository.java
-│   │   │   │   │   ├── JpaGoodsReceiptItemRepository.java
-│   │   │   │   │   ├── JpaGoodsReceiptRepository.java
-│   │   │   │   │   ├── JpaOrderItemRepository.java
-│   │   │   │   │   ├── JpaOrderRepository.java
-│   │   │   │   │   ├── JpaProductRepository.java
-│   │   │   │   │   ├── JpaSupplierRepository.java
-│   │   │   │   │   ├── JpaUserRepository.java
-│   │   │   │   │   ├── OrderEntity.java
-│   │   │   │   │   ├── OrderItemEntity.java
-│   │   │   │   │   ├── ProductEntity.java
-│   │   │   │   │   ├── SupplierEntity.java
-│   │   │   │   │   └── UserEntity.java
-│   │   │   │   ├── adapter/
-│   │   │   │   │   ├── CustomerRepositoryAdapter.java
-│   │   │   │   │   ├── GoodsReceiptRepositoryAdapter.java
-│   │   │   │   │   ├── OrderRepositoryAdapter.java
-│   │   │   │   │   ├── ProductRepositoryAdapter.java
-│   │   │   │   │   ├── SupplierRepositoryAdapter.java
-│   │   │   │   │   └── UserRepositoryAdapter.java
-│   │   │   │   ├── mapper/
-│   │   │   │   │   ├── CustomerMapper.java
-│   │   │   │   │   ├── GoodsReceiptMapper.java
-│   │   │   │   │   ├── OrderMapper.java
-│   │   │   │   │   ├── ProductMapper.java
-│   │   │   │   │   ├── SupplierMapper.java
-│   │   │   │   │   └── UserMapper.java
-│   │   │   │   └── security/
-│   │   │   │       ├── JwtAuthenticationFilter.java
-│   │   │   │       └── JwtUtils.java
+│   │   │   │   ├── persistence/    # Entidades JPA + Repositorios
+│   │   │   │   ├── adapter/        # Implementación de puertos
+│   │   │   │   ├── mapper/         # Mappers Entity ↔ Domain
+│   │   │   │   └── security/       # JWT Filter + Utils
 │   │   │   │
-│   │   │   ├── controller/
-│   │   │   │   ├── AuthController.java
-│   │   │   │   ├── CustomerController.java
-│   │   │   │   │   ├── GoodsReceiptController.java
-│   │   │   │   ├── OrderController.java
-│   │   │   │   ├── ProductController.java
-│   │   │   │   └── SupplierController.java
-│   │   │   │
-│   │   │   ├── config/
-│   │   │   │   ├── GlobalExceptionHandler.java
-│   │   │   │   ├── PasswordEncoderConfig.java
-│   │   │   │   ├── SecurityConfig.java
-│   │   │   │   └── WebConfig.java
-│   │   │   │
-│   │   │   ├── exception/
-│   │   │   │   ├── AuthenticationException.java
-│   │   │   │   ├── BusinessException.java
-│   │   │   │   └── ResourceNotFoundException.java
-│   │   │   │
-│   │   │   └── BellavistaApplication.java
+│   │   │   ├── controller/         # REST Controllers
+│   │   │   ├── config/             # Configuraciones
+│   │   │   └── exception/          # Excepciones personalizadas
 │   │   │
 │   │   └── resources/
-│   │       └── application.yml
+│   │       ├── application.yml
+│   │       ├── application-dev.yml
+│   │       └── application-prod.yml
 │   │
 │   └── test/
-│       └── java/com/drogueria/bellavista/
-│           └── domain/service/
-│               └── GoodsReceiptServiceTest.java
+│       └── java/.../integration/   # Tests de integración
 │
-├── http/
-│   └── auth.http
+├── http/                           # Archivos .http para pruebas
+├── Dockerfile
+├── render.yaml
 ├── docker-compose.yml
 ├── pom.xml
-├── ARCHITECTURE.md
-├── QUICKSTART.md
-├── SOLID_AND_PATTERNS_ANALYSIS.md
 └── README.md
 ```
 
@@ -531,10 +386,28 @@ softwareDrogueria/
 
 ---
 
+## 👥 Contribución
+
+1. Fork el proyecto
+2. Crea tu rama (`git checkout -b feature/nueva-funcionalidad`)
+3. Commit tus cambios (`git commit -m 'feat: agregar nueva funcionalidad'`)
+4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
+5. Abre un Pull Request
+
+---
+
+## 📄 Licencia
+
+Este proyecto es propiedad de **Droguería Bellavista** - Proyecto Académico.
+
+---
+
 ## 📧 Contacto
 
 Para más información o soporte, contacta al equipo de desarrollo.
 
-## 📄 Licencia
+---
 
-Este proyecto es propiedad de Droguería Bellavista.
+<p align="center">
+  Desarrollado con ❤️ usando Spring Boot
+</p>
