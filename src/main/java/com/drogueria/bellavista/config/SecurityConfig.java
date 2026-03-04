@@ -14,6 +14,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 @Configuration
@@ -42,11 +43,12 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(request -> {
                     var config = new org.springframework.web.cors.CorsConfiguration();
-                    config.setAllowedOrigins(Collections.singletonList(allowedOrigins));
-                    config.setAllowedMethods(Collections.singletonList("*"));
-                    config.setAllowedHeaders(Collections.singletonList("*"));
+                    config.setAllowedOrigins(Arrays.asList("https://invetoryrx.onrender.com", "http://localhost:5173"));
+                    config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+                    config.setAllowedHeaders(Arrays.asList("*"));
                     config.setAllowCredentials(true);
                     return config;
+
                 }))
                 .csrf(csrf -> csrf.disable())
 
