@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/drogueria_bellavista
+    username: postgres
+    password: JUNIORDIAZ
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  sql:
+    init:
+      mode: never
+
+app:
+  jwt:
+    secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970

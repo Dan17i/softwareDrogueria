@@ -1,0 +1,48 @@
+# application-prod.yml MEJORADO
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 2
+      connection-timeout: 30000
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  sql:
+    init:
+      mode: never
+
+server:
+  port: ${PORT:8080}
+  servlet:
+    context-path: /api
+
+app:
+  jwt:
+    secret: ${APP_JWT_SECRET}
+    expiration: 86400000
+
+logging:
+  level:
+    root: WARN
+    com.drogueria.bellavista: INFO
+# para el render
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
