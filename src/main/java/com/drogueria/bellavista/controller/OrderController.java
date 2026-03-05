@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  * Controlador REST - Órdenes de Compra
  */
 @RestController
-@RequestMapping("/orders")
+@RequestMapping("/api/orders")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class OrderController {
