@@ -9,6 +9,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Authentication controller.
+ * 
+ * MÉTRICAS DE CALIDAD:
+ * - Métrica 4.2: Seguridad en autenticación y recuperación de contraseña
+ * - Métrica 2.2: Mensajes claros en respuestas
+ */
 @RestController
 @RequestMapping("/auth")
 @CrossOrigin(origins = {"https://invetoryrx.onrender.com", "http://localhost:5173"})
@@ -51,6 +58,54 @@ public class AuthController {
         return ResponseEntity.ok(resp);
     }
 
+    /**
+     * Verify email with token.
+     * GET /auth/verify-email?token=xxx
+     */
+    @GetMapping("/verify-email")
+    public ResponseEntity<MessageResponseDTO> verifyEmail(@RequestParam String token) {
+        authService.verifyEmail(token);
+        return ResponseEntity.ok(MessageResponseDTO.builder()
+            .message("Email verificado exitosamente. Ya puedes iniciar sesión.")
+            .build());
+    }
+
+    /**
+     * Resend verification email.
+     * POST /auth/resend-verification
+     */
+    @PostMapping("/resend-verification")
+    public ResponseEntity<MessageResponseDTO> resendVerification(@Valid @RequestBody ForgotPasswordRequestDTO req) {
+        authService.resendVerificationEmail(req.getEmail());
+        return ResponseEntity.ok(MessageResponseDTO.builder()
+            .message("Email de verificación enviado. Por favor revisa tu bandeja de entrada.")
+            .build());
+    }
+
+    /**
+     * Request password reset - sends email with reset link.
+     * POST /auth/forgot-password
+     */
+    @PostMapping("/forgot-password")
+    public ResponseEntity<MessageResponseDTO> forgotPassword(@Valid @RequestBody ForgotPasswordRequestDTO req) {
+        authService.requestPasswordReset(req.getEmail());
+        return ResponseEntity.ok(MessageResponseDTO.builder()
+            .message("Si el email existe, recibirás instrucciones para restablecer tu contraseña.")
+            .build());
+    }
+
+    /**
+     * Reset password using token.
+     * POST /auth/reset-password
+     */
+    @PostMapping("/reset-password")
+    public ResponseEntity<MessageResponseDTO> resetPassword(@Valid @RequestBody ResetPasswordRequestDTO req) {
+        authService.resetPassword(req.getToken(), req.getNewPassword());
+        return ResponseEntity.ok(MessageResponseDTO.builder()
+            .message("Contraseña restablecida exitosamente. Ya puedes iniciar sesión con tu nueva contraseña.")
+            .build());
+    }
+
     @PostMapping("/dev-create-admin")
     public String createAdmin() {
         authService.registerUserWithRole(
@@ -63,6 +118,7 @@ public class AuthController {
         );
         return "Admin creado correctamente";
     }
+    
     @PostMapping("/admin/create-user")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponseDTO> createUserWithRole(@Valid @RequestBody RegisterWithRoleRequestDTO req) {

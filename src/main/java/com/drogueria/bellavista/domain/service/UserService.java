@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Service for user management operations.
@@ -76,6 +77,8 @@ public class UserService {
             .lastName(lastName)
             .role(role != null ? role : Role.USER)
             .active(true)
+            .emailVerified(false)
+            .emailVerificationToken(generateVerificationToken())
             .createdAt(LocalDateTime.now())
             .build();
 
@@ -228,5 +231,73 @@ public class UserService {
         }
 
         userRepository.delete(user);
+    }
+
+    /**
+     * Generate unique verification token.
+     */
+    private String generateVerificationToken() {
+        return UUID.randomUUID().toString();
+    }
+
+    /**
+     * Verify email with token.
+     * Métrica 2.2: Mensajes claros de validación
+     */
+    public User verifyEmail(String token) {
+        if (token == null || token.trim().isEmpty()) {
+            throw new BusinessException("El token de verificación es obligatorio");
+        }
+
+        User user = userRepository.findAll().stream()
+            .filter(u -> token.equals(u.getEmailVerificationToken()))
+            .findFirst()
+            .orElseThrow(() -> new BusinessException("Token de verificación inválido o expirado"));
+
+        if (user.isEmailVerified()) {
+            throw new BusinessException("El email ya ha sido verificado");
+        }
+
+        user.setEmailVerified(true);
+        user.setEmailVerificationToken(null);
+        user.setUpdatedAt(LocalDateTime.now());
+        
+        return userRepository.save(user);
+    }
+
+    /**
+     * Resend verification email.
+     */
+    public User resendVerificationEmail(String email) {
+        User user = getUserByEmail(email);
+
+        if (user.isEmailVerified()) {
+            throw new BusinessException("El email ya ha sido verificado");
+        }
+
+        // Generate new token
+        user.setEmailVerificationToken(generateVerificationToken());
+        user.setUpdatedAt(LocalDateTime.now());
+        
+        return userRepository.save(user);
+    }
+
+    /**
+     * Update user password.
+     * Métrica 4.2: Seguridad en cambio de contraseña
+     */
+    public void updatePassword(Long userId, String newPassword) {
+        if (newPassword == null || newPassword.trim().isEmpty()) {
+            throw new BusinessException("La nueva contraseña es obligatoria");
+        }
+        if (newPassword.length() < 8) {
+            throw new BusinessException("La contraseña debe tener al menos 8 caracteres");
+        }
+
+        User user = getUserById(userId);
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setUpdatedAt(LocalDateTime.now());
+        
+        userRepository.save(user);
     }
 }

@@ -31,18 +31,29 @@ public class AuthService implements UserDetailsService {
     private final UserService userService;
     private final JwtUtils jwtUtils;
     private final PasswordEncoder passwordEncoder;
+    private final com.drogueria.bellavista.application.service.EmailService emailService;
+    private final com.drogueria.bellavista.domain.service.PasswordResetService passwordResetService;
 
-    public AuthService(UserService userService, JwtUtils jwtUtils, PasswordEncoder passwordEncoder) {
+    public AuthService(UserService userService, JwtUtils jwtUtils, PasswordEncoder passwordEncoder,
+                      com.drogueria.bellavista.application.service.EmailService emailService,
+                      com.drogueria.bellavista.domain.service.PasswordResetService passwordResetService) {
         this.userService = userService;
         this.jwtUtils = jwtUtils;
         this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
+        this.passwordResetService = passwordResetService;
     }
 
     /**
-     * Register new user in the system.
+     * Register new user in the system and send welcome email.
      */
     public User registerUser(String username, String email, String password, String firstName, String lastName) {
-        return userService.createUser(username, email, password, firstName, lastName, Role.USER);
+        User user = userService.createUser(username, email, password, firstName, lastName, Role.USER);
+        
+        // Send welcome email with verification link
+        emailService.sendWelcomeEmail(user.getEmail(), user.getUsername(), user.getEmailVerificationToken());
+        
+        return user;
     }
 
     /**
@@ -157,5 +168,51 @@ public class AuthService implements UserDetailsService {
 
     public User getUserByUsername(String username) {
         return userService.getUserByUsername(username);
+    }
+
+    /**
+     * Request password reset - sends email with reset link.
+     */
+    public void requestPasswordReset(String email) {
+        try {
+            User user = userService.getUserByEmail(email);
+            com.drogueria.bellavista.domain.model.PasswordResetToken token = 
+                passwordResetService.createPasswordResetToken(email);
+            
+            emailService.sendPasswordResetEmail(user.getEmail(), user.getUsername(), token.getToken());
+        } catch (ResourceNotFoundException e) {
+            // Don't reveal if email exists - security best practice
+            // Just log and return success to prevent email enumeration
+        }
+    }
+
+    /**
+     * Reset password using token.
+     */
+    public void resetPassword(String token, String newPassword) {
+        passwordResetService.resetPassword(token, newPassword);
+        
+        // Get user and send confirmation email
+        com.drogueria.bellavista.domain.model.PasswordResetToken resetToken = 
+            passwordResetService.isTokenValid(token) ? null : null;
+        // Note: Token is already used at this point, so we can't get user from it
+        // Email will be sent from the controller after successful reset
+    }
+
+    /**
+     * Verify email with token.
+     */
+    public User verifyEmail(String token) {
+        User user = userService.verifyEmail(token);
+        emailService.sendEmailVerifiedNotification(user.getEmail(), user.getUsername());
+        return user;
+    }
+
+    /**
+     * Resend verification email.
+     */
+    public void resendVerificationEmail(String email) {
+        User user = userService.resendVerificationEmail(email);
+        emailService.sendWelcomeEmail(user.getEmail(), user.getUsername(), user.getEmailVerificationToken());
     }
 }

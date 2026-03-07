@@ -24,6 +24,8 @@ public class User {
     private String lastName;
     private Role role;
     private Boolean active;
+    private Boolean emailVerified;
+    private String emailVerificationToken;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime lastLogin;
@@ -34,5 +36,9 @@ public class User {
 
     public boolean isActive() {
         return Boolean.TRUE.equals(active);
+    }
+
+    public boolean isEmailVerified() {
+        return Boolean.TRUE.equals(emailVerified);
     }
 }

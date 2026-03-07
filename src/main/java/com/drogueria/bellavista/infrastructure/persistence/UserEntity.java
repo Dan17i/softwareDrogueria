@@ -46,6 +46,13 @@ public class UserEntity {
     @Column(name = "active", nullable = false)
     private Boolean active;
 
+    @Column(name = "email_verified", nullable = false)
+    @Builder.Default
+    private Boolean emailVerified = false;
+
+    @Column(name = "email_verification_token", length = 100)
+    private String emailVerificationToken;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
