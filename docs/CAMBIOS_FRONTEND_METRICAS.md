@@ -12,6 +12,9 @@ Se realizaron las siguientes modificaciones en el backend para implementar las m
 2. **Mensajes de error mejorados** (Métrica 2.2 - Claridad)
 3. **Corrección de ruta del controlador de órdenes** (Fix de integración)
 4. **🆕 Sistema de Gestión de Usuarios y Roles** (Métrica 4.3 - Control de Acceso)
+5. **🆕 Sistema de Email - Bienvenida y Recuperación de Contraseña** (Métrica 4.2 - Seguridad)
+
+**📧 NUEVO:** Ver detalles completos del sistema de email en [`CAMBIO_4_SISTEMA_EMAIL.md`](./CAMBIO_4_SISTEMA_EMAIL.md)
 
 ---
 
