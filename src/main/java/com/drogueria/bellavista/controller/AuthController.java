@@ -59,30 +59,6 @@ public class AuthController {
     }
 
     /**
-     * Verify email with token.
-     * GET /auth/verify-email?token=xxx
-     */
-    @GetMapping("/verify-email")
-    public ResponseEntity<MessageResponseDTO> verifyEmail(@RequestParam String token) {
-        authService.verifyEmail(token);
-        return ResponseEntity.ok(MessageResponseDTO.builder()
-            .message("Email verificado exitosamente. Ya puedes iniciar sesión.")
-            .build());
-    }
-
-    /**
-     * Resend verification email.
-     * POST /auth/resend-verification
-     */
-    @PostMapping("/resend-verification")
-    public ResponseEntity<MessageResponseDTO> resendVerification(@Valid @RequestBody ForgotPasswordRequestDTO req) {
-        authService.resendVerificationEmail(req.getEmail());
-        return ResponseEntity.ok(MessageResponseDTO.builder()
-            .message("Email de verificación enviado. Por favor revisa tu bandeja de entrada.")
-            .build());
-    }
-
-    /**
      * Request password reset - sends email with reset link.
      * POST /auth/forgot-password
      */

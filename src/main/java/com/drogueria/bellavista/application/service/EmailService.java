@@ -26,26 +26,21 @@ public class EmailService {
     private String frontendUrl;
     
     /**
-     * Send welcome email with verification link.
+     * Send simple welcome email (no verification required).
      */
     @Async
-    public void sendWelcomeEmail(String to, String username, String verificationToken) {
+    public void sendWelcomeEmail(String to, String username) {
         try {
             String subject = "¡Bienvenido a Droguería Bellavista!";
-            String verificationLink = frontendUrl + "/verify-email?token=" + verificationToken;
             
             String body = String.format(
                 "Hola %s,\n\n" +
                 "¡Bienvenido a Droguería Bellavista!\n\n" +
-                "Tu cuenta ha sido creada exitosamente. Para activar tu cuenta y verificar tu email, " +
-                "por favor haz clic en el siguiente enlace:\n\n" +
-                "%s\n\n" +
-                "Este enlace es válido por 24 horas.\n\n" +
-                "Si no creaste esta cuenta, puedes ignorar este mensaje.\n\n" +
+                "Tu cuenta ha sido creada exitosamente y ya puedes comenzar a usar el sistema.\n\n" +
+                "Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarnos.\n\n" +
                 "Saludos,\n" +
                 "Equipo Droguería Bellavista",
-                username,
-                verificationLink
+                username
             );
             
             sendEmail(to, subject, body);
@@ -111,6 +106,14 @@ public class EmailService {
         } catch (Exception e) {
             log.error("Error sending email verified notification to {}: {}", to, e.getMessage());
         }
+    }
+    
+    /**
+     * Resend welcome email.
+     */
+    @Async
+    public void resendWelcomeEmail(String to, String username) {
+        sendWelcomeEmail(to, username);
     }
     
     /**

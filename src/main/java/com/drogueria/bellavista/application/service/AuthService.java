@@ -50,8 +50,8 @@ public class AuthService implements UserDetailsService {
     public User registerUser(String username, String email, String password, String firstName, String lastName) {
         User user = userService.createUser(username, email, password, firstName, lastName, Role.USER);
         
-        // Send welcome email with verification link
-        emailService.sendWelcomeEmail(user.getEmail(), user.getUsername(), user.getEmailVerificationToken());
+        // Send simple welcome email (no verification required)
+        emailService.sendWelcomeEmail(user.getEmail(), user.getUsername());
         
         return user;
     }
@@ -191,28 +191,5 @@ public class AuthService implements UserDetailsService {
      */
     public void resetPassword(String token, String newPassword) {
         passwordResetService.resetPassword(token, newPassword);
-        
-        // Get user and send confirmation email
-        com.drogueria.bellavista.domain.model.PasswordResetToken resetToken = 
-            passwordResetService.isTokenValid(token) ? null : null;
-        // Note: Token is already used at this point, so we can't get user from it
-        // Email will be sent from the controller after successful reset
-    }
-
-    /**
-     * Verify email with token.
-     */
-    public User verifyEmail(String token) {
-        User user = userService.verifyEmail(token);
-        emailService.sendEmailVerifiedNotification(user.getEmail(), user.getUsername());
-        return user;
-    }
-
-    /**
-     * Resend verification email.
-     */
-    public void resendVerificationEmail(String email) {
-        User user = userService.resendVerificationEmail(email);
-        emailService.sendWelcomeEmail(user.getEmail(), user.getUsername(), user.getEmailVerificationToken());
     }
 }
