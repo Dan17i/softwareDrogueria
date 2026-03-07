@@ -33,9 +33,7 @@ USER appuser
 # JVM optimization for containers
 ENV JAVA_TOOL_OPTIONS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
 
-EXPOSE 8080
-
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD wget -q --spider http://localhost:8080/api/actuator/health || exit 1
+# Render asigna el puerto dinámicamente via variable PORT
+EXPOSE 10000
 
 ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=prod"]
