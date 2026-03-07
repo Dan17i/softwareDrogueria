@@ -40,6 +40,11 @@ public class OrderService {
      * - Cliente existe y está activo
      * - Cliente tiene crédito disponible
      * - Productos existen y tienen stock
+     * 
+     * MÉTRICAS DE CALIDAD:
+     * - Métrica 2.1: Tiempo de registro (meta ≤ 2s)
+     * - Métrica 2.2: Tasa de rechazo con mensajes claros (meta ≤ 5%)
+     * - Métrica 2.3: Auditoría completa con createdAt y createdBy (meta 100%)
      */
     public Order createOrder(Order order) {
         log.info("Creating order for customerId={}", order.getCustomerId());
@@ -49,9 +54,9 @@ public class OrderService {
             throw new BusinessException("El cliente está inactivo");
         }
         
-        // Validar que la orden tenga ítems
+        // Validar que la orden tenga ítems (Métrica 2.2: mensaje claro)
         if (order.getItems() == null || order.getItems().isEmpty()) {
-            throw new BusinessException("La orden debe contener al menos un producto");
+            throw new BusinessException("El campo 'items' es obligatorio. La orden debe contener al menos un producto");
         }
         
         // Validar productos y stock
@@ -59,12 +64,14 @@ public class OrderService {
             Product product = productService.getProductById(item.getProductId());
             
             if (!product.isAvailable()) {
-                throw new BusinessException("El producto " + product.getCode() + " no está disponible");
+                throw new BusinessException("El producto '" + product.getName() + "' (código: " + product.getCode() + ") no está disponible para la venta");
             }
             
+            // Métrica 2.2: Mensaje claro de stock insuficiente
             if (product.getStock() < item.getQuantity()) {
-                throw new BusinessException("Stock insuficiente para el producto " + product.getCode() 
-                    + ". Disponible: " + product.getStock());
+                throw new BusinessException("Stock insuficiente para el producto '" + product.getName() 
+                    + "' (código: " + product.getCode() + "). Disponible: " + product.getStock() 
+                    + ", solicitado: " + item.getQuantity());
             }
             
             // Actualizar datos del producto en la línea
@@ -91,6 +98,11 @@ public class OrderService {
         order.setOrderDate(LocalDateTime.now());
         order.setCreatedAt(LocalDateTime.now());
         order.setUpdatedAt(LocalDateTime.now());
+        
+        // Establecer createdBy si no está definido (Métrica 2.3: Auditoría)
+        if (order.getCreatedBy() == null) {
+            order.setCreatedBy("SYSTEM");
+        }
         
         // Guardar orden
         Order savedOrder = orderRepository.save(order);
@@ -167,6 +179,11 @@ public class OrderService {
     
     /**
      * Completar orden
+     * MÉTRICAS DE CALIDAD:
+     * - Métrica 4.1: Integridad transaccional (meta ≥ 99.9%)
+     * - Métrica 4.2: Tiempo de confirmación (meta ≤ 2s)
+     * 
+     * @Transactional asegura atomicidad: si algo falla, todo se revierte
      */
     public Order completeOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)

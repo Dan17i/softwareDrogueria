@@ -76,6 +76,9 @@ public class OrderEntity {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
     
+    @Column(name = "created_by", length = 100)
+    private String createdBy; // Usuario que creó la orden (para auditoría - Métrica 2.3)
+    
     // No usar @OneToMany porque queremos mantener la simplicidad
     // Los items se cargan por separado en el repositorio
 }

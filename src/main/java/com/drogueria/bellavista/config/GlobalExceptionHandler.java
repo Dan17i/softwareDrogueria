@@ -123,14 +123,14 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
+        // Log temporal para debugging
+        ex.printStackTrace();
+        
         ErrorResponse error = new ErrorResponse(
             HttpStatus.INTERNAL_SERVER_ERROR.value(),
             "Internal Server Error",
-            "Ha ocurrido un error interno en el servidor"
+            ex.getMessage() // Mostrar el mensaje real para debugging
         );
-        
-        // En producción, no mostrar detalles del error
-        // error.setMessage(ex.getMessage());
         
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }

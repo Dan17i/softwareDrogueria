@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: drogueria-bellavista-test
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    time-zone: America/Bogota
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+
+server:
+  port: 0  # Puerto aleatorio para tests
+  servlet:
+    context-path: /api
+
+# Configuración JWT para tests (no necesita variable de entorno)
+app:
+  jwt:
+    secret: test-secret-key-with-at-least-32-characters-for-testing-purposes-only
+    expiration: 86400000

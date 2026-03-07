@@ -42,6 +42,7 @@ public class OrderMapper {
             .actualDeliveryDate(entity.getActualDeliveryDate())
             .createdAt(entity.getCreatedAt())
             .updatedAt(entity.getUpdatedAt())
+            .createdBy(entity.getCreatedBy())
             .build();
     }
     
@@ -67,6 +68,7 @@ public class OrderMapper {
             .actualDeliveryDate(domain.getActualDeliveryDate())
             .createdAt(domain.getCreatedAt())
             .updatedAt(domain.getUpdatedAt())
+            .createdBy(domain.getCreatedBy())
             .build();
     }
     

@@ -37,6 +37,7 @@ public class Order {
     private LocalDateTime actualDeliveryDate;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String createdBy; // Usuario que creó la orden (para auditoría - Métrica 2.3)
     
     /**
      * Agregar línea a la orden
