@@ -83,16 +83,28 @@ public class AuthController {
     }
 
     @PostMapping("/dev-create-admin")
-    public String createAdmin() {
-        authService.registerUserWithRole(
-                "admin",
-                "admin@bellavista.com",
-                "admin123",
-                "Admin",
-                "Sistema",
-                Role.ADMIN
-        );
-        return "Admin creado correctamente";
+    public ResponseEntity<?> createAdmin() {
+        try {
+            // Primero verificar si ya existe
+            try {
+                User existing = authService.getUserByUsername("admin");
+                return ResponseEntity.ok("Admin ya existe con ID: " + existing.getId());
+            } catch (Exception e) {
+                // No existe, crear uno nuevo
+            }
+            
+            User admin = authService.registerUserWithRole(
+                    "admin",
+                    "admin@bellavista.com",
+                    "admin123",
+                    "Admin",
+                    "Sistema",
+                    Role.ADMIN
+            );
+            return ResponseEntity.ok("Admin creado correctamente con ID: " + admin.getId());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al crear admin: " + e.getMessage());
+        }
     }
     
     @PostMapping("/admin/create-user")
