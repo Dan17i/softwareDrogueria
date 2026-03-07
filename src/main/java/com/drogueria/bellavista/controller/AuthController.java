@@ -90,9 +90,10 @@ public class AuthController {
                 User existing = authService.getUserByUsername("admin");
                 return ResponseEntity.ok("Admin ya existe con ID: " + existing.getId());
             } catch (Exception e) {
-                // No existe, crear uno nuevo
+                // No existe, crear uno nuevo directamente sin enviar email
             }
             
+            // Crear admin directamente usando UserService (sin email)
             User admin = authService.registerUserWithRole(
                     "admin",
                     "admin@bellavista.com",
@@ -103,7 +104,8 @@ public class AuthController {
             );
             return ResponseEntity.ok("Admin creado correctamente con ID: " + admin.getId());
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al crear admin: " + e.getMessage());
+            // Retornar el error completo para debugging
+            return ResponseEntity.status(500).body("Error al crear admin: " + e.getClass().getName() + " - " + e.getMessage());
         }
     }
     
