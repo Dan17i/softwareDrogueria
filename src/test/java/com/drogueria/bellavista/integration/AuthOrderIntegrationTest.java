@@ -38,6 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@org.springframework.context.annotation.Import(com.drogueria.bellavista.config.TestMailConfig.class)
 public class AuthOrderIntegrationTest {
 
     @Container

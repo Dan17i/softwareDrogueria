@@ -38,6 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Testcontainers
 @DisplayName("User Management Integration Tests")
+@org.springframework.context.annotation.Import(com.drogueria.bellavista.config.TestMailConfig.class)
 class UserManagementIntegrationTest {
     
     @Container

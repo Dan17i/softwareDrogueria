@@ -15,6 +15,19 @@ spring:
       hibernate:
         format_sql: false
 
+  # Configuración de email para tests (mock)
+  mail:
+    host: localhost
+    port: 3025
+    username: test
+    password: test
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+
 server:
   port: 0  # Puerto aleatorio para tests
   servlet:
@@ -25,3 +38,7 @@ app:
   jwt:
     secret: test-secret-key-with-at-least-32-characters-for-testing-purposes-only
     expiration: 86400000
+  mail:
+    from: test@bellavista.com
+  frontend:
+    url: http://localhost:5173

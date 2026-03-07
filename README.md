@@ -5,7 +5,7 @@ Sistema de gestión para droguería construido con **Spring Boot 3.2.2** y **Jav
 [![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://openjdk.org/projects/jdk/21/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.2-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue.svg)](https://www.postgresql.org/)
-[![Tests](https://img.shields.io/badge/Tests-85%20passed-success.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-98%20passed-success.svg)]()
 [![Deploy](https://img.shields.io/badge/Deploy-Render-purple.svg)](https://drogueria-bellavista-api.onrender.com/api/actuator/health)
 
 ---
@@ -13,12 +13,14 @@ Sistema de gestión para droguería construido con **Spring Boot 3.2.2** y **Jav
 ## 📋 Tabla de Contenidos
 
 - [Demo en Producción](#-demo-en-producción)
+- [Características Principales](#-características-principales)
 - [Tecnologías](#-tecnologías)
 - [Arquitectura](#-arquitectura)
 - [Instalación Local](#-instalación-local)
 - [Configuración](#-configuración)
 - [API Endpoints](#-api-endpoints)
 - [Seguridad](#-seguridad)
+- [Sistema de Email](#-sistema-de-email)
 - [Testing](#-testing)
 - [Despliegue](#-despliegue)
 - [Estructura del Proyecto](#-estructura-del-proyecto)
@@ -43,6 +45,36 @@ https://drogueria-bellavista-api.onrender.com/api
 | Login | POST `/api/auth/login` |
 
 > ⚠️ **Nota**: El plan gratuito de Render apaga la app tras 15 min de inactividad. El primer request puede tardar ~30-60 segundos.
+
+---
+
+## ✨ Características Principales
+
+### 🔐 Gestión de Usuarios y Roles
+- Sistema completo de autenticación con JWT
+- 5 roles disponibles: ADMIN, MANAGER, SALES, WAREHOUSE, USER
+- Panel de administración para gestionar usuarios (solo ADMIN)
+- Activar/desactivar usuarios
+- Cambiar roles dinámicamente
+- Protección del último administrador del sistema
+
+### 📧 Sistema de Email
+- Email de bienvenida automático al registrarse
+- Recuperación de contraseña mediante token temporal (1 hora)
+- Notificaciones de cambios importantes
+- Tokens seguros de un solo uso
+- Protección contra enumeración de emails
+
+### 📦 Gestión de Inventario
+- Control de productos con stock en tiempo real
+- Recepción de mercancía de proveedores
+- Órdenes de venta con validación de stock
+- Auditoría completa de movimientos
+
+### 👥 Gestión de Clientes
+- Registro de clientes con límite de crédito
+- Control de saldo pendiente
+- Historial de órdenes por cliente
 
 ---
 
@@ -157,6 +189,12 @@ Abrir: http://localhost:8080/api/actuator/health
 | Variable | Descripción | Requerida |
 |----------|-------------|-----------|
 | `APP_JWT_SECRET` | Clave secreta para JWT (mín. 32 caracteres) | ✅ Sí |
+| `MAIL_HOST` | Servidor SMTP (ej: smtp.gmail.com) | ✅ Sí |
+| `MAIL_PORT` | Puerto SMTP (ej: 587) | ✅ Sí |
+| `MAIL_USERNAME` | Usuario del servidor de email | ✅ Sí |
+| `MAIL_PASSWORD` | Contraseña del servidor de email | ✅ Sí |
+| `MAIL_FROM` | Email remitente | ✅ Sí |
+| `FRONTEND_URL` | URL del frontend (para links en emails) | ✅ Sí |
 | `SPRING_DATASOURCE_URL` | URL de conexión JDBC | Solo en prod |
 | `SPRING_DATASOURCE_USERNAME` | Usuario de BD | Solo en prod |
 | `SPRING_DATASOURCE_PASSWORD` | Contraseña de BD | Solo en prod |
@@ -170,8 +208,20 @@ Abrir: http://localhost:8080/api/actuator/health
 
 | Método | Endpoint | Descripción |
 |--------|----------|-------------|
-| POST | `/api/auth/register` | Registrar usuario |
-| POST | `/api/auth/login` | Iniciar sesión |
+| POST | `/api/auth/register` | Registrar usuario (rol USER por defecto) |
+| POST | `/api/auth/login` | Iniciar sesión (retorna JWT) |
+| POST | `/api/auth/forgot-password` | Solicitar recuperación de contraseña |
+| POST | `/api/auth/reset-password` | Restablecer contraseña con token |
+
+### Gestión de Usuarios (solo ADMIN)
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET | `/api/users` | Listar todos los usuarios |
+| GET | `/api/users/{id}` | Obtener usuario por ID |
+| PATCH | `/api/users/{id}/role` | Cambiar rol de usuario |
+| PATCH | `/api/users/{id}/status` | Activar/desactivar usuario |
+| DELETE | `/api/users/{id}` | Eliminar usuario |
 
 ### Productos (protegidos)
 
@@ -287,7 +337,8 @@ curl https://drogueria-bellavista-api.onrender.com/api/products \
 | SecurityIntegrationTest | 11 | ✅ |
 | ProductIntegrationTest | 15 | ✅ |
 | AuthOrderIntegrationTest | 1 | ✅ |
-| **Total** | **85** | ✅ |
+| UserManagementIntegrationTest | 13 | ✅ |
+| **Total** | **98** | ✅ |
 
 ### Ejecutar tests
 

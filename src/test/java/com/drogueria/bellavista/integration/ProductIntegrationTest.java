@@ -22,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @DisplayName("Product Integration Tests")
+@org.springframework.context.annotation.Import(com.drogueria.bellavista.config.TestMailConfig.class)
 public class ProductIntegrationTest {
 
     @Container

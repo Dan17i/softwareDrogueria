@@ -4,6 +4,7 @@ import com.drogueria.bellavista.domain.model.Role;
 import com.drogueria.bellavista.domain.model.User;
 import com.drogueria.bellavista.domain.service.UserService;
 import com.drogueria.bellavista.exception.AuthenticationException;
+import com.drogueria.bellavista.exception.ResourceNotFoundException;
 import com.drogueria.bellavista.infrastructure.security.JwtUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
