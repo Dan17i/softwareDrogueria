@@ -10,10 +10,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Service for user management operations.
  * Handles user creation, retrieval, and password management with security best practices.
+ * 
+ * MÉTRICAS DE CALIDAD:
+ * - Métrica 2.2: Mensajes de error claros y específicos
+ * - Métrica 4.3: Control de acceso basado en roles
  */
 @Service
 @Transactional
@@ -137,5 +142,91 @@ public class UserService {
     private boolean isValidEmail(String email) {
         String emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$";
         return email.matches(emailRegex);
+    }
+
+    /**
+     * Get all users in the system.
+     * Métrica 3.3: Consulta optimizada de usuarios
+     */
+    @Transactional(readOnly = true)
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    /**
+     * Update user role (admin only).
+     * Métrica 2.2: Validación con mensajes claros
+     * Métrica 4.3: Control de acceso - solo ADMIN puede cambiar roles
+     */
+    public User updateUserRole(Long userId, Role newRole) {
+        if (newRole == null) {
+            throw new BusinessException("El rol no puede ser nulo");
+        }
+
+        User user = getUserById(userId);
+        
+        // Prevenir que el último admin pierda su rol
+        if (user.getRole() == Role.ADMIN && newRole != Role.ADMIN) {
+            long adminCount = userRepository.findAll().stream()
+                .filter(u -> u.getRole() == Role.ADMIN)
+                .count();
+            
+            if (adminCount <= 1) {
+                throw new BusinessException("No se puede cambiar el rol del único administrador del sistema");
+            }
+        }
+
+        user.setRole(newRole);
+        user.setUpdatedAt(LocalDateTime.now());
+        return userRepository.save(user);
+    }
+
+    /**
+     * Update user active status (admin only).
+     * Métrica 2.2: Validación con mensajes claros
+     * Métrica 4.3: Control de acceso - solo ADMIN puede activar/desactivar
+     */
+    public User updateUserStatus(Long userId, Boolean active) {
+        if (active == null) {
+            throw new BusinessException("El estado activo no puede ser nulo");
+        }
+
+        User user = getUserById(userId);
+        
+        // Prevenir desactivar el último admin
+        if (user.getRole() == Role.ADMIN && !active) {
+            long activeAdminCount = userRepository.findAll().stream()
+                .filter(u -> u.getRole() == Role.ADMIN && u.isActive())
+                .count();
+            
+            if (activeAdminCount <= 1) {
+                throw new BusinessException("No se puede desactivar el único administrador activo del sistema");
+            }
+        }
+
+        user.setActive(active);
+        user.setUpdatedAt(LocalDateTime.now());
+        return userRepository.save(user);
+    }
+
+    /**
+     * Delete user (admin only).
+     * Métrica 4.1: Integridad transaccional
+     */
+    public void deleteUser(Long userId) {
+        User user = getUserById(userId);
+        
+        // Prevenir eliminar el último admin
+        if (user.getRole() == Role.ADMIN) {
+            long adminCount = userRepository.findAll().stream()
+                .filter(u -> u.getRole() == Role.ADMIN)
+                .count();
+            
+            if (adminCount <= 1) {
+                throw new BusinessException("No se puede eliminar el único administrador del sistema");
+            }
+        }
+
+        userRepository.delete(user);
     }
 }

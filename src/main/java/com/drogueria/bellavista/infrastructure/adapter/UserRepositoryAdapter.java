@@ -7,7 +7,9 @@ import com.drogueria.bellavista.infrastructure.persistence.JpaUserRepository;
 import com.drogueria.bellavista.infrastructure.persistence.UserEntity;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Adapter implementing UserRepository port using JPA persistence.
@@ -63,5 +65,12 @@ public class UserRepositoryAdapter implements UserRepository {
     public void delete(User user) {
         UserEntity entity = userMapper.toEntity(user);
         jpaUserRepository.delete(entity);
+    }
+
+    @Override
+    public List<User> findAll() {
+        return jpaUserRepository.findAll().stream()
+            .map(userMapper::toDomain)
+            .collect(Collectors.toList());
     }
 }

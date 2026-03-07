@@ -2,6 +2,7 @@ package com.drogueria.bellavista.domain.repository;
 
 import com.drogueria.bellavista.domain.model.User;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -17,4 +18,5 @@ public interface UserRepository {
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
     void delete(User user);
+    List<User> findAll();
 }
