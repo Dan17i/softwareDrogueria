@@ -68,3 +68,10 @@ management:
   endpoint:
     health:
       show-details: never
+      probes:
+        enabled: true
+  health:
+    db:
+      enabled: false
+    mail:
+      enabled: false
