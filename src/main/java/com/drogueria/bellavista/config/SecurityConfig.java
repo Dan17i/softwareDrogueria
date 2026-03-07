@@ -43,6 +43,10 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(request -> {
                     var config = new org.springframework.web.cors.CorsConfiguration();
+                    config.setAllowedOrigins(Arrays.asList(
+                        "https://invetoryrx.onrender.com", 
+                        "http://localhost:5173"
+                    ));
                     config.setAllowedOrigins(Arrays.asList("https://invetoryrx.onrender.com", "http://localhost:5173"));
                     config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
                     config.setAllowedHeaders(Arrays.asList("*"));
