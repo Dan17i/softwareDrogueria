@@ -5,7 +5,7 @@ Sistema de gestión para droguería construido con **Spring Boot 3.2.2** y **Jav
 [![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://openjdk.org/projects/jdk/21/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.2-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue.svg)](https://www.postgresql.org/)
-[![Tests](https://img.shields.io/badge/Tests-98%20passed-success.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-109%20passed-success.svg)]()
 [![Deploy](https://img.shields.io/badge/Deploy-Render-purple.svg)](https://drogueria-bellavista-api.onrender.com/api/actuator/health)
 
 ---
@@ -333,12 +333,19 @@ curl https://drogueria-bellavista-api.onrender.com/api/products \
 
 | Tipo | Tests | Estado |
 |------|-------|--------|
-| Unit Tests (Servicios) | 58 | ✅ |
-| SecurityIntegrationTest | 11 | ✅ |
-| ProductIntegrationTest | 15 | ✅ |
-| AuthOrderIntegrationTest | 1 | ✅ |
-| UserManagementIntegrationTest | 13 | ✅ |
-| **Total** | **98** | ✅ |
+| Unit Tests (Servicios) | 69 | ✅ |
+| Integration Tests | 40 | ✅ |
+| **Total** | **109** | ✅ |
+
+### Desglose de Integration Tests
+
+| Test Suite | Tests |
+|-------------|-------|
+| SecurityIntegrationTest | 11 |
+| ProductIntegrationTest | 15 |
+| AuthOrderIntegrationTest | 1 |
+| UserManagementIntegrationTest | 13 |
+| **Subtotal Integration** | **40** |
 
 ### Ejecutar tests
 
