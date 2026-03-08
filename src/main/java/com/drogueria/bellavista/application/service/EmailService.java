@@ -31,15 +31,31 @@ public class EmailService {
     @Async
     public void sendWelcomeEmail(String to, String username) {
         try {
-            String subject = "¡Bienvenido a Droguería Bellavista!";
+            String subject = "¡Bienvenido a Invetoryx! Tu cuenta está lista";
             
             String body = String.format(
                 "Hola %s,\n\n" +
-                "¡Bienvenido a Droguería Bellavista!\n\n" +
-                "Tu cuenta ha sido creada exitosamente y ya puedes comenzar a usar el sistema.\n\n" +
-                "Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarnos.\n\n" +
-                "Saludos,\n" +
-                "Equipo Droguería Bellavista",
+                "¡Gracias por registrarte en Droguería Bellavista!\n\n" +
+                "Nos complace confirmar que tu cuenta ha sido creada exitosamente. " +
+                "Ya puedes comenzar a utilizar nuestro sistema de gestión empresarial.\n\n" +
+                "Tu nombre de usuario es: %s\n\n" +
+                "¿Qué puedes hacer con tu cuenta?\n" +
+                "• Gestionar inventario de productos\n" +
+                "• Administrar clientes y proveedores\n" +
+                "• Crear y gestionar órdenes de compra\n" +
+                "• Controlar recepción de mercancía\n\n" +
+                "Accede al sistema aquí:\n" +
+                "https://invetoryrx.onrender.com\n\n" +
+                "¿Primera vez usando el sistema?\n" +
+                "Te invitamos a ver este video tutorial que te mostrará las funcionalidades principales:\n" +
+                "https://youtu.be/GQ_C6K_xuFA\n\n" +
+                "Si tienes alguna pregunta o necesitas ayuda, estamos aquí para apoyarte. " +
+                "No dudes en contactarnos.\n\n" +
+                "¡Bienvenido a bordo!\n\n" +
+                "Saludos cordiales,\n" +
+                "Equipo de Droguería Bellavista\n" +
+                "Sistema de Gestión Empresarial",
+                username,
                 username
             );
             
