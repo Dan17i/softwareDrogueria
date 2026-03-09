@@ -18,6 +18,33 @@ spring:
     init:
       mode: never
 
+  # Configuración de email para desarrollo (REEMPLAZA CON TUS DATOS)
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: invetoryrx@gmail.com  # ← CAMBIA ESTO
+    password: zkck bmav klok qbum    # ← CAMBIA ESTO
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
 app:
   jwt:
     secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+  mail:
+    from: TU_EMAIL@gmail.com  # ← CAMBIA ESTO
+  frontend:
+    url: http://localhost:5173
+
+logging:
+  level:
+    root: INFO
+    com.drogueria.bellavista: DEBUG
+    org.springframework.mail: DEBUG  # ← Para ver logs de email
