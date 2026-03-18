@@ -150,4 +150,33 @@ public class UserController {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
+
+
+    /**
+     * Buscar usuarios por nombre o apellido
+     * GET /users/search?name=valeria
+     * Solo ADMIN
+     * * Métrica 3.3: Consultas filtradas y optimizadas
+     */
+    @GetMapping("/search")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<UserListDTO>> searchUsers(@RequestParam String name) {
+        List<User> users = userService.searchUsersByName(name);
+        
+        List<UserListDTO> response = users.stream()
+            .map(user -> UserListDTO.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .role(user.getRole() != null ? user.getRole().name() : null)
+                .active(user.getActive())
+                .createdAt(user.getCreatedAt())
+                .lastLogin(user.getLastLogin())
+                .build())
+            .collect(Collectors.toList());
+        
+        return ResponseEntity.ok(response);
+    }
 }

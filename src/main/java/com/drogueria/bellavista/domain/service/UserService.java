@@ -155,6 +155,19 @@ public class UserService {
     }
 
     /**
+     * Search users by first name or last name (case insensitive).
+     * Métrica 3.3: Consulta optimizada con filtros parciales
+     */
+    @Transactional(readOnly = true)
+    public List<User> searchUsersByName(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            return userRepository.findAll();
+        }
+        // Buscamos coincidencias en nombre o apellido ignorando mayúsculas/minúsculas
+        return userRepository.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(name, name);
+    }
+
+    /**
      * Update user role (admin only).
      * Métrica 2.2: Validación con mensajes claros
      * Métrica 4.3: Control de acceso - solo ADMIN puede cambiar roles

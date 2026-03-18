@@ -12,9 +12,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 /**
@@ -209,5 +211,47 @@ class UserServiceTest {
 
         assertNotNull(user.getLastLogin());
         verify(userRepository).save(user);
+    }
+
+    // =============================
+    // SEARCH USERS
+    // =============================
+
+    @Test
+    @DisplayName("Debe buscar usuarios por nombre exitosamente")
+    void shouldSearchUsersByName() {
+        log.info("🧪 Test searchUsersByName SUCCESS");
+
+        // Creamos una lista simulada con el usuario del setup
+        List<User> userList = List.of(user);
+        
+        // Simulamos que el repositorio encuentra al usuario por nombre o apellido
+        when(userRepository.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase("Daniel", "Daniel"))
+                .thenReturn(userList);
+
+        List<User> result = userService.searchUsersByName("Daniel");
+
+        assertFalse(result.isEmpty());
+        assertEquals(1, result.size());
+        assertEquals("Daniel", result.get(0).getFirstName());
+        
+        verify(userRepository).findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase("Daniel", "Daniel");
+        log.info("✅ Búsqueda por nombre verificada en el Service");
+    }
+
+    @Test
+    @DisplayName("Debe retornar todos los usuarios si el nombre de búsqueda está vacío")
+    void shouldReturnAllUsersIfSearchNameIsEmpty() {
+        log.info("🧪 Test searchUsersByName EMPTY");
+
+        when(userRepository.findAll()).thenReturn(List.of(user));
+
+        List<User> result = userService.searchUsersByName("");
+
+        assertEquals(1, result.size());
+        verify(userRepository).findAll();
+        verify(userRepository, never()).findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(any(), any());
+        
+        log.info("✅ Comportamiento de búsqueda vacía correcto");
     }
 }

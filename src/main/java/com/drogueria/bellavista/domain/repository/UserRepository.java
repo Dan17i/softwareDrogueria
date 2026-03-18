@@ -19,4 +19,8 @@ public interface UserRepository {
     boolean existsByEmail(String email);
     void delete(User user);
     List<User> findAll();
+    /**
+     * Busca por nombre o apellido ignorando mayúsculas/minúsculas y permitiendo coincidencias parciales.
+     */
+    List<User> findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(String firstName, String lastName);
 }
