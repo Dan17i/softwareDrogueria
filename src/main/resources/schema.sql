@@ -227,3 +227,23 @@ CREATE INDEX IF NOT EXISTS idx_payment_status ON payments(status);
 CREATE INDEX IF NOT EXISTS idx_payment_stripe_id ON payments(stripe_payment_id);
 CREATE INDEX IF NOT EXISTS idx_payment_created ON payments(created_at);
 
+-- Tabla: Notificaciones
+CREATE TABLE IF NOT EXISTS notifications (
+    id BIGSERIAL PRIMARY KEY,
+    type VARCHAR(50) NOT NULL,
+    title VARCHAR(500) NOT NULL,
+    message TEXT NOT NULL,
+    required_role VARCHAR(50) NOT NULL,
+    is_read BOOLEAN NOT NULL DEFAULT false,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    read_at TIMESTAMP,
+    related_entity_id VARCHAR(100),
+    related_entity_type VARCHAR(100)
+);
+
+CREATE INDEX IF NOT EXISTS idx_notifications_required_role ON notifications(required_role);
+CREATE INDEX IF NOT EXISTS idx_notifications_is_read ON notifications(is_read);
+CREATE INDEX IF NOT EXISTS idx_notifications_type ON notifications(type);
+CREATE INDEX IF NOT EXISTS idx_notifications_created_at ON notifications(created_at);
+CREATE INDEX IF NOT EXISTS idx_notifications_related_entity ON notifications(related_entity_id, related_entity_type);
+
