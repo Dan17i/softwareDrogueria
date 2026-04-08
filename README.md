@@ -77,6 +77,14 @@ https://drogueria-bellavista-api.onrender.com/api
 - Control de saldo pendiente
 - Historial de órdenes por cliente
 
+### 💳 Sistema de Pagos con Stripe
+- Integración completa con Stripe para pagos seguros
+- Procesamiento de tarjetas de crédito/débito
+- Estados de pago en tiempo real (pendiente, procesando, exitoso, fallido)
+- Reembolsos automáticos para devoluciones
+- Validación automática de fondos y seguridad PCI DSS
+- Historial completo de transacciones por cliente
+
 ---
 
 ## 🚀 Tecnologías
@@ -305,6 +313,13 @@ En modo desarrollo (`dev`), tienes acceso adicional a:
 | PATCH | `/api/goods-receipts/{id}/reject` | Rechazar recepción |
 | DELETE | `/api/goods-receipts/{id}` | Eliminar recepción (solo PENDING) |
 
+### 💳 Pagos (protegidos)
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| POST | `/api/payments/process` | Procesar pago con Stripe |
+| GET | `/api/payments/{intentId}` | Verificar estado de pago |
+
 ### Monitoreo y Documentación
 
 | Método | Endpoint | Descripción |
@@ -457,7 +472,11 @@ La documentación completa del proyecto está organizada en varios archivos espe
 | **[OPERATIONS.md](docs/OPERATIONS.md)** | Monitoreo, troubleshooting y mantenimiento |
 | **[IMPLEMENTACION_METRICAS_COMPLETADA.md](docs/IMPLEMENTACIONES%20COMPLETADAS/IMPLEMENTACION_METRICAS_COMPLETADA.md)** | Métricas de calidad implementadas |
 | **[TASK_COMPLETED_USER_MANAGEMENT.md](docs/IMPLEMENTACIONES%20COMPLETADAS/TASK_COMPLETED_USER_MANAGEMENT.md)** | Gestión de usuarios completada |
+| **[IMPLEMENTACION_METRICAS_COMPLETADA.md](docs/IMPLEMENTACIONES%20COMPLETADAS/IMPLEMENTACION_METRICAS_COMPLETADA.md)** | Métricas de calidad implementadas |
+| **[TASK_COMPLETED_USER_MANAGEMENT.md](docs/IMPLEMENTACIONES%20COMPLETADAS/TASK_COMPLETED_USER_MANAGEMENT.md)** | Gestión de usuarios completada |
 | **[CAMBIO_4_SISTEMA_EMAIL.md](docs/IMPLEMENTACIONES%20COMPLETADAS/CAMBIO_4_SISTEMA_EMAIL.md)** | Sistema de email implementado |
+| **[PAGOS_STRIPE_IMPLEMENTACION.md](docs/IMPLEMENTACIONES%20COMPLETADAS/PAGOS_STRIPE_IMPLEMENTACION.md)** | Implementación completa de pagos con Stripe |
+| **[IMPLEMENTACION_PAGOS_COMPLETA.md](docs/IMPLEMENTACION_PAGOS_COMPLETA.md)** | Guía detallada de sistema de pagos |
 
 ### 🎨 Frontend
 
