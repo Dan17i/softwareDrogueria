@@ -23,6 +23,7 @@ Sistema de gestión para droguería construido con **Spring Boot 3.2.2** y **Jav
 - [Sistema de Email](#-sistema-de-email)
 - [Testing](#-testing)
 - [Despliegue](#-despliegue)
+- [Documentación](#-documentación)
 - [Estructura del Proyecto](#-estructura-del-proyecto)
 - [Contribución](#-contribución)
 
@@ -173,6 +174,17 @@ mvn spring-boot:run -Dspring-boot.run.profiles=dev
 
 Abrir: http://localhost:8080/api/actuator/health
 
+### Desarrolladores
+
+En modo desarrollo (`dev`), tienes acceso adicional a:
+
+- **H2 Console**: http://localhost:8080/h2-console
+  - JDBC URL: `jdbc:h2:mem:testdb`
+  - User: `sa`
+  - Password: (vacío)
+- **Swagger UI**: http://localhost:8080/swagger-ui.html
+- **OpenAPI Spec**: http://localhost:8080/v3/api-docs
+
 ---
 
 ## ⚙️ Configuración
@@ -212,6 +224,7 @@ Abrir: http://localhost:8080/api/actuator/health
 | POST | `/api/auth/login` | Iniciar sesión (retorna JWT) |
 | POST | `/api/auth/forgot-password` | Solicitar recuperación de contraseña |
 | POST | `/api/auth/reset-password` | Restablecer contraseña con token |
+| POST | `/api/auth/dev-create-admin` | Crear admin por defecto (solo desarrollo) |
 
 ### Gestión de Usuarios (solo ADMIN)
 
@@ -227,22 +240,26 @@ Abrir: http://localhost:8080/api/actuator/health
 
 | Método | Endpoint | Descripción |
 |--------|----------|-------------|
-| GET | `/api/products` | Listar todos |
-| GET | `/api/products/{id}` | Obtener por ID |
-| GET | `/api/products/code/{code}` | Obtener por código |
+| GET | `/api/products` | Listar todos los productos |
+| GET | `/api/products?active=true` | Listar solo productos activos |
+| GET | `/api/products/{id}` | Obtener producto por ID |
+| GET | `/api/products/code/{code}` | Obtener producto por código |
+| GET | `/api/products/search?name=xxx` | Buscar productos por nombre |
+| GET | `/api/products/category/{category}` | Listar productos por categoría |
+| GET | `/api/products/restock-needed` | Productos que necesitan reabastecimiento |
 | POST | `/api/products` | Crear producto |
 | PUT | `/api/products/{id}` | Actualizar producto |
-| DELETE | `/api/products/{id}` | Eliminar producto |
 | POST | `/api/products/{id}/reduce-stock` | Reducir stock |
 | POST | `/api/products/{id}/increase-stock` | Aumentar stock |
-| PATCH | `/api/products/{id}/toggle-status` | Cambiar estado |
+| PATCH | `/api/products/{id}/toggle-status` | Cambiar estado (activo/inactivo) |
+| DELETE | `/api/products/{id}` | Eliminar producto |
 
 ### Clientes (protegidos)
 
 | Método | Endpoint | Descripción |
 |--------|----------|-------------|
-| GET | `/api/customers` | Listar todos |
-| GET | `/api/customers/{id}` | Obtener por ID |
+| GET | `/api/customers` | Listar todos los clientes |
+| GET | `/api/customers/{id}` | Obtener cliente por ID |
 | POST | `/api/customers` | Crear cliente |
 | PUT | `/api/customers/{id}` | Actualizar cliente |
 | DELETE | `/api/customers/{id}` | Eliminar cliente |
@@ -251,8 +268,8 @@ Abrir: http://localhost:8080/api/actuator/health
 
 | Método | Endpoint | Descripción |
 |--------|----------|-------------|
-| GET | `/api/suppliers` | Listar todos |
-| GET | `/api/suppliers/{id}` | Obtener por ID |
+| GET | `/api/suppliers` | Listar todos los proveedores |
+| GET | `/api/suppliers/{id}` | Obtener proveedor por ID |
 | POST | `/api/suppliers` | Crear proveedor |
 | PUT | `/api/suppliers/{id}` | Actualizar proveedor |
 | DELETE | `/api/suppliers/{id}` | Eliminar proveedor |
@@ -261,21 +278,40 @@ Abrir: http://localhost:8080/api/actuator/health
 
 | Método | Endpoint | Descripción |
 |--------|----------|-------------|
-| GET | `/api/orders` | Listar todas |
-| GET | `/api/orders/{id}` | Obtener por ID |
+| GET | `/api/orders` | Listar todas las órdenes |
+| GET | `/api/orders/{id}` | Obtener orden por ID |
+| GET | `/api/orders/number/{orderNumber}` | Obtener orden por número |
+| GET | `/api/orders/customer/{customerId}` | Órdenes de un cliente |
+| GET | `/api/orders/status/{status}` | Órdenes por estado |
+| GET | `/api/orders/customer/{customerId}/pending` | Órdenes pendientes de un cliente |
+| GET | `/api/orders/search?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD` | Órdenes por rango de fechas |
 | POST | `/api/orders` | Crear orden |
-| PUT | `/api/orders/{id}` | Actualizar orden |
-| DELETE | `/api/orders/{id}` | Eliminar orden |
+| PATCH | `/api/orders/{id}/complete` | Completar orden |
+| PATCH | `/api/orders/{id}/cancel` | Cancelar orden |
 
 ### Recepción de Mercancía (protegidos)
 
 | Método | Endpoint | Descripción |
 |--------|----------|-------------|
-| GET | `/api/goods-receipts` | Listar todas |
-| GET | `/api/goods-receipts/{id}` | Obtener por ID |
+| GET | `/api/goods-receipts` | Listar todas las recepciones |
+| GET | `/api/goods-receipts/{id}` | Obtener recepción por ID |
+| GET | `/api/goods-receipts/number/{receiptNumber}` | Obtener por número de recepción |
+| GET | `/api/goods-receipts/order/{orderId}` | Recepciones de una orden |
+| GET | `/api/goods-receipts/supplier/{supplierId}` | Recepciones de un proveedor |
+| GET | `/api/goods-receipts/status/{status}` | Recepciones por estado |
+| GET | `/api/goods-receipts/pending` | Recepciones pendientes |
 | POST | `/api/goods-receipts` | Crear recepción |
 | PATCH | `/api/goods-receipts/{id}/receive` | Confirmar recepción |
 | PATCH | `/api/goods-receipts/{id}/reject` | Rechazar recepción |
+| DELETE | `/api/goods-receipts/{id}` | Eliminar recepción (solo PENDING) |
+
+### Monitoreo y Documentación
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET | `/api/actuator/health` | Estado de salud de la aplicación |
+| GET | `/api/swagger-ui.html` | Documentación interactiva de la API |
+| GET | `/api/v3/api-docs` | Especificación OpenAPI JSON |
 
 ---
 
@@ -391,6 +427,71 @@ https://drogueria-bellavista-api.onrender.com/api
 ### Desplegar cambios
 
 Los cambios en la rama `main` se despliegan automáticamente.
+
+---
+
+## 📚 Documentación
+
+La documentación completa del proyecto está organizada en varios archivos especializados:
+
+### 📋 Documentos Principales
+
+| Documento | Descripción |
+|-----------|-------------|
+| **[README.md](README.md)** | Guía de inicio rápido y referencia general |
+| **[QUICKSTART.md](QUICKSTART.md)** | Inicio rápido en 5 minutos |
+| **[ARCHITECTURE.md](docs/Arquitectura%20y%20proyecto/ARCHITECTURE.md)** | Arquitectura hexagonal detallada |
+
+### 🗄️ Base de Datos
+
+| Documento | Descripción |
+|-----------|-------------|
+| **[DATABASE.md](docs/DATABASE.md)** | Esquema completo, relaciones y migraciones |
+| **[schema.sql](src/main/resources/schema.sql)** | Script de creación de tablas |
+| **[data.sql](src/main/resources/data.sql)** | Datos de prueba |
+
+### 🔧 Operaciones y Mantenimiento
+
+| Documento | Descripción |
+|-----------|-------------|
+| **[OPERATIONS.md](docs/OPERATIONS.md)** | Monitoreo, troubleshooting y mantenimiento |
+| **[IMPLEMENTACION_METRICAS_COMPLETADA.md](docs/IMPLEMENTACIONES%20COMPLETADAS/IMPLEMENTACION_METRICAS_COMPLETADA.md)** | Métricas de calidad implementadas |
+| **[TASK_COMPLETED_USER_MANAGEMENT.md](docs/IMPLEMENTACIONES%20COMPLETADAS/TASK_COMPLETED_USER_MANAGEMENT.md)** | Gestión de usuarios completada |
+| **[CAMBIO_4_SISTEMA_EMAIL.md](docs/IMPLEMENTACIONES%20COMPLETADAS/CAMBIO_4_SISTEMA_EMAIL.md)** | Sistema de email implementado |
+
+### 🎨 Frontend
+
+| Documento | Descripción |
+|-----------|-------------|
+| **[FRONTEND_INTEGRATION.md](docs/FRONTEND_INTEGRATION.md)** | Guía completa de integración frontend |
+| **[Postman_Collection.json](Postman_Collection.json)** | Colección de Postman con ejemplos |
+| **[Postman_Collection_Metricas.json](Postman_Collection_Metricas.json)** | Colección para pruebas de métricas |
+
+### 🔒 Seguridad y Calidad
+
+| Documento | Descripción |
+|-----------|-------------|
+| **[Plan_de_Gestion_de_la_Calidad_FINAL.md](docs/Arquitectura%20y%20proyecto/Plan_de_Gestion_de_la_Calidad_FINAL.md)** | Plan de calidad completo |
+| **[SOLID_AND_PATTERNS_ANALYSIS.md](docs/Arquitectura%20y%20proyecto/SOLID_AND_PATTERNS_ANALYSIS.md)** | Análisis SOLID y patrones |
+| **[1. Invetoryrx - Plan de Gestión de la Calidad del Proyecto.pdf](docs/1.%20Invetoryrx%20-%20Plan%20de%20Gesti%C3%B3n%20de%20la%20Calidad%20del%20Proyecto.pdf)** | Documento PDF del plan de calidad |
+
+### 🚀 Despliegue y Configuración
+
+| Documento | Descripción |
+|-----------|-------------|
+| **[render.yaml](render.yaml)** | Configuración de despliegue en Render |
+| **[Dockerfile](Dockerfile)** | Configuración de Docker |
+| **[docker-compose.yml](docker-compose.yml)** | Configuración local con Docker |
+| **[DEPLOY_RENDER.md](docs/DESPLIEGUE%20Y%20CONFIGURACIÓN/DEPLOY_RENDER.md)** | Guía de despliegue en Render |
+| **[CONFIGURAR_GMAIL_RAPIDO.md](docs/DESPLIEGUE%20Y%20CONFIGURACIÓN/CONFIGURAR_GMAIL_RAPIDO.md)** | Configuración rápida de Gmail |
+
+### 🧪 Testing y Calidad
+
+| Documento | Descripción |
+|-----------|-------------|
+| **[Configuracion_SonarCloud.md](docs/Pruebas%20y%20Calidad/Configuracion_SonarCloud.md)** | Configuración de análisis de vulnerabilidades |
+| **[Configuracion_Uptime_Monitoring.md](docs/Pruebas%20y%20Calidad/Configuracion_Uptime_Monitoring.md)** | Monitoreo de disponibilidad |
+| **[INSTRUCCIONES_SONARCLOUD.md](docs/Pruebas%20y%20Calidad/INSTRUCCIONES_SONARCLOUD.md)** | Guía completa de SonarCloud |
 
 ---
 
