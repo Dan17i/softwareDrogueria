@@ -5,7 +5,7 @@ Sistema de gestión para droguería construido con **Spring Boot 3.2.2** y **Jav
 [![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://openjdk.org/projects/jdk/21/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.2-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue.svg)](https://www.postgresql.org/)
-[![Tests](https://img.shields.io/badge/Tests-109%20passed-success.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-150%20passed-success.svg)]()
 [![Deploy](https://img.shields.io/badge/Deploy-Render-purple.svg)](https://drogueria-bellavista-api.onrender.com/api/actuator/health)
 
 ---
@@ -85,6 +85,14 @@ https://drogueria-bellavista-api.onrender.com/api
 - Validación automática de fondos y seguridad PCI DSS
 - Historial completo de transacciones por cliente
 
+### 🔔 Sistema de Notificaciones
+- Alertas automáticas de inventario bajo
+- Notificaciones específicas por roles (ADMIN, WAREHOUSE, etc.)
+- Estados de lectura y timestamps
+- Scheduler automático cada 6 horas
+- API REST completa para gestión de notificaciones
+- Integración con productos que necesitan reabastecimiento
+
 ---
 
 ## 🚀 Tecnologías
@@ -96,8 +104,9 @@ https://drogueria-bellavista-api.onrender.com/api
 | **Seguridad** | Spring Security + JWT |
 | **Persistencia** | Spring Data JPA |
 | **Base de Datos** | PostgreSQL 15 (prod) / H2 (dev) |
+| **Documentación** | SpringDoc OpenAPI (Swagger) |
+| **Testing** | JUnit 5, Testcontainers, Spring Security Test |
 | **Build** | Maven |
-| **Testing** | JUnit 5, Testcontainers |
 | **Contenedores** | Docker |
 | **Deploy** | Render |
 
@@ -222,6 +231,19 @@ En modo desarrollo (`dev`), tienes acceso adicional a:
 
 ---
 
+## ⏰ Tareas Programadas
+
+El sistema incluye tareas automáticas que se ejecutan periódicamente:
+
+### Scheduler de Notificaciones
+- **Frecuencia**: Cada 6 horas
+- **Función**: Verifica automáticamente el inventario de productos
+- **Acción**: Crea notificaciones de alerta para productos con stock bajo
+- **Configuración**: `@EnableScheduling` en `BellavistaApplication.java`
+- **Productos monitoreados**: Aquellos con `minStockLevel` definido y stock actual ≤ nivel mínimo
+
+---
+
 ## 📚 API Endpoints
 
 ### Autenticación (públicos)
@@ -320,6 +342,19 @@ En modo desarrollo (`dev`), tienes acceso adicional a:
 | POST | `/api/payments/process` | Procesar pago con Stripe |
 | GET | `/api/payments/{intentId}` | Verificar estado de pago |
 
+### 🔔 Notificaciones (protegidos)
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET | `/api/notifications` | Listar todas las notificaciones |
+| GET | `/api/notifications/unread` | Listar notificaciones no leídas |
+| GET | `/api/notifications/{id}` | Obtener notificación por ID |
+| GET | `/api/notifications/role/{role}` | Notificaciones por rol |
+| PATCH | `/api/notifications/{id}/read` | Marcar notificación como leída |
+| PATCH | `/api/notifications/mark-all-read` | Marcar todas como leídas |
+| DELETE | `/api/notifications/{id}` | Eliminar notificación |
+| POST | `/api/notifications/check-inventory` | Verificar inventario y crear alertas |
+
 ### Monitoreo y Documentación
 
 | Método | Endpoint | Descripción |
@@ -384,9 +419,9 @@ curl https://drogueria-bellavista-api.onrender.com/api/products \
 
 | Tipo | Tests | Estado |
 |------|-------|--------|
-| Unit Tests (Servicios) | 69 | ✅ |
-| Integration Tests | 40 | ✅ |
-| **Total** | **109** | ✅ |
+| Unit Tests (Servicios) | 99 | ✅ |
+| Integration Tests | 51 | ✅ |
+| **Total** | **150** | ✅ |
 
 ### Desglose de Integration Tests
 
@@ -396,7 +431,8 @@ curl https://drogueria-bellavista-api.onrender.com/api/products \
 | ProductIntegrationTest | 15 |
 | AuthOrderIntegrationTest | 1 |
 | UserManagementIntegrationTest | 13 |
-| **Subtotal Integration** | **40** |
+| NotificationIntegrationTest | 11 |
+| **Subtotal Integration** | **51** |
 
 ### Ejecutar tests
 
