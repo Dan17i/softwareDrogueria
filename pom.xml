@@ -25,9 +25,9 @@
         <jacoco.skip>false</jacoco.skip>
         
         <!-- SonarCloud properties -->
-        <sonar.organization>dan17i</sonar.organization>
+        <sonar.organization>software-drogueria</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <sonar.projectKey>Dan17i_softwareDrogueria</sonar.projectKey>
+        <sonar.projectKey>software-drogueria_softwareDrogueria</sonar.projectKey>
     </properties>
 
     <dependencies>
