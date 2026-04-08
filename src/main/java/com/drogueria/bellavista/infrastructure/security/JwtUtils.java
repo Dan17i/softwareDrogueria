@@ -30,10 +30,10 @@ import java.util.Date;
 public class JwtUtils {
     private static final Logger log = LoggerFactory.getLogger(JwtUtils.class);
 
-    @Value("${app.jwt.secret:your-secret-key-must-be-at-least-32-characters-for-hs256}")
+    @Value("${app.jwt.secret}")
     private String jwtSecret;
 
-    @Value("${app.jwt.expiration:86400000}")  // 24 hours in ms
+    @Value("${app.jwt.expiration}")
     private long jwtExpirationMs;
 
     // Minimum secret length for HS256 is 32 bytes recommended

@@ -198,3 +198,32 @@ CREATE TABLE IF NOT EXISTS goods_receipt_items (
 
 CREATE INDEX IF NOT EXISTS idx_receipt_items_receipt ON goods_receipt_items(goods_receipt_id);
 CREATE INDEX IF NOT EXISTS idx_receipt_items_product ON goods_receipt_items(product_id);
+
+-- Tabla: Pagos (Payment Gateway - Stripe)
+CREATE TABLE IF NOT EXISTS payments (
+    id BIGSERIAL PRIMARY KEY,
+    order_id BIGINT NOT NULL,
+    stripe_payment_id VARCHAR(255) UNIQUE,
+    stripe_intent_id VARCHAR(255) UNIQUE,
+    customer_id BIGINT NOT NULL,
+    amount NUMERIC(12, 2) NOT NULL,
+    currency VARCHAR(3) NOT NULL DEFAULT 'USD',
+    status VARCHAR(30) NOT NULL DEFAULT 'PENDING',
+    payment_method VARCHAR(50),
+    description TEXT,
+    error_message TEXT,
+    metadata TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP,
+    paid_at TIMESTAMP,
+
+    CONSTRAINT fk_payment_order FOREIGN KEY (order_id) REFERENCES orders(id),
+    CONSTRAINT fk_payment_customer FOREIGN KEY (customer_id) REFERENCES customers(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_payment_order ON payments(order_id);
+CREATE INDEX IF NOT EXISTS idx_payment_customer ON payments(customer_id);
+CREATE INDEX IF NOT EXISTS idx_payment_status ON payments(status);
+CREATE INDEX IF NOT EXISTS idx_payment_stripe_id ON payments(stripe_payment_id);
+CREATE INDEX IF NOT EXISTS idx_payment_created ON payments(created_at);
+
