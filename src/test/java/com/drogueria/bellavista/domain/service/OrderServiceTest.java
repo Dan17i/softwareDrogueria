@@ -104,64 +104,149 @@ class OrderServiceTest {
         log.info("✅ Orden creada correctamente");
     }
 
+    // =============================
+    // CREATE ORDER - ERROR CASES
+    // =============================
+
     @Test
-    @DisplayName("Debe fallar si cliente está inactivo")
-    void shouldFailIfCustomerInactive() {
-        log.info("🧪 Test cliente inactivo");
+    @DisplayName("No debe crear orden si cliente está inactivo")
+    void shouldNotCreateOrderIfCustomerInactive() {
+        log.info("🧪 Test createOrder with inactive customer");
 
-        customer.setActive(false);
-        when(customerService.getCustomerById(1L)).thenReturn(customer);
+        Customer inactiveCustomer = Customer.builder()
+                .id(1L)
+                .active(false)
+                .build();
 
-        assertThrows(BusinessException.class,
+        when(customerService.getCustomerById(1L)).thenReturn(inactiveCustomer);
+
+        BusinessException exception = assertThrows(BusinessException.class,
                 () -> orderService.createOrder(order));
 
-        log.info("✅ Excepción correcta por cliente inactivo");
+        assertTrue(exception.getMessage().contains("cliente está inactivo"));
+        verify(orderRepository, never()).save(any());
+        verify(productService, never()).reduceStockInternal(any(), any());
+        verify(customerService, never()).increasePendingBalance(any(), any());
+
+        log.info("✅ Orden rechazada por cliente inactivo");
     }
 
     @Test
-    @DisplayName("Debe fallar si no tiene items")
-    void shouldFailIfNoItems() {
-        log.info("🧪 Test sin items");
+    @DisplayName("No debe crear orden si no tiene items")
+    void shouldNotCreateOrderIfNoItems() {
+        log.info("🧪 Test createOrder with no items");
 
-        order.setItems(Collections.emptyList());
+        Order orderWithoutItems = Order.builder()
+                .customerId(1L)
+                .items(new ArrayList<>())
+                .build();
+
         when(customerService.getCustomerById(1L)).thenReturn(customer);
 
-        assertThrows(BusinessException.class,
-                () -> orderService.createOrder(order));
+        BusinessException exception = assertThrows(BusinessException.class,
+                () -> orderService.createOrder(orderWithoutItems));
 
-        log.info("✅ Excepción correcta por orden sin items");
+        assertTrue(exception.getMessage().contains("campo 'items' es obligatorio"));
+        verify(orderRepository, never()).save(any());
+        verify(productService, never()).reduceStockInternal(any(), any());
+        verify(customerService, never()).increasePendingBalance(any(), any());
+
+        log.info("✅ Orden rechazada por falta de items");
     }
 
     @Test
-    @DisplayName("Debe fallar si stock insuficiente")
-    void shouldFailIfStockInsufficient() {
-        log.info("🧪 Test stock insuficiente");
+    @DisplayName("No debe crear orden si producto no está disponible")
+    void shouldNotCreateOrderIfProductNotAvailable() {
+        log.info("🧪 Test createOrder with unavailable product");
 
-        product.setStock(1);
+        Product unavailableProduct = new Product();
+        unavailableProduct.setId(10L);
+        unavailableProduct.setCode("P001");
+        unavailableProduct.setName("Producto no disponible");
+        unavailableProduct.setActive(false); // No disponible
 
         when(customerService.getCustomerById(1L)).thenReturn(customer);
+        when(productService.getProductById(10L)).thenReturn(unavailableProduct);
+
+        BusinessException exception = assertThrows(BusinessException.class,
+                () -> orderService.createOrder(order));
+
+        assertTrue(exception.getMessage().contains("no está disponible para la venta"));
+        verify(orderRepository, never()).save(any());
+        verify(productService, never()).reduceStockInternal(any(), any());
+        verify(customerService, never()).increasePendingBalance(any(), any());
+
+        log.info("✅ Orden rechazada por producto no disponible");
+    }
+
+    @Test
+    @DisplayName("No debe crear orden si stock insuficiente")
+    void shouldNotCreateOrderIfInsufficientStock() {
+        log.info("🧪 Test createOrder with insufficient stock");
+
+        Product lowStockProduct = new Product();
+        lowStockProduct.setId(10L);
+        lowStockProduct.setCode("P001");
+        lowStockProduct.setName("Producto con poco stock");
+        lowStockProduct.setPrice(new BigDecimal("100"));
+        lowStockProduct.setStock(1); // Solo 1 disponible
+        lowStockProduct.setActive(true);
+
+        OrderItem highQuantityItem = new OrderItem();
+        highQuantityItem.setProductId(10L);
+        highQuantityItem.setQuantity(5); // Pide 5, pero solo hay 1
+
+        Order orderWithHighQuantity = Order.builder()
+                .customerId(1L)
+                .items(List.of(highQuantityItem))
+                .build();
+
+        when(customerService.getCustomerById(1L)).thenReturn(customer);
+        when(productService.getProductById(10L)).thenReturn(lowStockProduct);
+
+        BusinessException exception = assertThrows(BusinessException.class,
+                () -> orderService.createOrder(orderWithHighQuantity));
+
+        assertTrue(exception.getMessage().contains("Stock insuficiente"));
+        assertTrue(exception.getMessage().contains("Disponible: 1"));
+        assertTrue(exception.getMessage().contains("solicitado: 5"));
+        verify(orderRepository, never()).save(any());
+        verify(productService, never()).reduceStockInternal(any(), any());
+        verify(customerService, never()).increasePendingBalance(any(), any());
+
+        log.info("✅ Orden rechazada por stock insuficiente");
+    }
+
+    @Test
+    @DisplayName("No debe crear orden si cliente no tiene crédito suficiente")
+    void shouldNotCreateOrderIfInsufficientCredit() {
+        log.info("🧪 Test createOrder with insufficient credit");
+
+        Customer lowCreditCustomer = Customer.builder()
+                .id(1L)
+                .active(true)
+                .creditLimit(new BigDecimal("100")) // Solo 100 de límite
+                .pendingBalance(BigDecimal.ZERO)
+                .build();
+
+        Order expensiveOrder = Order.builder()
+                .customerId(1L)
+                .items(List.of(item)) // Item cuesta 200 (2 * 100)
+                .build();
+
+        when(customerService.getCustomerById(1L)).thenReturn(lowCreditCustomer);
         when(productService.getProductById(10L)).thenReturn(product);
 
-        assertThrows(BusinessException.class,
-                () -> orderService.createOrder(order));
+        BusinessException exception = assertThrows(BusinessException.class,
+                () -> orderService.createOrder(expensiveOrder));
 
-        log.info("✅ Excepción correcta por stock insuficiente");
-    }
+        assertTrue(exception.getMessage().contains("no tiene crédito suficiente"));
+        assertTrue(exception.getMessage().contains("Límite: 100"));
+        verify(orderRepository, never()).save(any());
+        verify(productService, never()).reduceStockInternal(any(), any());
+        verify(customerService, never()).increasePendingBalance(any(), any());
 
-    @Test
-    @DisplayName("Debe fallar si cliente sin crédito")
-    void shouldFailIfNoCredit() {
-        log.info("🧪 Test sin crédito");
-
-        customer.setCreditLimit(new BigDecimal("50"));
-
-        when(customerService.getCustomerById(1L)).thenReturn(customer);
-        when(productService.getProductById(10L)).thenReturn(product);
-
-        assertThrows(BusinessException.class,
-                () -> orderService.createOrder(order));
-
-        log.info("✅ Excepción correcta por crédito insuficiente");
+        log.info("✅ Orden rechazada por crédito insuficiente");
     }
 
     // =============================
@@ -185,6 +270,22 @@ class OrderServiceTest {
         verify(orderRepository).save(order);
 
         log.info("✅ Orden completada correctamente");
+    }
+
+    @Test
+    @DisplayName("No debe completar orden inexistente")
+    void shouldNotCompleteNonExistentOrder() {
+        log.info("🧪 Test completeOrder with non-existent order");
+
+        when(orderRepository.findById(999L)).thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> orderService.completeOrder(999L));
+
+        assertTrue(exception.getMessage().contains("Order"));
+        verify(orderRepository, never()).save(any());
+
+        log.info("✅ Completar orden inexistente lanza excepción correcta");
     }
 
     // =============================
@@ -213,15 +314,52 @@ class OrderServiceTest {
     }
 
     @Test
-    @DisplayName("Debe lanzar excepción si orden no existe")
-    void shouldThrowIfOrderNotFound() {
-        log.info("🧪 Test order not found");
+    @DisplayName("No debe cancelar orden inexistente")
+    void shouldNotCancelNonExistentOrder() {
+        log.info("🧪 Test cancelOrder with non-existent order");
 
-        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+        when(orderRepository.findById(999L)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class,
-                () -> orderService.getOrderById(1L));
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> orderService.cancelOrder(999L));
 
-        log.info("✅ Excepción correcta por orden inexistente");
+        assertTrue(exception.getMessage().contains("Order"));
+        verify(orderRepository, never()).save(any());
+        verify(productService, never()).increaseStockInternal(any(), any());
+        verify(customerService, never()).reducePendingBalance(any(), any());
+
+        log.info("✅ Cancelar orden inexistente lanza excepción correcta");
+    }
+
+    @Test
+    @DisplayName("Debe obtener orden por número correctamente")
+    void shouldGetOrderByOrderNumber() {
+        log.info("🧪 Test getOrderByOrderNumber");
+
+        when(orderRepository.findByOrderNumber("ORD-123")).thenReturn(Optional.of(order));
+
+        Order result = orderService.getOrderByOrderNumber("ORD-123");
+
+        assertNotNull(result);
+        assertEquals(order.getId(), result.getId());
+        verify(orderRepository).findByOrderNumber("ORD-123");
+
+        log.info("✅ Obtener orden por número funciona correctamente");
+    }
+
+    @Test
+    @DisplayName("Debe lanzar excepción si orden por número no existe")
+    void shouldThrowIfOrderByNumberNotFound() {
+        log.info("🧪 Test getOrderByOrderNumber not found");
+
+        when(orderRepository.findByOrderNumber("ORD-INEXISTENTE")).thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> orderService.getOrderByOrderNumber("ORD-INEXISTENTE"));
+
+        assertTrue(exception.getMessage().contains("Order"));
+        assertTrue(exception.getMessage().contains("orderNumber"));
+
+        log.info("✅ Excepción correcta por orden inexistente por número");
     }
 }

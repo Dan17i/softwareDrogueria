@@ -175,5 +175,4 @@ class GlobalExceptionHandlerTest {
         assert errorResponse.getDetails().size() == 2;
         assert "error1".equals(errorResponse.getDetails().get("field1"));
     }
-}</content>
-<parameter name="filePath">C:\Users\DANIEL-PC\Documents\software 3\softwareDrogueria\src\test\java\com\drogueria\bellavista\config\GlobalExceptionHandlerTest.java
+}
