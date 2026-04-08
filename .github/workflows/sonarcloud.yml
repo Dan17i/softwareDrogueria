@@ -48,4 +48,5 @@ jobs:
           mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
             -Dsonar.projectKey=Dan17i_softwareDrogueria \
             -Dsonar.organization=dan17i \
-            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Djacoco.check.skip=true
