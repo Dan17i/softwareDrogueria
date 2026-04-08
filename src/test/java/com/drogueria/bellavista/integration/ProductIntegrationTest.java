@@ -116,6 +116,12 @@ public class ProductIntegrationTest {
         assertThat(response.getBody()).containsKey("id");
         assertThat(response.getBody().get("code")).isEqualTo("PROD-001");
         assertThat(response.getBody().get("active")).isEqualTo(true);
+        
+        // HC-02: Validar que se establecieron timestamps de creación y actualización
+        assertThat(response.getBody()).containsKey("createdAt");
+        assertThat(response.getBody()).containsKey("updatedAt");
+        assertThat(response.getBody().get("createdAt")).isNotNull();
+        assertThat(response.getBody().get("updatedAt")).isNotNull();
 
         productId = ((Number) response.getBody().get("id")).longValue();
     }
@@ -214,6 +220,12 @@ public class ProductIntegrationTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody().get("name")).isEqualTo("Acetaminofén 500mg Actualizado");
         assertThat(((Number) response.getBody().get("price")).doubleValue()).isEqualTo(5500.00);
+        
+        // HC-02: Validar que updatedAt cambió después de la actualización
+        assertThat(response.getBody()).containsKey("updatedAt");
+        assertThat(response.getBody().get("updatedAt")).isNotNull();
+        assertThat(response.getBody()).containsKey("createdAt");
+        assertThat(response.getBody().get("createdAt")).isNotNull();
     }
 
     // ============================================

@@ -37,3 +37,31 @@ app:
     from: ${MAIL_FROM:noreply@bellavista.com}
   frontend:
     url: ${FRONTEND_URL:http://localhost:5173}
+
+  # Redis configuration for token blacklist
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
+    timeout: ${REDIS_TIMEOUT:2000ms}
+    jedis:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        timeout: 2000ms
+
+# Configuración de Redis en Spring Data
+spring:
+  data:
+    redis:
+      host: ${app.redis.host}
+      port: ${app.redis.port}
+      password: ${app.redis.password}
+      timeout: ${app.redis.timeout}
+      jedis:
+        pool:
+          max-active: ${app.redis.jedis.pool.max-active}
+          max-idle: ${app.redis.jedis.pool.max-idle}
+          min-idle: ${app.redis.jedis.pool.min-idle}
+          timeout: ${app.redis.jedis.pool.timeout}

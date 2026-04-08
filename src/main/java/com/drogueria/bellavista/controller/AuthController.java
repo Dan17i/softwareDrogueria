@@ -132,4 +132,30 @@ public class AuthController {
 
         return ResponseEntity.ok(resp);
     }
+
+    /**
+     * Logout user by adding token to blacklist.
+     * HC-02: Implementación de Token Blacklist para invalidar tokens JWT.
+     * POST /auth/logout
+     */
+    @PostMapping("/logout")
+    public ResponseEntity<MessageResponseDTO> logout(@RequestHeader("Authorization") String authHeader) {
+        try {
+            // Extraer token del header Bearer
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                String token = authHeader.substring("Bearer ".length());
+                authService.logout(token);
+                return ResponseEntity.ok(MessageResponseDTO.builder()
+                    .message("Sesión cerrada correctamente. El token ha sido invalidado.")
+                    .build());
+            }
+            return ResponseEntity.badRequest().body(MessageResponseDTO.builder()
+                .message("Token inválido o no proporcionado en el header Authorization.")
+                .build());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(MessageResponseDTO.builder()
+                .message("Error al cerrar sesión: " + e.getMessage())
+                .build());
+        }
+    }
 }

@@ -6,6 +6,7 @@ import com.drogueria.bellavista.domain.service.UserService;
 import com.drogueria.bellavista.exception.AuthenticationException;
 import com.drogueria.bellavista.exception.ResourceNotFoundException;
 import com.drogueria.bellavista.infrastructure.security.JwtUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Authentication service handling user login, registration and token management.
@@ -34,15 +36,18 @@ public class AuthService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
     private final com.drogueria.bellavista.application.service.EmailService emailService;
     private final com.drogueria.bellavista.domain.service.PasswordResetService passwordResetService;
+    private final RedisTemplate<String, String> redisTemplate;
 
     public AuthService(UserService userService, JwtUtils jwtUtils, PasswordEncoder passwordEncoder,
                       com.drogueria.bellavista.application.service.EmailService emailService,
-                      com.drogueria.bellavista.domain.service.PasswordResetService passwordResetService) {
+                      com.drogueria.bellavista.domain.service.PasswordResetService passwordResetService,
+                      RedisTemplate<String, String> redisTemplate) {
         this.userService = userService;
         this.jwtUtils = jwtUtils;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
         this.passwordResetService = passwordResetService;
+        this.redisTemplate = redisTemplate;
     }
 
     /**
@@ -107,6 +112,50 @@ public class AuthService implements UserDetailsService {
      */
     public String getUsernameFromToken(String token) {
         return jwtUtils.getUsernameFromToken(token);
+    }
+
+    /**
+     * Logout user by adding token to blacklist in Redis.
+     * Token will be invalidated until its expiration time.
+     */
+    public void logout(String token) {
+        try {
+            String jti = jwtUtils.getIdFromToken(token);
+            java.util.Date expiration = jwtUtils.getExpirationFromToken(token);
+            
+            if (jti != null && expiration != null) {
+                long expirationTimeMillis = expiration.getTime() - System.currentTimeMillis();
+                
+                if (expirationTimeMillis > 0) {
+                    redisTemplate.opsForValue().set(
+                        "blacklist:" + jti,
+                        "true",
+                        expirationTimeMillis,
+                        TimeUnit.MILLISECONDS
+                    );
+                }
+            }
+        } catch (Exception e) {
+            // Log error but don't fail logout if Redis is unavailable
+            org.slf4j.LoggerFactory.getLogger(AuthService.class)
+                .warn("Error adding token to blacklist: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * Check if token is blacklisted.
+     */
+    public boolean isTokenBlacklisted(String token) {
+        try {
+            String jti = jwtUtils.getIdFromToken(token);
+            if (jti != null) {
+                return Boolean.TRUE.equals(redisTemplate.hasKey("blacklist:" + jti));
+            }
+        } catch (Exception e) {
+            org.slf4j.LoggerFactory.getLogger(AuthService.class)
+                .debug("Error checking token blacklist: {}", e.getMessage());
+        }
+        return false;
     }
 
     /**

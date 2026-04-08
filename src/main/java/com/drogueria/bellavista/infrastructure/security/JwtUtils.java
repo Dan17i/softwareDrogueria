@@ -135,6 +135,41 @@ public class JwtUtils {
     }
 
     /**
+     * Get JWT ID (jti) claim from token.
+     * Used for token blacklist identification.
+     * HC-02: Token Blacklist implementation.
+     */
+    public String getIdFromToken(String token) {
+        try {
+            Claims claims = getAllClaimsFromToken(token);
+            String jti = claims.getId();
+            if (jti == null || jti.isEmpty()) {
+                // If no explicit jti, use a combination of subject and issued-at time
+                jti = claims.getSubject() + "_" + claims.getIssuedAt().getTime();
+            }
+            return jti;
+        } catch (Exception e) {
+            log.warn("Error extracting JTI from token: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Get expiration date from token.
+     * Used to set TTL for blacklisted tokens.
+     * HC-02: Token Blacklist implementation.
+     */
+    public Date getExpirationFromToken(String token) {
+        try {
+            Claims claims = getAllClaimsFromToken(token);
+            return claims.getExpiration();
+        } catch (Exception e) {
+            log.warn("Error extracting expiration from token: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    /**
      * Get signing key for JWT operations.
      */
     private SecretKey getSigningKey() {
