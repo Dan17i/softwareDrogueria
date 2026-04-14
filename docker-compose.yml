@@ -1,16 +1,53 @@
-
 services:
   postgres:
-    image: postgres:15
+    image: postgres:15-alpine
     container_name: drogueria_db
+    restart: unless-stopped
     environment:
       POSTGRES_DB: drogueria_bellavista
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: "JUNIORDIAZ"
-    ports:
-      - "5433:5432"
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - drogueria_net
+    mem_limit: 256m
+    mem_reservation: 128m
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d drogueria_bellavista"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: drogueria_app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/drogueria_bellavista
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      APP_JWT_SECRET: ${APP_JWT_SECRET}
+      MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_FROM: ${MAIL_FROM:-noreply@bellavista.com}
+      FRONTEND_URL: ${FRONTEND_URL:-https://drogueria-bellavista.netlify.app}
+    ports:
+      - "8080:8080"
+    networks:
+      - drogueria_net
+    mem_limit: 512m
+    mem_reservation: 256m
+
+networks:
+  drogueria_net:
+    driver: bridge
 
 volumes:
   postgres_data:
