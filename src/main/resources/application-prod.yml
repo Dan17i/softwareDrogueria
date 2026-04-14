@@ -23,6 +23,12 @@ spring:
     init:
       mode: never
 
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisReactiveAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+
   # Configuración de email para producción (opcional)
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
