@@ -6,7 +6,7 @@ Sistema de gestión para droguería construido con **Spring Boot 3.2.2** y **Jav
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.2-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue.svg)](https://www.postgresql.org/)
 [![Tests](https://img.shields.io/badge/Tests-150%20passed-success.svg)]()
-[![Deploy](https://img.shields.io/badge/Deploy-Render-purple.svg)](https://drogueria-bellavista-api.onrender.com/api/actuator/health)
+[![Deploy](https://img.shields.io/badge/Deploy-AWS%20EC2-orange.svg)](http://3.83.244.10:8080/api/actuator/health)
 
 ---
 
@@ -34,18 +34,16 @@ Sistema de gestión para droguería construido con **Spring Boot 3.2.2** y **Jav
 La API está desplegada y disponible en:
 
 ```
-https://drogueria-bellavista-api.onrender.com/api
+http://3.83.244.10:8080/api
 ```
 
 ### Endpoints públicos para probar:
 
 | Endpoint | URL |
 |----------|-----|
-| Health Check | [/api/actuator/health](https://drogueria-bellavista-api.onrender.com/api/actuator/health) |
+| Health Check | [/api/actuator/health](http://3.83.244.10:8080/api/actuator/health) |
 | Registro | POST `/api/auth/register` |
 | Login | POST `/api/auth/login` |
-
-> ⚠️ **Nota**: El plan gratuito de Render apaga la app tras 15 min de inactividad. El primer request puede tardar ~30-60 segundos.
 
 ---
 
@@ -108,7 +106,7 @@ https://drogueria-bellavista-api.onrender.com/api
 | **Testing** | JUnit 5, Testcontainers, Spring Security Test |
 | **Build** | Maven |
 | **Contenedores** | Docker |
-| **Deploy** | Render |
+| **Deploy** | AWS EC2 |
 
 ---
 
@@ -211,7 +209,7 @@ En modo desarrollo (`dev`), tienes acceso adicional a:
 | Perfil | Base de Datos | Uso |
 |--------|---------------|-----|
 | `dev` | PostgreSQL (localhost:5433) | Desarrollo local |
-| `prod` | PostgreSQL (Render) | Producción |
+| `prod` | PostgreSQL (AWS EC2) | Producción |
 
 ### Variables de entorno
 
@@ -397,17 +395,17 @@ Authorization: Bearer <token>
 
 ```bash
 # 1. Registrar
-curl -X POST https://drogueria-bellavista-api.onrender.com/api/auth/register \
+curl -X POST http://3.83.244.10:8080/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{"username":"admin","email":"admin@test.com","password":"password123","firstName":"Admin","lastName":"User"}'
 
 # 2. Login
-curl -X POST https://drogueria-bellavista-api.onrender.com/api/auth/login \
+curl -X POST http://3.83.244.10:8080/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username":"admin","password":"password123"}'
 
 # 3. Usar token
-curl https://drogueria-bellavista-api.onrender.com/api/products \
+curl http://3.83.244.10:8080/api/products \
   -H "Authorization: Bearer <tu-token>"
 ```
 
@@ -455,29 +453,36 @@ Utilizan **Testcontainers** con PostgreSQL 15 para simular el entorno de producc
 
 ## 🚀 Despliegue
 
-### Plataforma: Render
+### Plataforma: AWS EC2
 
-La aplicación está desplegada en [Render](https://render.com) con:
+La aplicación está desplegada en una instancia **AWS EC2 t2.micro** (Ubuntu 24.04) usando Docker Compose:
 
-- **Web Service**: Docker container con JRE 21
-- **Base de datos**: PostgreSQL 15
+- **App**: Spring Boot en contenedor Docker (JRE 21 Alpine)
+- **Base de datos**: PostgreSQL 15 en contenedor local (sin RDS)
+- **Cache/Blacklist**: Redis 7 en contenedor local
 
 ### Archivos de configuración
 
 | Archivo | Descripción |
 |---------|-------------|
 | `Dockerfile` | Build multi-stage con Maven + JRE Alpine |
-| `render.yaml` | Blueprint para despliegue automático |
+| `docker-compose.yml` | Orquestación de servicios (app, postgres, redis) |
+| `deploy-aws.sh` | Script de instalación y despliegue automático en EC2 |
+| `docs/AWS_DEPLOYMENT.md` | Guía completa de arquitectura y despliegue |
 
 ### URL de producción
 
 ```
-https://drogueria-bellavista-api.onrender.com/api
+http://3.83.244.10:8080/api
 ```
 
 ### Desplegar cambios
 
-Los cambios en la rama `main` se despliegan automáticamente.
+```bash
+cd ~/softwareDrogueria
+git pull
+docker compose up -d --build app
+```
 
 ---
 
@@ -537,7 +542,8 @@ La documentación completa del proyecto está organizada en varios archivos espe
 | **[render.yaml](render.yaml)** | Configuración de despliegue en Render |
 | **[Dockerfile](Dockerfile)** | Configuración de Docker |
 | **[docker-compose.yml](docker-compose.yml)** | Configuración local con Docker |
-| **[DEPLOY_RENDER.md](docs/DESPLIEGUE%20Y%20CONFIGURACIÓN/DEPLOY_RENDER.md)** | Guía de despliegue en Render |
+| **[DEPLOY_RENDER.md](docs/DESPLIEGUE%20Y%20CONFIGURACIÓN/DEPLOY_RENDER.md)** | Guía de despliegue en Render (histórico) |
+| **[AWS_DEPLOYMENT.md](docs/AWS_DEPLOYMENT.md)** | Arquitectura y guía de despliegue en AWS EC2 |
 | **[CONFIGURAR_GMAIL_RAPIDO.md](docs/DESPLIEGUE%20Y%20CONFIGURACIÓN/CONFIGURAR_GMAIL_RAPIDO.md)** | Configuración rápida de Gmail |
 
 ### 🧪 Testing y Calidad
