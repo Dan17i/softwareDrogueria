@@ -26,6 +26,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: prod
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/drogueria_bellavista
@@ -44,6 +46,14 @@ services:
       - drogueria_net
     mem_limit: 512m
     mem_reservation: 256m
+
+  redis:
+    image: redis:7-alpine
+    container_name: drogueria_redis
+    restart: unless-stopped
+    mem_limit: 64m
+    networks:
+      - drogueria_net
 
 networks:
   drogueria_net:
