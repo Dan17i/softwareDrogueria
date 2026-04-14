@@ -33,7 +33,6 @@ USER appuser
 # JVM optimization for containers
 ENV JAVA_TOOL_OPTIONS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
 
-# Render asigna el puerto dinámicamente via variable PORT
-EXPOSE 10000
+EXPOSE 8080
 
 ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=prod"]

@@ -6,8 +6,8 @@ spring:
     password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
-      maximum-pool-size: 5
-      minimum-idle: 2
+      maximum-pool-size: 3
+      minimum-idle: 1
       connection-timeout: 30000
 
   jpa:
@@ -59,7 +59,6 @@ logging:
     root: WARN
     com.drogueria.bellavista: INFO
     
-# para el render
 management:
   endpoints:
     web:
