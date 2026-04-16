@@ -43,13 +43,15 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(request -> {
                     var config = new org.springframework.web.cors.CorsConfiguration();
+                    // 1. Orígenes permitidos
                     config.setAllowedOrigins(Arrays.asList(
                         "https://invetoryrx.onrender.com", 
                         "http://localhost:5173"
                     ));
-                    config.setAllowedOrigins(Arrays.asList("https://invetoryrx.onrender.com", "http://localhost:5173"));
+                    // 2. Métodos permitidos
                     config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-                    config.setAllowedHeaders(Arrays.asList("*"));
+                    // 3. Headers permitidos (Especificamos el de ngrok para evitar el bloqueo)
+                    config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "X-Requested-With","ngrok-skip-browser-warning"));
                     config.setAllowCredentials(true);
                     return config;
 
