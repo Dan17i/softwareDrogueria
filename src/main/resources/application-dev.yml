@@ -44,10 +44,9 @@ app:
     url: http://localhost:5173
   stripe:
     api:
-      # ⚠️ CONFIGURACIÓN DE STRIPE - Reemplazar con tus credenciales reales
-      # Obtén tus keys en: https://dashboard.stripe.com/apikeys
-      key: ${STRIPE_SECRET_KEY:sk_test_placeholder_development_only}
-      public-key: ${STRIPE_PUBLIC_KEY:pk_test_placeholder_development_only}
+      # Configura las claves en el archivo .env (ver .env.example)
+      key: ${STRIPE_SECRET_KEY}
+      public-key: ${STRIPE_PUBLIC_KEY}
 
 logging:
   level:

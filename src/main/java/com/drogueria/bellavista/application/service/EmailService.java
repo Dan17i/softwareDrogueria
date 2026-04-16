@@ -41,7 +41,7 @@ public class EmailService {
             log.info("Welcome email sent to: {}", to);
             
         } catch (Exception e) {
-            log.error("Error sending welcome email to {}: {}", to, e.getMessage());
+            log.error("Error sending welcome email to {}: {}", to, e.getMessage(), e);
         }
     }
     

@@ -58,6 +58,10 @@ app:
     from: ${MAIL_FROM:noreply@bellavista.com}
   frontend:
     url: ${FRONTEND_URL:https://drogueria-bellavista.netlify.app}
+  stripe:
+    api:
+      key: ${STRIPE_SECRET_KEY}
+      public-key: ${STRIPE_PUBLIC_KEY}
 
 logging:
   level:

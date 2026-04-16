@@ -21,6 +21,7 @@ Sistema de gestión para droguería construido con **Spring Boot 3.2.2** y **Jav
 - [API Endpoints](#-api-endpoints)
 - [Seguridad](#-seguridad)
 - [Sistema de Email](#-sistema-de-email)
+- [Configuración de Stripe](#-configuración-de-stripe)
 - [Testing](#-testing)
 - [Despliegue](#-despliegue)
 - [Documentación](#-documentación)
@@ -222,10 +223,79 @@ En modo desarrollo (`dev`), tienes acceso adicional a:
 | `MAIL_PASSWORD` | Contraseña del servidor de email | ✅ Sí |
 | `MAIL_FROM` | Email remitente | ✅ Sí |
 | `FRONTEND_URL` | URL del frontend (para links en emails) | ✅ Sí |
+| `STRIPE_SECRET_KEY` | Clave secreta de Stripe (`sk_test_...` o `sk_live_...`) | ✅ Sí |
+| `STRIPE_PUBLIC_KEY` | Clave publicable de Stripe (`pk_test_...` o `pk_live_...`) | ✅ Sí |
 | `SPRING_DATASOURCE_URL` | URL de conexión JDBC | Solo en prod |
 | `SPRING_DATASOURCE_USERNAME` | Usuario de BD | Solo en prod |
 | `SPRING_DATASOURCE_PASSWORD` | Contraseña de BD | Solo en prod |
 | `PORT` | Puerto del servidor | Solo en prod |
+
+---
+
+## 💳 Configuración de Stripe
+
+### Modo Test vs Producción
+
+| Modo | Prefijo de claves | Descripción |
+|------|-------------------|-------------|
+| Test | `sk_test_` / `pk_test_` | Sin cobros reales. Usar en desarrollo. |
+| Live | `sk_live_` / `pk_live_` | Cobros reales. Solo en producción. |
+
+### Variables de entorno requeridas
+
+```bash
+# Backend (clave secreta — nunca exponer al frontend)
+STRIPE_SECRET_KEY=sk_test_...
+
+# Frontend (clave publicable — puede ser pública)
+STRIPE_PUBLIC_KEY=pk_test_...
+```
+
+### Configuración local (desarrollo)
+
+Las claves se cargan desde el archivo `.env` en la raíz del proyecto (gitignoreado). Copia la plantilla y rellena tus valores:
+
+```bash
+cp .env.example .env
+# Edita .env con tus claves reales de Stripe
+```
+
+Para que Spring Boot cargue el `.env` al ejecutar con Maven:
+
+```bash
+# Windows (PowerShell)
+Get-Content .env | ForEach-Object { $var = $_ -split '=', 2; [System.Environment]::SetEnvironmentVariable($var[0], $var[1]) }
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
+
+# Linux / macOS
+export $(cat .env | xargs)
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
+```
+
+### Configuración por perfil
+
+| Perfil | Archivo | Comportamiento |
+|--------|---------|----------------|
+| `dev` | `application-dev.yml` | Usa valores por defecto del YAML (clave test embebida) |
+| `prod` | `application-prod.yml` | Lee obligatoriamente desde variables de entorno |
+
+> **Seguridad:** `application-dev.yml` está en `.gitignore` para evitar exponer claves en el repositorio.
+
+### Mejores prácticas
+
+- En producción, usa siempre una **Clave Restringida** (`rk_live_...`) con solo los permisos necesarios (Payments, Checkout Sessions, Customers) en lugar de la clave secreta estándar.
+- Nunca cometas claves `sk_live_` ni `rk_live_` en el código fuente.
+- En producción (AWS EC2), configura las variables de entorno directamente en el servidor o en el `docker-compose.yml` usando un archivo `.env` que esté en `.gitignore`.
+
+### Tarjetas de prueba (modo test)
+
+| Número | Resultado |
+|--------|-----------|
+| `4242 4242 4242 4242` | Pago exitoso |
+| `4000 0000 0000 0002` | Tarjeta rechazada |
+| `4000 0025 0000 3155` | Requiere autenticación 3D Secure |
+
+Fecha: cualquier fecha futura. CVC: cualquier 3 dígitos.
 
 ---
 
