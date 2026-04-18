@@ -3,7 +3,6 @@ package com.drogueria.bellavista.config;
 import com.drogueria.bellavista.application.service.AuthService;
 import com.drogueria.bellavista.infrastructure.security.JwtUtils;
 import com.drogueria.bellavista.infrastructure.security.JwtAuthenticationFilter;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -15,7 +14,9 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.util.Arrays;
-import java.util.Collections;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -25,12 +26,21 @@ public class SecurityConfig {
     private final AuthService authService;
     private final JwtUtils jwtUtils;
 
-    @Value("${app.cors.allowed-origins:http://localhost:5173}")
-    private String allowedOrigins;
-
     public SecurityConfig(AuthService authService, JwtUtils jwtUtils) {
         this.authService = authService;
         this.jwtUtils = jwtUtils;
+    }
+
+    @Bean
+    public CorsFilter corsFilter() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(Arrays.asList("https://inventoryrs.online","https://invetoryrx.onrender.com","http://localhost:5173"));
+        config.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","PATCH","OPTIONS"));
+        config.setAllowedHeaders(Arrays.asList("Authorization","Content-Type","Accept","X-Requested-With","ngrok-skip-browser-warning"));
+        config.setAllowCredentials(true);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return new CorsFilter(source);
     }
 
     @Bean
@@ -41,22 +51,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors.configurationSource(request -> {
-                    var config = new org.springframework.web.cors.CorsConfiguration();
-                    // 1. Orígenes permitidos
-                    config.setAllowedOrigins(Arrays.asList(
-			"https://inventoryrs.online",
-                        "https://invetoryrx.onrender.com", 
-                        "http://localhost:5173"
-                    ));
-                    // 2. Métodos permitidos
-                    config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-                    // 3. Headers permitidos (Especificamos el de ngrok para evitar el bloqueo)
-                    config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "X-Requested-With","ngrok-skip-browser-warning"));
-                    config.setAllowCredentials(true);
-                    return config;
-
-                }))
+                .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
 
                 // 👇 ESTA LÍNEA ES LA CLAVE PARA H2
