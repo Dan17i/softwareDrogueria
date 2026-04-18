@@ -1,0 +1,44 @@
+### ========================================
+### USUARIOS - /api/users
+### Solo accesible con rol ADMIN
+### Reemplaza <TOKEN> con el token de un usuario ADMIN
+### ========================================
+
+### Listar todos los usuarios
+GET http://localhost:8080/api/users
+Authorization: Bearer <TOKEN>
+
+### Obtener usuario por ID
+GET http://localhost:8080/api/users/1
+Authorization: Bearer <TOKEN>
+
+### Actualizar rol de usuario (roles: USER, ADMIN, WAREHOUSE)
+PATCH http://localhost:8080/api/users/1/role
+Content-Type: application/json
+Authorization: Bearer <TOKEN>
+
+{
+  "role": "ADMIN"
+}
+
+### Activar usuario
+PATCH http://localhost:8080/api/users/1/status
+Content-Type: application/json
+Authorization: Bearer <TOKEN>
+
+{
+  "active": true
+}
+
+### Desactivar usuario
+PATCH http://localhost:8080/api/users/2/status
+Content-Type: application/json
+Authorization: Bearer <TOKEN>
+
+{
+  "active": false
+}
+
+### Eliminar usuario
+DELETE http://localhost:8080/api/users/2
+Authorization: Bearer <TOKEN>

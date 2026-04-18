@@ -1,0 +1,88 @@
+### ========================================
+### PRODUCTOS - /api/products
+### Reemplaza <TOKEN> con el token del login
+### ========================================
+
+### Crear producto
+POST http://localhost:8080/api/products
+Content-Type: application/json
+Authorization: Bearer <TOKEN>
+
+{
+  "code": "MED-001",
+  "name": "Acetaminofén 500mg",
+  "description": "Analgésico y antipirético",
+  "price": 5000.00,
+  "stock": 100,
+  "minStock": 10,
+  "category": "Medicamentos"
+}
+
+### Actualizar producto
+PUT http://localhost:8080/api/products/1
+Content-Type: application/json
+Authorization: Bearer <TOKEN>
+
+{
+  "code": "MED-001",
+  "name": "Acetaminofén 500mg actualizado",
+  "description": "Analgésico antipirético mejorado",
+  "price": 5500.00,
+  "stock": 120,
+  "minStock": 15,
+  "category": "Medicamentos"
+}
+
+### Obtener producto por ID
+GET http://localhost:8080/api/products/1
+Authorization: Bearer <TOKEN>
+
+### Obtener producto por código
+GET http://localhost:8080/api/products/code/MED-001
+Authorization: Bearer <TOKEN>
+
+### Listar todos los productos
+GET http://localhost:8080/api/products
+Authorization: Bearer <TOKEN>
+
+### Listar solo productos activos
+GET http://localhost:8080/api/products?active=true
+Authorization: Bearer <TOKEN>
+
+### Buscar productos por nombre
+GET http://localhost:8080/api/products/search?name=Acetaminof%C3%A9n
+Authorization: Bearer <TOKEN>
+
+### Listar productos por categoría
+GET http://localhost:8080/api/products/category/Medicamentos
+Authorization: Bearer <TOKEN>
+
+### Productos que necesitan reabastecimiento (stock < minStock)
+GET http://localhost:8080/api/products/restock-needed
+Authorization: Bearer <TOKEN>
+
+### Reducir stock de un producto
+POST http://localhost:8080/api/products/1/reduce-stock
+Content-Type: application/json
+Authorization: Bearer <TOKEN>
+
+{
+  "quantity": 5
+}
+
+### Aumentar stock de un producto
+POST http://localhost:8080/api/products/1/increase-stock
+Content-Type: application/json
+Authorization: Bearer <TOKEN>
+
+{
+  "quantity": 50
+}
+
+### Activar/Desactivar producto (toggle)
+PATCH http://localhost:8080/api/products/1/toggle-status
+Authorization: Bearer <TOKEN>
+
+### Eliminar producto
+DELETE http://localhost:8080/api/products/1
+Authorization: Bearer <TOKEN>

@@ -1,0 +1,36 @@
+### ========================================
+### NOTIFICACIONES - /api/api/notifications
+### NOTA: Este controlador tiene @RequestMapping("/api/notifications")
+### con context-path=/api, resultando en /api/api/notifications
+### Reemplaza <TOKEN> con el token del login
+### Endpoints con (ADMIN) requieren rol ADMIN
+### ========================================
+
+### Listar notificaciones para un rol (default: USER)
+GET http://localhost:8080/api/api/notifications?role=USER
+Authorization: Bearer <TOKEN>
+
+### Listar notificaciones para rol ADMIN
+GET http://localhost:8080/api/api/notifications?role=ADMIN
+Authorization: Bearer <TOKEN>
+
+### Listar notificaciones no leídas para un rol
+GET http://localhost:8080/api/api/notifications/unread?role=WAREHOUSE
+Authorization: Bearer <TOKEN>
+
+### Listar TODAS las notificaciones (solo ADMIN)
+GET http://localhost:8080/api/api/notifications/admin
+Authorization: Bearer <TOKEN>
+
+### Marcar notificación como leída
+PUT http://localhost:8080/api/api/notifications/1/read
+Authorization: Bearer <TOKEN>
+
+### Generar alertas de inventario (solo ADMIN)
+### Crea notificaciones para productos con stock < minStock
+POST http://localhost:8080/api/api/notifications/generate-inventory-alerts
+Authorization: Bearer <TOKEN>
+
+### Eliminar notificación (solo ADMIN)
+DELETE http://localhost:8080/api/api/notifications/1
+Authorization: Bearer <TOKEN>
