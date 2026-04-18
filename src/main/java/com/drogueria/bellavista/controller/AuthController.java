@@ -5,6 +5,7 @@ import com.drogueria.bellavista.application.service.AuthService;
 import com.drogueria.bellavista.domain.model.Role;
 import com.drogueria.bellavista.domain.model.User;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -149,7 +150,7 @@ public class AuthController {
                     .message("Sesión cerrada correctamente. El token ha sido invalidado.")
                     .build());
             }
-            return ResponseEntity.badRequest().body(MessageResponseDTO.builder()
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(MessageResponseDTO.builder()
                 .message("Token inválido o no proporcionado en el header Authorization.")
                 .build());
         } catch (Exception e) {
