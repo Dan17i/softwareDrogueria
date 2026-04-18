@@ -66,7 +66,7 @@ public class EmailService {
             log.info("Password reset email sent to: {}", to);
             
         } catch (Exception e) {
-            log.error("Error sending password reset email to {}: {}", to, e.getMessage());
+            log.error("Error sending password reset email to {}: {}", to, e.getMessage(), e);
         }
     }
     
@@ -90,7 +90,7 @@ public class EmailService {
             log.info("Email verified notification sent to: {}", to);
             
         } catch (Exception e) {
-            log.error("Error sending email verified notification to {}: {}", to, e.getMessage());
+            log.error("Error sending email verified notification to {}: {}", to, e.getMessage(), e);
         }
     }
     
@@ -122,7 +122,7 @@ public class EmailService {
             log.info("Password changed email sent to: {}", to);
             
         } catch (Exception e) {
-            log.error("Error sending password changed email to {}: {}", to, e.getMessage());
+            log.error("Error sending password changed email to {}: {}", to, e.getMessage(), e);
         }
     }
     

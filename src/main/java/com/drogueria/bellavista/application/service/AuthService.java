@@ -240,6 +240,7 @@ public class AuthService implements UserDetailsService {
      * Reset password using token.
      */
     public void resetPassword(String token, String newPassword) {
-        passwordResetService.resetPassword(token, newPassword);
+        com.drogueria.bellavista.domain.model.User user = passwordResetService.resetPassword(token, newPassword);
+        emailService.sendPasswordChangedEmail(user.getEmail(), user.getUsername());
     }
 }

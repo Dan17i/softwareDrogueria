@@ -58,29 +58,28 @@ public class PasswordResetService {
      * Validate and use password reset token.
      * Métrica 2.2: Validación con mensajes claros
      */
-    public void resetPassword(String token, String newPassword) {
+    public User resetPassword(String token, String newPassword) {
         if (token == null || token.trim().isEmpty()) {
             throw new BusinessException("El token de recuperación es obligatorio");
         }
-        
+
         PasswordResetToken resetToken = tokenRepository.findByToken(token)
             .orElseThrow(() -> new BusinessException("Token de recuperación inválido o expirado"));
-        
-        // Validate token
+
         if (resetToken.isUsed()) {
             throw new BusinessException("Este token ya ha sido utilizado");
         }
-        
+
         if (resetToken.isExpired()) {
             throw new BusinessException("El token ha expirado. Por favor solicita uno nuevo");
         }
-        
-        // Update password
+
         userService.updatePassword(resetToken.getUserId(), newPassword);
-        
-        // Mark token as used
+
         resetToken.setUsed(true);
         tokenRepository.save(resetToken);
+
+        return userService.getUserById(resetToken.getUserId());
     }
     
     /**
