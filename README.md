@@ -537,7 +537,7 @@ La aplicación está desplegada en una instancia **AWS EC2 t2.micro** (Ubuntu 24
 |---------|-------------|
 | `Dockerfile` | Build multi-stage con Maven + JRE Alpine |
 | `docker-compose.yml` | Orquestación de servicios (app, postgres, redis) |
-| `deploy-aws.sh` | Script de instalación y despliegue automático en EC2 |
+| `scripts/deploy-aws.sh` | Script de instalación y despliegue automático en EC2 |
 | `docs/AWS_DEPLOYMENT.md` | Guía completa de arquitectura y despliegue |
 
 ### URL de producción
@@ -609,7 +609,7 @@ La documentación completa del proyecto está organizada en varios archivos espe
 
 | Documento | Descripción |
 |-----------|-------------|
-| **[render.yaml](render.yaml)** | Configuración de despliegue en Render |
+| **[render.yaml](infra/render.yaml)** | Configuración de despliegue en Render |
 | **[Dockerfile](Dockerfile)** | Configuración de Docker |
 | **[docker-compose.yml](docker-compose.yml)** | Configuración local con Docker |
 | **[DEPLOY_RENDER.md](docs/DESPLIEGUE%20Y%20CONFIGURACIÓN/DEPLOY_RENDER.md)** | Guía de despliegue en Render (histórico) |
@@ -666,7 +666,12 @@ softwareDrogueria/
 │
 ├── http/                           # Archivos .http para pruebas
 ├── Dockerfile
-├── render.yaml
+├── infra/
+│   └── render.yaml
+├── scripts/
+│   ├── deploy-aws.sh
+│   ├── run-dev.sh
+│   └── reset-admin.sql
 ├── docker-compose.yml
 ├── pom.xml
 └── README.md

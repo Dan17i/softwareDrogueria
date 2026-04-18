@@ -40,3 +40,9 @@ application-prod.yml
 # Database
 *.db
 *.h2.db
+
+# Build artifacts and personal files
+*.tar.gz
+*.zip
+mvn_output.log
+*.pdf

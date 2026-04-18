@@ -10,8 +10,8 @@ cd drogueria-bellavista-backend
 
 ### 2. Ejecutar en modo desarrollo (con H2)
 ```bash
-chmod +x run-dev.sh
-./run-dev.sh
+chmod +x scripts/run-dev.sh
+./scripts/run-dev.sh
 ```
 
 O manualmente:
@@ -57,7 +57,7 @@ drogueria-bellavista-backend/
 ├── README.md                        # Documentación completa
 ├── ARCHITECTURE.md                  # Diagrama de arquitectura
 ├── Postman_Collection.json          # Colección para pruebas
-├── run-dev.sh                       # Script de inicio rápido
+├── scripts/run-dev.sh               # Script de inicio rápido
 │
 └── src/
     ├── main/

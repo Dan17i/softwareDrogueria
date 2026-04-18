@@ -128,7 +128,7 @@ ssh -i tu-clave.pem ubuntu@3.83.244.10
 
 Desde tu máquina local:
 ```bash
-scp -i tu-clave.pem deploy-aws.sh ubuntu@3.83.244.10:~
+scp -i tu-clave.pem scripts/deploy-aws.sh ubuntu@3.83.244.10:~
 ```
 
 En la instancia:
