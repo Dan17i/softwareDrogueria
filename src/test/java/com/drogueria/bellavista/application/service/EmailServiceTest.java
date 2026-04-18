@@ -24,7 +24,7 @@ class EmailServiceTest {
     private MimeMessage mimeMessage;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
         ReflectionTestUtils.setField(emailService, "fromEmail", "noreply@bellavista.com");
         ReflectionTestUtils.setField(emailService, "frontendUrl", "http://localhost:5173");

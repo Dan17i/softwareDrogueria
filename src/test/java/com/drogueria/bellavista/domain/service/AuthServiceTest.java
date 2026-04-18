@@ -3,7 +3,6 @@ package com.drogueria.bellavista.domain.service;
 import com.drogueria.bellavista.application.service.AuthService;
 import com.drogueria.bellavista.domain.model.Role;
 import com.drogueria.bellavista.domain.model.User;
-import com.drogueria.bellavista.domain.service.UserService;
 import com.drogueria.bellavista.exception.AuthenticationException;
 import com.drogueria.bellavista.infrastructure.security.JwtUtils;
 import org.junit.jupiter.api.BeforeEach;

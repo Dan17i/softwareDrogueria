@@ -72,16 +72,18 @@ class PaymentServiceTest {
     @Test
     @DisplayName("❌ createPayment - orderId null lanza BusinessException")
     void shouldThrowWhenOrderIdIsNull() {
+        BigDecimal amount = new BigDecimal("100.00");
         assertThrows(BusinessException.class,
-            () -> paymentService.createPayment(null, 20L, new BigDecimal("100.00"), "desc"));
+            () -> paymentService.createPayment(null, 20L, amount, "desc"));
         verifyNoInteractions(paymentRepository);
     }
 
     @Test
     @DisplayName("❌ createPayment - customerId null lanza BusinessException")
     void shouldThrowWhenCustomerIdIsNull() {
+        BigDecimal amount = new BigDecimal("100.00");
         assertThrows(BusinessException.class,
-            () -> paymentService.createPayment(10L, null, new BigDecimal("100.00"), "desc"));
+            () -> paymentService.createPayment(10L, null, amount, "desc"));
         verifyNoInteractions(paymentRepository);
     }
 
@@ -96,8 +98,9 @@ class PaymentServiceTest {
     @Test
     @DisplayName("❌ createPayment - amount negativo lanza BusinessException")
     void shouldThrowWhenAmountIsNegative() {
+        BigDecimal negAmount = new BigDecimal("-10.00");
         assertThrows(BusinessException.class,
-            () -> paymentService.createPayment(10L, 20L, new BigDecimal("-10.00"), "desc"));
+            () -> paymentService.createPayment(10L, 20L, negAmount, "desc"));
         verifyNoInteractions(paymentRepository);
     }
 

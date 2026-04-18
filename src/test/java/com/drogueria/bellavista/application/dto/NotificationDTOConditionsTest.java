@@ -31,7 +31,7 @@ class NotificationDTOConditionsTest {
     @DisplayName("🧪 Response.equals - misma referencia → true")
     void responseSameReference() {
         NotificationDTO.Response r = fullResponse();
-        assertEquals(r, r);
+        assertTrue(r.equals(r));
     }
 
     @Test
@@ -43,7 +43,7 @@ class NotificationDTOConditionsTest {
     @Test
     @DisplayName("🧪 Response.equals - clase diferente → false")
     void responseNotEqualDifferentClass() {
-        assertFalse(fullResponse().equals("x"));
+        assertNotEquals(fullResponse(), "x");
     }
 
     @Test
@@ -331,7 +331,7 @@ class NotificationDTOConditionsTest {
     @DisplayName("🧪 CreateRequest.equals - misma referencia → true")
     void requestSameReference() {
         NotificationDTO.CreateRequest r = fullRequest();
-        assertEquals(r, r);
+        assertTrue(r.equals(r));
     }
 
     @Test
@@ -343,7 +343,7 @@ class NotificationDTOConditionsTest {
     @Test
     @DisplayName("🧪 CreateRequest.equals - clase diferente → false")
     void requestNotEqualDifferentClass() {
-        assertFalse(fullRequest().equals("x"));
+        assertNotEquals(fullRequest(), "x");
     }
 
     @Test

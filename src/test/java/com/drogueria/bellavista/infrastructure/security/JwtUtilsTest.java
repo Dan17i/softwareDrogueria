@@ -25,7 +25,7 @@ class JwtUtilsTest {
     @Mock private Authentication authentication;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
         jwtUtils = new JwtUtils();
         ReflectionTestUtils.setField(jwtUtils, "jwtSecret", SECRET);

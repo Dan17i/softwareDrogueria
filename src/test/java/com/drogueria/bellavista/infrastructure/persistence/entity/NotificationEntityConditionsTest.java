@@ -40,7 +40,7 @@ class NotificationEntityConditionsTest {
     @Test
     @DisplayName("🧪 equals - comparar con clase diferente → false (branch instanceof)")
     void shouldNotEqualDifferentClass() {
-        assertFalse(full().equals("string"));
+        assertNotEquals(full(), "string");
     }
 
     @Test
