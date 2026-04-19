@@ -75,22 +75,22 @@ public class GoodsReceiptService {
                         "for product: " + item.getProductCode());
             }
         }
-        
-        // Generar número único de recepción
+
+        // DESPUÉS — CORRECTO
         String receiptNumber = "GR-" + System.currentTimeMillis() + "-" + UUID.randomUUID().toString().substring(0, 8);
+
+        // Validar ANTES de guardar
+        if (goodsReceiptRepository.existsByReceiptNumber(receiptNumber)) {
+            throw new BusinessException("Goods receipt number already exists: " + receiptNumber);
+        }
+
         goodsReceipt.setReceiptNumber(receiptNumber);
         goodsReceipt.setStatus("PENDING");
         goodsReceipt.setReceiptDate(LocalDateTime.now());
         goodsReceipt.setCreatedAt(LocalDateTime.now());
         goodsReceipt.setUpdatedAt(LocalDateTime.now());
-        
-        // Guardar recepción
+
         GoodsReceipt saved = goodsReceiptRepository.save(goodsReceipt);
-        
-        // Validar que receiptNumber es único
-        if (goodsReceiptRepository.existsByReceiptNumber(receiptNumber)) {
-            throw new BusinessException("Goods receipt number already exists: " + receiptNumber);
-        }
         
         return saved;
     }
