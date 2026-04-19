@@ -481,26 +481,53 @@ curl http://3.83.244.10:8080/api/products \
 
 ---
 
+### Resumen de cobertura
 ## 🧪 Testing
 
 ### Resumen de cobertura
 
 | Tipo | Tests | Estado |
 |------|-------|--------|
-| Unit Tests (Servicios) | 99 | ✅ |
-| Integration Tests | 51 | ✅ |
-| **Total** | **150** | ✅ |
+| Integration Tests | 60 | ✅ |
+| Domain Services | 140 | ✅ |
+| Controllers | 41 | ✅ |
+| Domain Models/Conditions | 241 | ✅ |
+| Infrastructure | 49 | ✅ |
+| Application Layer | 32 | ✅ |
+| Configuration | 2 | ✅ |
+| **Total** | **565** | ✅ |
 
-### Desglose de Integration Tests
+### Desglose por categoría
+
+<details>
+<summary><b>Integration Tests (60 tests)</b></summary>
 
 | Test Suite | Tests |
 |-------------|-------|
-| SecurityIntegrationTest | 11 |
-| ProductIntegrationTest | 15 |
-| AuthOrderIntegrationTest | 1 |
-| UserManagementIntegrationTest | 13 |
+| ProductIntegrationTest | 17 |
+| UserManagementIntegrationTest | 14 |
+| SecurityIntegrationTest | 13 |
 | NotificationIntegrationTest | 11 |
-| **Subtotal Integration** | **51** |
+| AuthOrderIntegrationTest | 3 |
+| AdminCreationTest | 2 |
+
+</details>
+
+<details>
+<summary><b>Tests de mayor cobertura</b></summary>
+
+| Test Suite | Tests | Categoría |
+|-------------|-------|-----------|
+| NotificationDTOConditionsTest | 61 | Validaciones |
+| PaymentConditionsTest | 47 | Validaciones |
+| PaymentEntityConditionsTest | 45 | Validaciones |
+| NotificationConditionsTest | 41 | Validaciones |
+| NotificationEntityConditionsTest | 38 | Validaciones |
+| AuthServiceTest | 26 | Servicios |
+| PaymentServiceTest | 20 | Servicios |
+| GoodsReceiptControllerTest | 20 | Controllers |
+
+</details>
 
 ### Ejecutar tests
 
@@ -519,7 +546,6 @@ mvn test jacoco:report
 
 Utilizan **Testcontainers** con PostgreSQL 15 para simular el entorno de producción.
 
----
 
 ## 🚀 Despliegue
 
@@ -678,16 +704,6 @@ softwareDrogueria/
 ```
 
 </details>
-
----
-
-## 👥 Contribución
-
-1. Fork el proyecto
-2. Crea tu rama (`git checkout -b feature/nueva-funcionalidad`)
-3. Commit tus cambios (`git commit -m 'feat: agregar nueva funcionalidad'`)
-4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
-5. Abre un Pull Request
 
 ---
 
