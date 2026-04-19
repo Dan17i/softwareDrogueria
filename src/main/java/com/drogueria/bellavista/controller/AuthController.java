@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/auth")
-@CrossOrigin(origins = {"https://invetoryrx.onrender.com", "http://localhost:5173"})
 public class AuthController {
 
     private final AuthService authService;

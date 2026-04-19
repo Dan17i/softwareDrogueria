@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/customers")  // ← CAMBIADO
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class CustomerController {
 
     private final CustomerService customerService;

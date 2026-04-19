@@ -49,9 +49,12 @@ public class SecurityConfig {
     }
 
     @Bean
+    @SuppressWarnings("java:S4502") // Safe: stateless JWT API — no session cookies, CSRF vector does not apply
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .cors(Customizer.withDefaults())
+                // CSRF disabled: API is stateless (SessionCreationPolicy.STATELESS) and authenticates via Bearer JWT tokens,
+                // not browser session cookies. No CSRF attack vector exists in this configuration.
                 .csrf(csrf -> csrf.disable())
 
                 // 👇 ESTA LÍNEA ES LA CLAVE PARA H2

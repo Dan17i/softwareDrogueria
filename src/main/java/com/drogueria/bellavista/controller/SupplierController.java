@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/suppliers")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class SupplierController {
     
     private final SupplierService supplierService;
