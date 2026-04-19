@@ -22,7 +22,7 @@ services:
       - "5432:5432"
 
   app:
-    build: .
+    image: ghcr.io/dan17i/softwaredrogueria:latest
     container_name: drogueria_app
     restart: unless-stopped
     depends_on:
