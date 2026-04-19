@@ -55,7 +55,6 @@ public class EmailService {
     /**
      * Send password reset email with reset link (HTML format).
      */
-    @Async
     public void sendPasswordResetEmail(String to, String username, String resetToken) {
         try {
             String subject = "Recuperación de Contraseña - Droguería Bellavista";
