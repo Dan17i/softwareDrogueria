@@ -66,7 +66,9 @@ public class EmailService {
             log.info("Password reset email sent to: {}", to);
             
         } catch (Exception e) {
-            log.error("Error sending password reset email to {}: {}", to, e.getMessage(), e);
+            log.error("Error sending password reset email to {}: {} - CAUSE: {}",
+                to, e.getMessage(), e.getCause() != null ? e.getCause().getMessage() : "none", e);
+            throw new RuntimeException(e);
         }
     }
     
