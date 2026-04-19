@@ -13,9 +13,9 @@ jobs:
       packages: write
     steps:
       - name: Checkout código
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - name: Setup Java 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@3a4f6e1af504cf6a31855fa7c6e08c2d87be1f7a
         with:
           java-version: '21'
           distribution: 'temurin'
@@ -23,19 +23,19 @@ jobs:
       - name: Build JAR con Maven
         run: mvn package -DskipTests
       - name: Login a GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7ffe25e78
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build y Push imagen Docker
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c8
         with:
           context: .
           push: true
           tags: ${{ env.IMAGE_NAME }}:latest
       - name: Deploy en EC2 vía SSH
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@2ead5e36573f08b82fbfce1504f1a4b05a0a9d56
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
