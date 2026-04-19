@@ -40,6 +40,10 @@ public class GoodsReceiptController {
         Order order = orderService.getOrderById(request.getOrderId());
         if (order == null) throw new ResourceNotFoundException("Order not found with ID: " + request.getOrderId());
 
+        if (order.getSupplierId() == null) {
+            throw new ResourceNotFoundException("Order " + order.getOrderNumber() + " has no supplier assigned. Cannot create goods receipt.");
+        }
+
         Supplier supplier = supplierService.getSupplierById(order.getSupplierId());
         if (supplier == null) throw new ResourceNotFoundException("Supplier not found with ID: " + order.getSupplierId());
 
