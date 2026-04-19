@@ -36,7 +36,9 @@ public class OrderDTO {
     public static class CreateRequest {
         @NotNull(message = "Customer ID es requerido")
         private Long customerId;
-        
+
+        private Long supplierId;
+
         @Valid
         @NotEmpty(message = "Debe contener al menos un producto")
         private List<OrderItemRequest> items;
