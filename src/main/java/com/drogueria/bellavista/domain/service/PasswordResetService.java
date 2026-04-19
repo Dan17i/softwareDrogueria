@@ -5,6 +5,7 @@ import com.drogueria.bellavista.domain.model.User;
 import com.drogueria.bellavista.domain.repository.PasswordResetTokenRepository;
 import com.drogueria.bellavista.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ import java.util.UUID;
  * - Métrica 4.2: Seguridad en recuperación de contraseña
  * - Métrica 2.2: Mensajes claros y específicos
  */
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -34,24 +36,29 @@ public class PasswordResetService {
      * Deletes any existing tokens for the user first.
      */
     public PasswordResetToken createPasswordResetToken(String email) {
-        User user = userService.getUserByEmail(email);
-        
-        // Delete any existing tokens for this user
-        tokenRepository.deleteByUserId(user.getId());
-        
-        // Generate new token
-        String token = UUID.randomUUID().toString();
-        LocalDateTime expiryDate = LocalDateTime.now().plusHours(TOKEN_EXPIRY_HOURS);
-        
-        PasswordResetToken resetToken = PasswordResetToken.builder()
-            .token(token)
-            .userId(user.getId())
-            .expiryDate(expiryDate)
-            .used(false)
-            .createdAt(LocalDateTime.now())
-            .build();
-        
-        return tokenRepository.save(resetToken);
+        try {
+            User user = userService.getUserByEmail(email);
+
+            // Delete any existing tokens for this user
+            tokenRepository.deleteByUserId(user.getId());
+
+            // Generate new token
+            String token = UUID.randomUUID().toString();
+            LocalDateTime expiryDate = LocalDateTime.now().plusHours(TOKEN_EXPIRY_HOURS);
+
+            PasswordResetToken resetToken = PasswordResetToken.builder()
+                .token(token)
+                .userId(user.getId())
+                .expiryDate(expiryDate)
+                .used(false)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+            return tokenRepository.save(resetToken);
+        } catch (Exception e) {
+            log.error("ERROR en createPasswordResetToken para email {}: {}", email, e.getMessage(), e);
+            throw e;
+        }
     }
     
     /**
