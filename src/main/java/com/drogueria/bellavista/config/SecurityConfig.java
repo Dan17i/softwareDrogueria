@@ -67,7 +67,8 @@ public class SecurityConfig {
                         .requestMatchers("/orders/**", "/customers/**", "/api/notifications/**").permitAll()
                         .requestMatchers("/auth/admin/**").hasRole("ADMIN")
                         .requestMatchers("/h2-console/**", "/swagger-ui/**", "/v3/api-docs/**", "/actuator/health").permitAll()
-                        .anyRequest().authenticated()
+                                .requestMatchers("/actuator/**").permitAll()  // ⬅️ AGREGAR ESTA LÍNEA
+                                .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .httpBasic(Customizer.withDefaults());
