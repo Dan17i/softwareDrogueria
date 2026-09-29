@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: drogueria-bellavista-api
+    runtime: docker
+    region: oregon
+    plan: free
+    healthCheckPath: /api/actuator/health
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:postgresql://${drogueria-db.host}:${drogueria-db.port}/${drogueria-db.database}
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: drogueria-db
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: drogueria-db
+          property: password
+      - key: APP_JWT_SECRET
+        generateValue: true
+
+databases:
+  - name: drogueria-db
+    plan: free
+    region: oregon
+    databaseName: drogueria_bellavista
+    user: drogueria_user

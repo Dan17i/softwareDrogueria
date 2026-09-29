@@ -1,0 +1,52 @@
+### HC-02: Logout - Invalidar token (Token Blacklist)
+### INSTRUCCIONES:
+### 1. Primero, ejecuta el request de "Login usuario correcto" en auth.http
+### 2. Copia el token obtenido de la respuesta
+### 3. Pega el token a continuación en la línea Authorization
+### 4. Luego ejecuta este request para logout
+
+POST http://localhost:8080/api/auth/logout
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VybmFtZSIsImlhdCI6MTcxMjU1MGQMN.REEMPLAZAR_CON_TOKEN_REAL
+Content-Type: application/json
+
+###
+
+### HC-02: Verificar que token invalidado no funciona
+### Después de ejecutar logout, este request debería retornar 403 (Unauthorized)
+### porque el token está en la blacklist
+
+GET http://localhost:8080/api/products
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VybmFtZSIsImlhdCI6MTcxMjU1MDQzNy25.TOKEN_INVALIDADO
+
+###
+
+### HC-02: Test de seguridad - Token válido y nuevo sí funciona
+### Después de logout, un nuevo login debería generar token que funciona
+
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "juan123",
+  "password": "12345678"
+}
+
+###
+
+### HC-02: Luego de nuevo login, usar el nuevo token:
+GET http://localhost:8080/api/products
+Authorization: Bearer NUEVO_TOKEN_DEL_LOGIN_ANTERIOR
+Content-Type: application/json
+
+###
+
+### HC-01: Verificar cabeceras de seguridad
+### Ejecuta esta petición y revisa en Postman o navegador:
+### - X-Frame-Options: SAMEORIGIN
+### - Content-Security-Policy: default-src 'self'...
+### - Strict-Transport-Security: max-age=31536000
+### - Referrer-Policy: strict-origin-when-cross-origin
+
+OPTIONS http://localhost:8080/api/products
+
+###

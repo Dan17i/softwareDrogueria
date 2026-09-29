@@ -80,6 +80,9 @@ public class GoodsReceipt {
         } else if (isPartiallyReceived()) {
             this.status = "PARTIALLY_RECEIVED";
             this.actualDeliveryDate = LocalDateTime.now();
+        } else {
+            throw new IllegalStateException(
+                "No se recibió ninguna cantidad; no se puede confirmar la recepción");
         }
     }
     

@@ -63,9 +63,10 @@ public class CustomerService {
             throw new BusinessException("Ya existe un cliente con el código: " + customerData.getCode());
         }
         
-        // Validar email único si cambió
-        if (customerData.getEmail() != null 
-            && !existingCustomer.getEmail().equals(customerData.getEmail())
+        // Validar email único si cambió (existingCustomer.getEmail() puede ser null: un cliente
+        // pudo crearse sin email, así que se compara con .equals() sobre el valor no-nulo)
+        if (customerData.getEmail() != null
+            && !customerData.getEmail().equals(existingCustomer.getEmail())
             && customerRepository.existsByEmail(customerData.getEmail())) {
             throw new BusinessException("Ya existe un cliente con el email: " + customerData.getEmail());
         }

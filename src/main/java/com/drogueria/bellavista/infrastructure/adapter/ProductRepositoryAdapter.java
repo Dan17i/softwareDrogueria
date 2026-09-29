@@ -35,6 +35,12 @@ public class ProductRepositoryAdapter implements ProductRepository {
         return jpaRepository.findById(id)
                 .map(mapper::toDomain);
     }
+
+    @Override
+    public Optional<Product> findByIdForUpdate(Long id) {
+        return jpaRepository.findByIdForUpdate(id)
+                .map(mapper::toDomain);
+    }
     
     @Override
     public Optional<Product> findByCode(String code) {

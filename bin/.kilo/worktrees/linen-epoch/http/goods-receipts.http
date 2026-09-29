@@ -1,0 +1,67 @@
+### ========================================
+### RECEPCIONES DE MERCANCÍA - /api/goods-receipts
+### Reemplaza <TOKEN> con el token del login
+### Solo se pueden modificar/eliminar recepciones en estado PENDING
+### ========================================
+
+### Crear recepción de mercancía
+### Requiere: orderId válido con proveedor asociado
+POST http://localhost:8080/api/goods-receipts
+Content-Type: application/json
+Authorization: Bearer <TOKEN>
+
+{
+  "orderId": 1,
+  "notes": "Mercancía recibida en buen estado",
+  "items": [
+    {
+      "productId": 1,
+      "quantityOrdered": 10,
+      "quantityReceived": 10,
+      "unitCost": 4500.00
+    }
+  ]
+}
+
+### Obtener recepción por ID
+GET http://localhost:8080/api/goods-receipts/1
+Authorization: Bearer <TOKEN>
+
+### Obtener recepción por número
+GET http://localhost:8080/api/goods-receipts/number/GR-2024-001
+Authorization: Bearer <TOKEN>
+
+### Listar todas las recepciones
+GET http://localhost:8080/api/goods-receipts
+Authorization: Bearer <TOKEN>
+
+### Listar recepciones pendientes
+GET http://localhost:8080/api/goods-receipts/pending
+Authorization: Bearer <TOKEN>
+
+### Listar recepciones por estado (PENDING, RECEIVED, REJECTED)
+GET http://localhost:8080/api/goods-receipts/status/PENDING
+Authorization: Bearer <TOKEN>
+
+### Listar recepciones de una orden
+GET http://localhost:8080/api/goods-receipts/order/1
+Authorization: Bearer <TOKEN>
+
+### Listar recepciones de un proveedor
+GET http://localhost:8080/api/goods-receipts/supplier/1
+Authorization: Bearer <TOKEN>
+
+### Confirmar recepción (actualiza stock y cambia estado a RECEIVED)
+### Solo funciona si la recepción está en estado PENDING
+PATCH http://localhost:8080/api/goods-receipts/1/receive
+Authorization: Bearer <TOKEN>
+
+### Rechazar recepción (cambia estado a REJECTED, no afecta stock)
+### Solo funciona si la recepción está en estado PENDING
+PATCH http://localhost:8080/api/goods-receipts/1/reject?reason=Mercancía%20dañada
+Authorization: Bearer <TOKEN>
+
+### Eliminar recepción
+### Solo funciona si la recepción está en estado PENDING
+DELETE http://localhost:8080/api/goods-receipts/1
+Authorization: Bearer <TOKEN>

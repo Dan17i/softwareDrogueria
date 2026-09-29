@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker compose *)",
+      "Bash(mvn test *)",
+      "Bash(powershell -Command ' *)",
+      "Bash(awk -F, 'NR>1 { *)",
+      "Bash(grep -E \"PaymentService$|PasswordResetService$|EmailService$|GoodsReceiptController$\")",
+      "Bash(grep -E \"AuthController$|NotificationDTO$|NotificationEntity$|PaymentMapper$|NotificationMapper$|PaymentRepositoryAdapter$|AuthService$\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(mvn clean *)",
+      "Bash(mvn spring-boot:run)"
+    ]
+  }
+}

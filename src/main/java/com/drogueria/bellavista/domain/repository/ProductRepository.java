@@ -21,6 +21,14 @@ public interface ProductRepository {
      * Buscar producto por ID
      */
     Optional<Product> findById(Long id);
+
+    /**
+     * Buscar producto por ID con bloqueo pessimista (SELECT ... FOR UPDATE).
+     * Usar solo al modificar stock: serializa lecturas+escrituras concurrentes
+     * del mismo producto para evitar sobreventa (dos órdenes decrementando
+     * a la vez sobre una lectura de stock ya obsoleta).
+     */
+    Optional<Product> findByIdForUpdate(Long id);
     
     /**
      * Buscar producto por código

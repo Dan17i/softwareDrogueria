@@ -178,10 +178,12 @@ public class ProductService {
     
     /**
      * Reducir stock (uso interno desde OrderService)
-     * NO inicia transacción porque ya está en una
+     * NO inicia transacción porque ya está en una.
+     * Usa bloqueo pessimista: dos órdenes concurrentes sobre el mismo producto
+     * ya no pueden pasar ambas la validación de stock con una lectura obsoleta.
      */
     protected void reduceStockInternal(Long productId, Integer quantity) {
-        Product product = productRepository.findById(productId)
+        Product product = productRepository.findByIdForUpdate(productId)
             .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
         try {
             product.reduceStock(quantity);
@@ -190,13 +192,14 @@ public class ProductService {
         }
         productRepository.save(product);
     }
-    
+
     /**
      * Aumentar stock (uso interno desde OrderService)
-     * NO inicia transacción porque ya está en una
+     * NO inicia transacción porque ya está en una.
+     * Mismo bloqueo pessimista que reduceStockInternal para evitar incrementos perdidos.
      */
     protected void increaseStockInternal(Long productId, Integer quantity) {
-        Product product = productRepository.findById(productId)
+        Product product = productRepository.findByIdForUpdate(productId)
             .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
         try {
             product.increaseStock(quantity);

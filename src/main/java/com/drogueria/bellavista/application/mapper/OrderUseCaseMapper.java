@@ -24,6 +24,7 @@ public class OrderUseCaseMapper {
         
         Order order = Order.builder()
             .customerId(request.getCustomerId())
+            .supplierId(request.getSupplierId())
             .notes(request.getNotes())
             .expectedDeliveryDate(request.getExpectedDeliveryDate())
             .build();

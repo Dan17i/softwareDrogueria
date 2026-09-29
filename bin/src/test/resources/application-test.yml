@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: drogueria-bellavista-test
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    time-zone: America/Bogota
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+
+  # Configuración de email para tests (mock)
+  mail:
+    host: localhost
+    port: 3025
+    username: test
+    password: test
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+
+server:
+  port: 0  # Puerto aleatorio para tests
+  servlet:
+    context-path: /api
+
+# Configuración JWT para tests (no necesita variable de entorno)
+app:
+  jwt:
+    secret: test-secret-key-with-at-least-32-characters-for-testing-purposes-only
+    expiration: 86400000
+  mail:
+    from: test@bellavista.com
+  frontend:
+    url: http://localhost:5173

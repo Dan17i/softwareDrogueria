@@ -1,0 +1,285 @@
+{
+  "info": {
+    "name": "Droguería Bellavista API",
+    "description": "Colección de endpoints para probar la API de Droguería Bellavista",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080/api",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"MED010\",\n  \"name\": \"Paracetamol 500mg\",\n  \"description\": \"Analgésico de venta libre\",\n  \"price\": 4500,\n  \"stock\": 200,\n  \"minStock\": 50,\n  \"category\": \"Medicamentos\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/products",
+              "host": ["{{base_url}}"],
+              "path": ["products"]
+            }
+          }
+        },
+        {
+          "name": "Get All Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products",
+              "host": ["{{base_url}}"],
+              "path": ["products"]
+            }
+          }
+        },
+        {
+          "name": "Get Active Products Only",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products?active=true",
+              "host": ["{{base_url}}"],
+              "path": ["products"],
+              "query": [
+                {
+                  "key": "active",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Product by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/1",
+              "host": ["{{base_url}}"],
+              "path": ["products", "1"]
+            }
+          }
+        },
+        {
+          "name": "Get Product by Code",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/code/MED001",
+              "host": ["{{base_url}}"],
+              "path": ["products", "code", "MED001"]
+            }
+          }
+        },
+        {
+          "name": "Search Products by Name",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/search?name=acetaminofen",
+              "host": ["{{base_url}}"],
+              "path": ["products", "search"],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "acetaminofen"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Products by Category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/category/Medicamentos",
+              "host": ["{{base_url}}"],
+              "path": ["products", "category", "Medicamentos"]
+            }
+          }
+        },
+        {
+          "name": "Get Products Needing Restock",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/restock-needed",
+              "host": ["{{base_url}}"],
+              "path": ["products", "restock-needed"]
+            }
+          }
+        },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"MED001\",\n  \"name\": \"Acetaminofén 500mg (Actualizado)\",\n  \"description\": \"Analgésico y antipirético en tabletas\",\n  \"price\": 5500,\n  \"stock\": 180,\n  \"minStock\": 30,\n  \"category\": \"Medicamentos\",\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/products/1",
+              "host": ["{{base_url}}"],
+              "path": ["products", "1"]
+            }
+          }
+        },
+        {
+          "name": "Reduce Stock",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 10\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/products/1/reduce-stock",
+              "host": ["{{base_url}}"],
+              "path": ["products", "1", "reduce-stock"]
+            }
+          }
+        },
+        {
+          "name": "Increase Stock",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 50\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/products/1/increase-stock",
+              "host": ["{{base_url}}"],
+              "path": ["products", "1", "increase-stock"]
+            }
+          }
+        },
+        {
+          "name": "Toggle Product Status",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/1/toggle-status",
+              "host": ["{{base_url}}"],
+              "path": ["products", "1", "toggle-status"]
+            }
+          }
+        },
+        {
+          "name": "Delete Product",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/1",
+              "host": ["{{base_url}}"],
+              "path": ["products", "1"]
+            }
+          }
+        }
+      ]
+    }
+    ,
+    {
+      "name": "Goods Receipts",
+      "item": [
+        {
+          "name": "Create Goods Receipt",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": 3,\n  \"items\": [\n    {\n      \"productId\": 1,\n      \"productCode\": \"MED001\",\n      \"productName\": \"Acetaminofén 500mg\",\n      \"orderedQuantity\": 10,\n      \"receivedQuantity\": 10\n    }\n  ],\n  \"notes\": \"Recepción inicial\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/goods-receipts", "host": ["{{base_url}}"], "path": ["goods-receipts"] }
+          }
+        },
+        {
+          "name": "Get Goods Receipt by ID",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/goods-receipts/1", "host": ["{{base_url}}"], "path": ["goods-receipts","1"] } }
+        },
+        {
+          "name": "Get Goods Receipt by Number",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/goods-receipts/number/GR-202400001", "host": ["{{base_url}}"], "path": ["goods-receipts","number","GR-202400001"] } }
+        },
+        {
+          "name": "Get Goods Receipts by Order",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/goods-receipts/order/3", "host": ["{{base_url}}"], "path": ["goods-receipts","order","3"] } }
+        },
+        {
+          "name": "Get Goods Receipts by Supplier",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/goods-receipts/supplier/2", "host": ["{{base_url}}"], "path": ["goods-receipts","supplier","2"] } }
+        },
+        {
+          "name": "Get Goods Receipts by Status",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/goods-receipts/status/PENDING", "host": ["{{base_url}}"], "path": ["goods-receipts","status","PENDING"] } }
+        },
+        {
+          "name": "Get Pending Goods Receipts",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/goods-receipts/pending", "host": ["{{base_url}}"], "path": ["goods-receipts","pending"] } }
+        },
+        {
+          "name": "Get All Goods Receipts",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/goods-receipts", "host": ["{{base_url}}"], "path": ["goods-receipts"] } }
+        },
+        {
+          "name": "Receive Goods Receipt",
+          "request": { "method": "PATCH", "header": [], "url": { "raw": "{{base_url}}/goods-receipts/1/receive", "host": ["{{base_url}}"], "path": ["goods-receipts","1","receive"] } }
+        },
+        {
+          "name": "Reject Goods Receipt",
+          "request": { "method": "PATCH", "header": [], "url": { "raw": "{{base_url}}/goods-receipts/1/reject?reason=damaged", "host": ["{{base_url}}"], "path": ["goods-receipts","1","reject"], "query": [{ "key": "reason", "value": "damaged" }] } }
+        },
+        {
+          "name": "Delete Goods Receipt",
+          "request": { "method": "DELETE", "header": [], "url": { "raw": "{{base_url}}/goods-receipts/1", "host": ["{{base_url}}"], "path": ["goods-receipts","1"] } }
+        }
+      ]
+    }
+  ]
+}

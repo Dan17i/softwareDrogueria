@@ -1,0 +1,80 @@
+### ========================================
+### CLIENTES - /api/customers
+### Reemplaza <TOKEN> con el token del login
+### ========================================
+
+### Crear cliente
+POST http://localhost:8080/api/customers
+Content-Type: application/json
+Authorization: Bearer <TOKEN>
+
+{
+  "code": "CLI-001",
+  "firstName": "María",
+  "lastName": "García",
+  "email": "maria.garcia@example.com",
+  "phone": "3001234567",
+  "address": "Calle 10 # 5-20, Bogotá",
+  "customerType": "RETAIL",
+  "creditLimit": 500000.00
+}
+
+### Actualizar cliente
+PUT http://localhost:8080/api/customers/1
+Content-Type: application/json
+Authorization: Bearer <TOKEN>
+
+{
+  "code": "CLI-001",
+  "firstName": "María",
+  "lastName": "García Actualizada",
+  "email": "maria.garcia@example.com",
+  "phone": "3009876543",
+  "address": "Carrera 5 # 10-30, Bogotá",
+  "customerType": "WHOLESALE",
+  "creditLimit": 1000000.00
+}
+
+### Obtener cliente por ID
+GET http://localhost:8080/api/customers/1
+Authorization: Bearer <TOKEN>
+
+### Obtener cliente por código
+GET http://localhost:8080/api/customers/code/CLI-001
+Authorization: Bearer <TOKEN>
+
+### Obtener cliente por email
+GET http://localhost:8080/api/customers/email/maria.garcia@example.com
+Authorization: Bearer <TOKEN>
+
+### Listar todos los clientes
+GET http://localhost:8080/api/customers
+Authorization: Bearer <TOKEN>
+
+### Listar clientes activos
+GET http://localhost:8080/api/customers/status/active
+Authorization: Bearer <TOKEN>
+
+### Listar clientes por tipo
+GET http://localhost:8080/api/customers/type/RETAIL
+Authorization: Bearer <TOKEN>
+
+### Listar clientes morosos
+GET http://localhost:8080/api/customers/status/morosos
+Authorization: Bearer <TOKEN>
+
+### Desactivar cliente
+PATCH http://localhost:8080/api/customers/1/deactivate
+Authorization: Bearer <TOKEN>
+
+### Activar cliente
+PATCH http://localhost:8080/api/customers/1/activate
+Authorization: Bearer <TOKEN>
+
+### Verificar crédito disponible para un monto
+GET http://localhost:8080/api/customers/1/credit-available/100000
+Authorization: Bearer <TOKEN>
+
+### Obtener balance del cliente (crédito, saldo pendiente)
+GET http://localhost:8080/api/customers/1/balance
+Authorization: Bearer <TOKEN>

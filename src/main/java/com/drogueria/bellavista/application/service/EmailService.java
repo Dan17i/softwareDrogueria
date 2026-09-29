@@ -54,16 +54,20 @@ public class EmailService {
     
     /**
      * Send password reset email with reset link (HTML format).
+     * @Async: un bounce/timeout de SES no debe bloquear la respuesta de
+     * POST /auth/forgot-password (el request ya respondió un mensaje genérico
+     * antes de que esto se ejecute).
      */
+    @Async
     public void sendPasswordResetEmail(String to, String username, String resetToken) {
         try {
             String subject = "Recuperación de Contraseña - Droguería Bellavista";
             String resetLink = frontendUrl + "/reset-password?token=" + resetToken;
             String htmlBody = buildPasswordResetEmailTemplate(username, resetLink);
-            
+
             sendHtmlEmail(to, subject, htmlBody);
             log.info("Password reset email sent to: {}", to);
-            
+
         } catch (Exception e) {
             log.error("Error sending password reset email to {}: {} - CAUSE: {}",
                 to, e.getMessage(), e.getCause() != null ? e.getCause().getMessage() : "none", e);

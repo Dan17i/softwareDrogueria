@@ -1,0 +1,58 @@
+### ========================================
+### PROVEEDORES - /api/suppliers
+### Reemplaza <TOKEN> con el token del login
+### ========================================
+
+### Crear proveedor
+POST http://localhost:8080/api/suppliers
+Content-Type: application/json
+Authorization: Bearer <TOKEN>
+
+{
+  "code": "PROV-001",
+  "name": "Laboratorios Bayer S.A.",
+  "contactName": "Carlos Rodríguez",
+  "email": "ventas@bayer.com",
+  "phone": "6011234567",
+  "address": "Zona Industrial, Bogotá",
+  "taxId": "900123456-1"
+}
+
+### Actualizar proveedor
+PUT http://localhost:8080/api/suppliers/1
+Content-Type: application/json
+Authorization: Bearer <TOKEN>
+
+{
+  "code": "PROV-001",
+  "name": "Laboratorios Bayer S.A. Colombia",
+  "contactName": "Ana López",
+  "email": "ana.lopez@bayer.com",
+  "phone": "6019876543",
+  "address": "Calle 100 # 7-33, Bogotá",
+  "taxId": "900123456-1"
+}
+
+### Obtener proveedor por ID
+GET http://localhost:8080/api/suppliers/1
+Authorization: Bearer <TOKEN>
+
+### Obtener proveedor por código
+GET http://localhost:8080/api/suppliers/code/PROV-001
+Authorization: Bearer <TOKEN>
+
+### Listar todos los proveedores
+GET http://localhost:8080/api/suppliers
+Authorization: Bearer <TOKEN>
+
+### Listar proveedores activos
+GET http://localhost:8080/api/suppliers/status/active
+Authorization: Bearer <TOKEN>
+
+### Desactivar proveedor
+PATCH http://localhost:8080/api/suppliers/1/deactivate
+Authorization: Bearer <TOKEN>
+
+### Activar proveedor
+PATCH http://localhost:8080/api/suppliers/1/activate
+Authorization: Bearer <TOKEN>

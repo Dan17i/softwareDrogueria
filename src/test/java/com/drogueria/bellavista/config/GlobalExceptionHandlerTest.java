@@ -7,6 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.validation.BindingResult;
@@ -103,6 +104,19 @@ class GlobalExceptionHandlerTest {
         assertNotNull(response.getBody());
         assertEquals("Illegal State", response.getBody().getError());
         assertTrue(response.getBody().getMessage().contains("orden ya fue completada"));
+    }
+
+    @Test
+    @DisplayName("Debe manejar DataIntegrityViolationException correctamente")
+    void shouldHandleDataIntegrityViolationException() {
+        DataIntegrityViolationException ex = new DataIntegrityViolationException(
+            "duplicate key value violates unique constraint \"customer_code_key\"");
+
+        var response = exceptionHandler.handleDataIntegrityViolation(ex);
+
+        assertTrue(response.getStatusCode().is4xxClientError());
+        assertNotNull(response.getBody());
+        assertEquals("Data Integrity Violation", response.getBody().getError());
     }
 
     @Test

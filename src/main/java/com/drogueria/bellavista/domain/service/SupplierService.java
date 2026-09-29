@@ -52,8 +52,10 @@ public class SupplierService {
             throw new BusinessException("Ya existe un proveedor con el código: " + supplierData.getCode());
         }
         
-        if (supplierData.getEmail() != null 
-            && !existingSupplier.getEmail().equals(supplierData.getEmail())
+        // existingSupplier.getEmail() puede ser null: un proveedor pudo crearse sin email,
+        // así que se compara con .equals() sobre el valor no-nulo
+        if (supplierData.getEmail() != null
+            && !supplierData.getEmail().equals(existingSupplier.getEmail())
             && supplierRepository.existsByEmail(supplierData.getEmail())) {
             throw new BusinessException("Ya existe un proveedor con el email: " + supplierData.getEmail());
         }

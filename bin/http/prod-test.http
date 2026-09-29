@@ -1,0 +1,63 @@
+### ========================================
+### PRUEBAS EN PRODUCCIÓN - RENDER
+### ========================================
+
+### 1. Health Check
+GET https://drogueria-bellavista-api.onrender.com/api/actuator/health
+
+### 2. Registrar nuevo usuario
+POST https://drogueria-bellavista-api.onrender.com/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "email": "admin@drogueria.com",
+  "password": "password123",
+  "firstName": "Admin",
+  "lastName": "Bellavista"
+}
+
+### 3. Login
+POST https://drogueria-bellavista-api.onrender.com/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "password123"
+}
+
+### ========================================
+### ENDPOINTS PROTEGIDOS (requieren token)
+### Copia el token del login y reemplaza <TOKEN>
+### ========================================
+
+### 4. Listar productos
+GET https://drogueria-bellavista-api.onrender.com/api/products
+Authorization: Bearer <TOKEN>
+
+### 5. Crear producto
+POST https://drogueria-bellavista-api.onrender.com/api/products
+Content-Type: application/json
+Authorization: Bearer <TOKEN>
+
+{
+  "code": "PROD-001",
+  "name": "Acetaminofén 500mg",
+  "description": "Analgésico y antipirético",
+  "price": 5000.00,
+  "stock": 100,
+  "minStock": 10,
+  "category": "Medicamentos"
+}
+
+### 6. Listar clientes
+GET https://drogueria-bellavista-api.onrender.com/api/customers
+Authorization: Bearer <TOKEN>
+
+### 7. Listar proveedores
+GET https://drogueria-bellavista-api.onrender.com/api/suppliers
+Authorization: Bearer <TOKEN>
+
+### 8. Listar órdenes
+GET https://drogueria-bellavista-api.onrender.com/api/orders
+Authorization: Bearer <TOKEN>

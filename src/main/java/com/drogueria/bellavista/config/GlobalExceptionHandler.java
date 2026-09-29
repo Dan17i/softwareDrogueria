@@ -5,6 +5,7 @@ import com.drogueria.bellavista.exception.BusinessException;
 import com.drogueria.bellavista.exception.ResourceNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -152,6 +153,23 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
     }
     
+    /**
+     * Maneja DataIntegrityViolationException (violaciones de constraint en BD).
+     * Cubre la carrera entre el chequeo de unicidad (SELECT) y el INSERT/UPDATE
+     * en CustomerService/SupplierService/etc: el request perdedor cae aquí
+     * en vez de recibir un 500 con el mensaje crudo de SQL.
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        log.warn("Data integrity violation: {}", ex.getMessage());
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Data Integrity Violation",
+                "El recurso ya existe o viola una restricción única. Verifica los datos enviados."
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
     /**
      * Maneja AccessDeniedException (Spring Security)
      * Métrica 4.3: Control de acceso - Respuestas claras cuando se deniega acceso

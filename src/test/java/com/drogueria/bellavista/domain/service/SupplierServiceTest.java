@@ -133,6 +133,32 @@ class SupplierServiceTest {
     }
 
     @Test
+    @DisplayName("Debe actualizar proveedor sin email agregándole uno nuevo (sin NPE)")
+    void shouldUpdateSupplierAddingEmailWhenPreviouslyNull() {
+        log.info("🧪 Test updateSupplier con email previamente null");
+
+        supplier.setEmail(null);
+
+        Supplier newData = Supplier.builder()
+                .code("SUP-01")
+                .name("Proveedor Test")
+                .email("nuevo@test.com")
+                .active(true)
+                .build();
+
+        when(supplierRepository.findById(1L)).thenReturn(Optional.of(supplier));
+        when(supplierRepository.existsByCode("SUP-01")).thenReturn(false);
+        when(supplierRepository.existsByEmail("nuevo@test.com")).thenReturn(false);
+        when(supplierRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        Supplier result = supplierService.updateSupplier(1L, newData);
+
+        assertEquals("nuevo@test.com", result.getEmail());
+
+        log.info("✅ Proveedor actualizado sin NPE al agregar email");
+    }
+
+    @Test
     @DisplayName("Debe lanzar excepción si proveedor no existe")
     void shouldThrowIfSupplierNotFound() {
         log.info("🧪 Test supplier not found");

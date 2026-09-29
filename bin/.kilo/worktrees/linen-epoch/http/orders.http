@@ -1,0 +1,64 @@
+### ========================================
+### ÓRDENES - /api/orders
+### Reemplaza <TOKEN> con el token del login
+### ========================================
+
+### Crear orden
+### Requiere: cliente activo con crédito, productos con stock
+POST http://localhost:8080/api/orders
+Content-Type: application/json
+Authorization: Bearer <TOKEN>
+
+{
+  "customerId": 1,
+  "supplierId": 1,
+  "notes": "Orden urgente",
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 10,
+      "unitPrice": 5000.00
+    },
+    {
+      "productId": 2,
+      "quantity": 5,
+      "unitPrice": 12000.00
+    }
+  ]
+}
+
+### Obtener orden por ID
+GET http://localhost:8080/api/orders/1
+Authorization: Bearer <TOKEN>
+
+### Obtener orden por número
+GET http://localhost:8080/api/orders/number/ORD-2024-001
+Authorization: Bearer <TOKEN>
+
+### Listar todas las órdenes
+GET http://localhost:8080/api/orders
+Authorization: Bearer <TOKEN>
+
+### Listar órdenes por cliente
+GET http://localhost:8080/api/orders/customer/1
+Authorization: Bearer <TOKEN>
+
+### Listar órdenes por estado (PENDING, COMPLETED, CANCELLED)
+GET http://localhost:8080/api/orders/status/PENDING
+Authorization: Bearer <TOKEN>
+
+### Listar órdenes pendientes de un cliente
+GET http://localhost:8080/api/orders/customer/1/pending
+Authorization: Bearer <TOKEN>
+
+### Buscar órdenes por rango de fechas
+GET http://localhost:8080/api/orders/search?startDate=2024-01-01&endDate=2024-12-31
+Authorization: Bearer <TOKEN>
+
+### Completar orden (cambia estado a COMPLETED)
+PATCH http://localhost:8080/api/orders/1/complete
+Authorization: Bearer <TOKEN>
+
+### Cancelar orden (revierte stock y saldo pendiente del cliente)
+PATCH http://localhost:8080/api/orders/1/cancel
+Authorization: Bearer <TOKEN>

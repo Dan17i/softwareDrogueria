@@ -177,4 +177,31 @@ class CustomerServiceTest {
 
         log.info("✅ Cliente activado correctamente");
     }
+
+    @Test
+    @DisplayName("Debe actualizar cliente sin email agregándole uno nuevo (sin NPE)")
+    void shouldUpdateCustomerAddingEmailWhenPreviouslyNull() {
+        log.info("🧪 Iniciando test: updateCustomer con email previamente null");
+
+        customer.setEmail(null);
+
+        Customer updateData = Customer.builder()
+                .code("C001")
+                .name("Cliente Test")
+                .email("nuevo@mail.com")
+                .creditLimit(new BigDecimal("1000"))
+                .active(true)
+                .build();
+
+        when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
+        when(customerRepository.existsByCode("C001")).thenReturn(false);
+        when(customerRepository.existsByEmail("nuevo@mail.com")).thenReturn(false);
+        when(customerRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        Customer result = customerService.updateCustomer(1L, updateData);
+
+        assertEquals("nuevo@mail.com", result.getEmail());
+
+        log.info("✅ Cliente actualizado sin NPE al agregar email");
+    }
 }
