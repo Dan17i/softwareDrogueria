@@ -66,14 +66,18 @@ public class NotificationService {
     public void generateInventoryAlerts() {
         List<Product> productsNeedingRestock = productRepository.findProductsNeedingRestock();
 
+        // Una sola consulta para todas las alertas activas, no una por producto (N+1)
+        List<Notification> activeAlerts = notificationRepository.findUnreadByRequiredRole("WAREHOUSE");
+
+        int createdCount = 0;
         for (Product product : productsNeedingRestock) {
-            // Verificar si ya existe una notificación activa para este producto
-            if (!hasActiveAlertForProduct(product.getId())) {
+            if (!hasActiveAlertForProduct(product, activeAlerts)) {
                 createInventoryAlert(product);
+                createdCount++;
             }
         }
 
-        log.info("Generadas {} alertas de inventario", productsNeedingRestock.size());
+        log.info("Generadas {} alertas de inventario", createdCount);
     }
 
     /**
@@ -96,15 +100,15 @@ public class NotificationService {
     }
 
     /**
-     * Verificar si ya existe una alerta activa para un producto.
+     * Verificar si ya existe una alerta activa para este producto específico
+     * (antes ignoraba el producto y bastaba con que existiera CUALQUIER
+     * alerta de inventario para bloquear la creación de nuevas alertas).
      */
-    private boolean hasActiveAlertForProduct(Long productId) {
-        // Esta es una simplificación. En un sistema real, mantendríamos
-        // una relación entre notificaciones y productos
-        List<Notification> unreadAlerts = notificationRepository.findUnreadByRequiredRole("WAREHOUSE");
-        return unreadAlerts.stream()
+    private boolean hasActiveAlertForProduct(Product product, List<Notification> activeAlerts) {
+        return activeAlerts.stream()
             .anyMatch(n -> n.getType() == Notification.NotificationType.INVENTORY_ALERT &&
-                          n.getMessage().contains("unidades en inventario"));
+                          "PRODUCT".equals(n.getRelatedEntityType()) &&
+                          product.getCode().equals(n.getRelatedEntityId()));
     }
 
     /**

@@ -23,6 +23,12 @@ public interface ProductRepository {
     Optional<Product> findById(Long id);
 
     /**
+     * Buscar varios productos por sus IDs en una sola consulta
+     * (evita N+1 al validar los ítems de una orden o recepción).
+     */
+    List<Product> findAllById(List<Long> ids);
+
+    /**
      * Buscar producto por ID con bloqueo pessimista (SELECT ... FOR UPDATE).
      * Usar solo al modificar stock: serializa lecturas+escrituras concurrentes
      * del mismo producto para evitar sobreventa (dos órdenes decrementando

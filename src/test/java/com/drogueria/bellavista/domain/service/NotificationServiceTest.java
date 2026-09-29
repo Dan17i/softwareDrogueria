@@ -129,13 +129,35 @@ class NotificationServiceTest {
         Notification existingAlert = Notification.builder()
             .type(Notification.NotificationType.INVENTORY_ALERT)
             .message("Quedan 2 unidades en inventario.")
-            .isRead(false).requiredRole("WAREHOUSE").build();
+            .isRead(false).requiredRole("WAREHOUSE")
+            .relatedEntityId("MED-002").relatedEntityType("PRODUCT").build();
         when(productRepository.findProductsNeedingRestock()).thenReturn(List.of(product));
         when(notificationRepository.findUnreadByRequiredRole("WAREHOUSE")).thenReturn(List.of(existingAlert));
 
         notificationService.generateInventoryAlerts();
 
         verify(notificationRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("✅ generateInventoryAlerts - alerta activa de OTRO producto no bloquea la del actual")
+    void shouldCreateAlertForDifferentProductEvenIfAnotherHasActiveAlert() {
+        Product productA = Product.builder().id(10L).name("Ibuprofeno").code("MED-002").stock(2).build();
+        Product productB = Product.builder().id(11L).name("Amoxicilina").code("MED-003").stock(1).build();
+        Notification alertForProductA = Notification.builder()
+            .type(Notification.NotificationType.INVENTORY_ALERT)
+            .message("Quedan 2 unidades en inventario.")
+            .isRead(false).requiredRole("WAREHOUSE")
+            .relatedEntityId("MED-002").relatedEntityType("PRODUCT").build();
+
+        when(productRepository.findProductsNeedingRestock()).thenReturn(List.of(productA, productB));
+        when(notificationRepository.findUnreadByRequiredRole("WAREHOUSE")).thenReturn(List.of(alertForProductA));
+        when(notificationRepository.save(any())).thenReturn(notification);
+
+        notificationService.generateInventoryAlerts();
+
+        // Solo debe crear la alerta faltante (para productB), una sola vez
+        verify(notificationRepository, times(1)).save(any(Notification.class));
     }
 
     @Test

@@ -80,7 +80,7 @@ class GoodsReceiptServiceTest {
 
         when(orderService.getOrderById(sampleOrder.getId())).thenReturn(sampleOrder);
         when(goodsReceiptRepository.findByOrderId(sampleOrder.getId())).thenReturn(Collections.emptyList());
-        when(productService.getProductById(sampleProduct.getId())).thenReturn(sampleProduct);
+        when(productService.getProductsByIds(anyList())).thenReturn(java.util.List.of(sampleProduct));
         when(goodsReceiptRepository.save(any())).thenAnswer(inv -> {
             GoodsReceipt g = (GoodsReceipt) inv.getArgument(0);
             g.setId(1L);

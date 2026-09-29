@@ -76,6 +76,15 @@ public class ProductService {
     }
     
     /**
+     * Obtener varios productos por sus IDs en una sola consulta
+     * (evita N+1 al validar los ítems de una orden o recepción de mercancía).
+     */
+    @Transactional(readOnly = true)
+    public List<Product> getProductsByIds(List<Long> ids) {
+        return productRepository.findAllById(ids);
+    }
+
+    /**
      * Obtener producto por código
      */
     @Transactional(readOnly = true)

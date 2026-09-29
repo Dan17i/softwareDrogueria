@@ -91,7 +91,7 @@ class OrderServiceTest {
         log.info("🧪 Test createOrder SUCCESS");
 
         when(customerService.getCustomerById(1L)).thenReturn(customer);
-        when(productService.getProductById(10L)).thenReturn(product);
+        when(productService.getProductsByIds(any())).thenReturn(List.of(product));
         when(orderRepository.save(any())).thenReturn(order);
 
         Order result = orderService.createOrder(order);
@@ -166,7 +166,7 @@ class OrderServiceTest {
         unavailableProduct.setActive(false); // No disponible
 
         when(customerService.getCustomerById(1L)).thenReturn(customer);
-        when(productService.getProductById(10L)).thenReturn(unavailableProduct);
+        when(productService.getProductsByIds(any())).thenReturn(List.of(unavailableProduct));
 
         BusinessException exception = assertThrows(BusinessException.class,
                 () -> orderService.createOrder(order));
@@ -202,7 +202,7 @@ class OrderServiceTest {
                 .build();
 
         when(customerService.getCustomerById(1L)).thenReturn(customer);
-        when(productService.getProductById(10L)).thenReturn(lowStockProduct);
+        when(productService.getProductsByIds(any())).thenReturn(List.of(lowStockProduct));
 
         BusinessException exception = assertThrows(BusinessException.class,
                 () -> orderService.createOrder(orderWithHighQuantity));
@@ -235,7 +235,7 @@ class OrderServiceTest {
                 .build();
 
         when(customerService.getCustomerById(1L)).thenReturn(lowCreditCustomer);
-        when(productService.getProductById(10L)).thenReturn(product);
+        when(productService.getProductsByIds(any())).thenReturn(List.of(product));
 
         BusinessException exception = assertThrows(BusinessException.class,
                 () -> orderService.createOrder(expensiveOrder));

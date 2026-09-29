@@ -55,10 +55,16 @@ public class GoodsReceiptService {
             throw new BusinessException("Order already has a RECEIVED goods receipt");
         }
         
-        // Validar cada item
+        // Validar cada item (una sola consulta para todos los productos, no una por ítem)
+        List<Long> productIds = goodsReceipt.getItems().stream()
+                .map(GoodsReceiptItem::getProductId)
+                .distinct()
+                .toList();
+        java.util.Map<Long, Product> productsById = productService.getProductsByIds(productIds).stream()
+                .collect(java.util.stream.Collectors.toMap(Product::getId, p -> p));
+
         for (GoodsReceiptItem item : goodsReceipt.getItems()) {
-            // Validar que el producto existe
-            Product product = productService.getProductById(item.getProductId());
+            Product product = productsById.get(item.getProductId());
             if (product == null) {
                 throw new ResourceNotFoundException("Product not found with ID: " + item.getProductId());
             }
@@ -66,7 +72,7 @@ public class GoodsReceiptService {
                 throw new BusinessException(
                         "Cannot receive from inactive product: " + product.getCode());
             }
-            
+
             // Validar que la cantidad recibida es válida
             if (!item.isValidQuantity()) {
                 throw new BusinessException(

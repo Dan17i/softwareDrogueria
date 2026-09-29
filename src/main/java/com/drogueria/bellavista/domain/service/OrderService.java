@@ -2,6 +2,7 @@ package com.drogueria.bellavista.domain.service;
 
 import com.drogueria.bellavista.domain.model.Customer;
 import com.drogueria.bellavista.domain.model.Order;
+import com.drogueria.bellavista.domain.model.OrderItem;
 import com.drogueria.bellavista.domain.model.Product;
 import com.drogueria.bellavista.domain.repository.OrderRepository;
 import com.drogueria.bellavista.exception.BusinessException;
@@ -59,10 +60,18 @@ public class OrderService {
             throw new BusinessException("El campo 'items' es obligatorio. La orden debe contener al menos un producto");
         }
         
-        // Validar productos y stock
+        // Validar productos y stock (una sola consulta para todos los ítems, no una por ítem)
+        java.util.Map<Long, Product> productsById = productService.getProductsByIds(
+                order.getItems().stream().map(OrderItem::getProductId).distinct().toList()
+            ).stream()
+            .collect(java.util.stream.Collectors.toMap(Product::getId, p -> p));
+
         order.getItems().forEach(item -> {
-            Product product = productService.getProductById(item.getProductId());
-            
+            Product product = productsById.get(item.getProductId());
+            if (product == null) {
+                throw new ResourceNotFoundException("Product", "id", item.getProductId());
+            }
+
             if (!product.isAvailable()) {
                 throw new BusinessException("El producto '" + product.getName() + "' (código: " + product.getCode() + ") no está disponible para la venta");
             }
