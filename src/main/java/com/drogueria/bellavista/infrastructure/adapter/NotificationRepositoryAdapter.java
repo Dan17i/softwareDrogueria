@@ -4,7 +4,6 @@ import com.drogueria.bellavista.domain.model.Notification;
 import com.drogueria.bellavista.domain.repository.NotificationRepository;
 import com.drogueria.bellavista.infrastructure.persistence.entity.NotificationEntity;
 import com.drogueria.bellavista.infrastructure.persistence.repository.NotificationJpaRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -15,10 +14,13 @@ import java.util.stream.Collectors;
  * Adapter that implements NotificationRepository port using JPA.
  */
 @Component
-@RequiredArgsConstructor
 public class NotificationRepositoryAdapter implements NotificationRepository {
 
     private final NotificationJpaRepository jpaRepository;
+
+    public NotificationRepositoryAdapter(NotificationJpaRepository jpaRepository) {
+        this.jpaRepository = jpaRepository;
+    }
 
     @Override
     public Notification save(Notification notification) {

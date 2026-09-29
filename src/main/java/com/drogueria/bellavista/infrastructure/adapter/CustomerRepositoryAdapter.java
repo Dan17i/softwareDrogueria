@@ -5,7 +5,6 @@ import com.drogueria.bellavista.domain.repository.CustomerRepository;
 import com.drogueria.bellavista.infrastructure.mapper.CustomerMapper;
 import com.drogueria.bellavista.infrastructure.persistence.CustomerEntity;
 import com.drogueria.bellavista.infrastructure.persistence.JpaCustomerRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -17,11 +16,15 @@ import java.util.stream.Collectors;
  * Convierte entre objetos de dominio y entidades JPA
  */
 @Component
-@RequiredArgsConstructor
 public class CustomerRepositoryAdapter implements CustomerRepository {
-    
+
     private final JpaCustomerRepository jpaRepository;
     private final CustomerMapper mapper;
+
+    public CustomerRepositoryAdapter(JpaCustomerRepository jpaRepository, CustomerMapper mapper) {
+        this.jpaRepository = jpaRepository;
+        this.mapper = mapper;
+    }
     
     @Override
     public Customer save(Customer customer) {

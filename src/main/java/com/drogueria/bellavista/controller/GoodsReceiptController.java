@@ -9,7 +9,6 @@ import com.drogueria.bellavista.domain.service.SupplierService;
 import com.drogueria.bellavista.exception.BusinessException;
 import com.drogueria.bellavista.exception.ResourceNotFoundException;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,7 +23,6 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/goods-receipts")
-@RequiredArgsConstructor
 public class GoodsReceiptController {
 
     private static final String READ_ROLES = "hasAnyRole('ADMIN','WAREHOUSE','MANAGER')";
@@ -34,6 +32,14 @@ public class GoodsReceiptController {
     private final OrderService orderService;
     private final SupplierService supplierService;
     private final GoodsReceiptUseCaseMapper mapper;
+
+    public GoodsReceiptController(GoodsReceiptService goodsReceiptService, OrderService orderService,
+                                   SupplierService supplierService, GoodsReceiptUseCaseMapper mapper) {
+        this.goodsReceiptService = goodsReceiptService;
+        this.orderService = orderService;
+        this.supplierService = supplierService;
+        this.mapper = mapper;
+    }
 
     /**
      * POST /api/goods-receipts - Crear nueva recepción de mercancía

@@ -4,7 +4,6 @@ import com.drogueria.bellavista.domain.model.Supplier;
 import com.drogueria.bellavista.domain.repository.SupplierRepository;
 import com.drogueria.bellavista.exception.BusinessException;
 import com.drogueria.bellavista.exception.ResourceNotFoundException;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,11 +14,14 @@ import java.util.List;
  * Servicio de dominio - Casos de uso de Proveedores
  */
 @Service
-@RequiredArgsConstructor
 @Transactional
 public class SupplierService {
-    
+
     private final SupplierRepository supplierRepository;
+
+    public SupplierService(SupplierRepository supplierRepository) {
+        this.supplierRepository = supplierRepository;
+    }
     
     /**
      * Crear nuevo proveedor

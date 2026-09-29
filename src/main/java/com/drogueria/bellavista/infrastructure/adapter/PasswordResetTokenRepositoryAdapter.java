@@ -4,17 +4,19 @@ import com.drogueria.bellavista.domain.model.PasswordResetToken;
 import com.drogueria.bellavista.domain.repository.PasswordResetTokenRepository;
 import com.drogueria.bellavista.infrastructure.persistence.JpaPasswordResetTokenRepository;
 import com.drogueria.bellavista.infrastructure.persistence.PasswordResetTokenEntity;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 @Component
-@RequiredArgsConstructor
 public class PasswordResetTokenRepositoryAdapter implements PasswordResetTokenRepository {
-    
+
     private final JpaPasswordResetTokenRepository jpaRepository;
+
+    public PasswordResetTokenRepositoryAdapter(JpaPasswordResetTokenRepository jpaRepository) {
+        this.jpaRepository = jpaRepository;
+    }
     
     @Override
     @Transactional

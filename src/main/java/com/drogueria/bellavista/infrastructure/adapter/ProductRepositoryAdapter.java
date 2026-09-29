@@ -5,7 +5,6 @@ import com.drogueria.bellavista.domain.repository.ProductRepository;
 import com.drogueria.bellavista.infrastructure.mapper.ProductMapper;
 import com.drogueria.bellavista.infrastructure.persistence.JpaProductRepository;
 import com.drogueria.bellavista.infrastructure.persistence.ProductEntity;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -17,11 +16,15 @@ import java.util.stream.Collectors;
  * Conecta el dominio con JPA/Base de datos
  */
 @Repository
-@RequiredArgsConstructor
 public class ProductRepositoryAdapter implements ProductRepository {
-    
+
     private final JpaProductRepository jpaRepository;
     private final ProductMapper mapper;
+
+    public ProductRepositoryAdapter(JpaProductRepository jpaRepository, ProductMapper mapper) {
+        this.jpaRepository = jpaRepository;
+        this.mapper = mapper;
+    }
     
     @Override
     public Product save(Product product) {

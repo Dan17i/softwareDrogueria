@@ -7,7 +7,6 @@ import com.drogueria.bellavista.application.dto.UserResponseDTO;
 import com.drogueria.bellavista.domain.model.User;
 import com.drogueria.bellavista.domain.service.UserService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -25,10 +24,13 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/users")
-@RequiredArgsConstructor
 public class UserController {
-    
+
     private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
     
     /**
      * Listar todos los usuarios

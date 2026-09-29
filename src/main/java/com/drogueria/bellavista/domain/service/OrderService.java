@@ -7,7 +7,6 @@ import com.drogueria.bellavista.domain.model.Product;
 import com.drogueria.bellavista.domain.repository.OrderRepository;
 import com.drogueria.bellavista.exception.BusinessException;
 import com.drogueria.bellavista.exception.ResourceNotFoundException;
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -22,7 +21,6 @@ import java.util.UUID;
  * Servicio de dominio - Casos de uso de Órdenes
  */
 @Service
-@RequiredArgsConstructor
 @Transactional
 public class OrderService {
     private static final Logger log = LoggerFactory.getLogger(OrderService.class);
@@ -34,7 +32,13 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final CustomerService customerService;
     private final ProductService productService;
-    
+
+    public OrderService(OrderRepository orderRepository, CustomerService customerService, ProductService productService) {
+        this.orderRepository = orderRepository;
+        this.customerService = customerService;
+        this.productService = productService;
+    }
+
     /**
      * Crear nueva orden
      * Validaciones críticas:

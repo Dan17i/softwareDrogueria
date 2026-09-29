@@ -4,7 +4,6 @@ import com.drogueria.bellavista.domain.model.Supplier;
 import com.drogueria.bellavista.domain.repository.SupplierRepository;
 import com.drogueria.bellavista.infrastructure.mapper.SupplierMapper;
 import com.drogueria.bellavista.infrastructure.persistence.JpaSupplierRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -15,11 +14,15 @@ import java.util.stream.Collectors;
  * Adaptador - Implementa SupplierRepository usando Spring Data JPA
  */
 @Component
-@RequiredArgsConstructor
 public class SupplierRepositoryAdapter implements SupplierRepository {
-    
+
     private final JpaSupplierRepository jpaRepository;
     private final SupplierMapper mapper;
+
+    public SupplierRepositoryAdapter(JpaSupplierRepository jpaRepository, SupplierMapper mapper) {
+        this.jpaRepository = jpaRepository;
+        this.mapper = mapper;
+    }
     
     @Override
     public Supplier save(Supplier supplier) {

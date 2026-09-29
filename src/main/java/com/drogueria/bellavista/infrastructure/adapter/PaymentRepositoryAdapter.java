@@ -5,7 +5,6 @@ import com.drogueria.bellavista.domain.repository.PaymentRepository;
 import com.drogueria.bellavista.infrastructure.mapper.PaymentMapper;
 import com.drogueria.bellavista.infrastructure.persistence.entity.PaymentEntity;
 import com.drogueria.bellavista.infrastructure.persistence.repository.PaymentJpaRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -14,11 +13,15 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
-@RequiredArgsConstructor
 public class PaymentRepositoryAdapter implements PaymentRepository {
-    
+
     private final PaymentJpaRepository jpaRepository;
     private final PaymentMapper mapper;
+
+    public PaymentRepositoryAdapter(PaymentJpaRepository jpaRepository, PaymentMapper mapper) {
+        this.jpaRepository = jpaRepository;
+        this.mapper = mapper;
+    }
     
     @Override
     public Payment save(Payment payment) {

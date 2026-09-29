@@ -3,8 +3,6 @@ package com.drogueria.bellavista.config;
 import com.drogueria.bellavista.exception.AuthenticationException;
 import com.drogueria.bellavista.exception.BusinessException;
 import com.drogueria.bellavista.exception.ResourceNotFoundException;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,21 +30,43 @@ public class GlobalExceptionHandler {
     /**
      * Clase para estructurar las respuestas de error
      */
-    @Data
-    @AllArgsConstructor
     public static class ErrorResponse {
-        private LocalDateTime timestamp;
-        private int status;
-        private String error;
-        private String message;
+        private final LocalDateTime timestamp;
+        private final int status;
+        private final String error;
+        private final String message;
         private Map<String, String> details;
-        
+
         public ErrorResponse(int status, String error, String message) {
             this.timestamp = LocalDateTime.now();
             this.status = status;
             this.error = error;
             this.message = message;
             this.details = null;
+        }
+
+        public LocalDateTime getTimestamp() {
+            return timestamp;
+        }
+
+        public int getStatus() {
+            return status;
+        }
+
+        public String getError() {
+            return error;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public Map<String, String> getDetails() {
+            return details;
+        }
+
+        public void setDetails(Map<String, String> details) {
+            this.details = details;
         }
     }
     

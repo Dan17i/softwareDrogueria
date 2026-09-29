@@ -7,7 +7,6 @@ import com.drogueria.bellavista.domain.model.Product;
 import com.drogueria.bellavista.domain.repository.GoodsReceiptRepository;
 import com.drogueria.bellavista.exception.BusinessException;
 import com.drogueria.bellavista.exception.ResourceNotFoundException;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,13 +23,18 @@ import java.util.UUID;
  * - Si se rechaza: limpiar cambios
  */
 @Service
-@RequiredArgsConstructor
 public class GoodsReceiptService {
-    
+
     private final GoodsReceiptRepository goodsReceiptRepository;
     private final OrderService orderService;
     private final ProductService productService;
-    
+
+    public GoodsReceiptService(GoodsReceiptRepository goodsReceiptRepository, OrderService orderService, ProductService productService) {
+        this.goodsReceiptRepository = goodsReceiptRepository;
+        this.orderService = orderService;
+        this.productService = productService;
+    }
+
     /**
      * LÓGICA CRÍTICA: Crear recepción de mercancía
      * Validaciones complejas entre Order y Productos

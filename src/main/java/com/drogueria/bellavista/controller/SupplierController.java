@@ -5,7 +5,6 @@ import com.drogueria.bellavista.application.mapper.SupplierUseCaseMapper;
 import com.drogueria.bellavista.domain.model.Supplier;
 import com.drogueria.bellavista.domain.service.SupplierService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,12 +19,16 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/suppliers")
-@RequiredArgsConstructor
 @PreAuthorize("hasAnyRole('ADMIN','WAREHOUSE','MANAGER')")
 public class SupplierController {
 
     private final SupplierService supplierService;
     private final SupplierUseCaseMapper mapper;
+
+    public SupplierController(SupplierService supplierService, SupplierUseCaseMapper mapper) {
+        this.supplierService = supplierService;
+        this.mapper = mapper;
+    }
 
     @PostMapping
     public ResponseEntity<SupplierDTO.Response> createSupplier(

@@ -4,8 +4,8 @@ import com.drogueria.bellavista.domain.model.Payment;
 import com.drogueria.bellavista.domain.repository.PaymentRepository;
 import com.drogueria.bellavista.exception.BusinessException;
 import com.drogueria.bellavista.exception.ResourceNotFoundException;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,12 +18,16 @@ import java.util.List;
  * Contiene toda la lógica de negocio relacionada con pagos via Stripe
  */
 @Service
-@Slf4j
-@RequiredArgsConstructor
 @Transactional
 public class PaymentService {
-    
+
+    private static final Logger log = LoggerFactory.getLogger(PaymentService.class);
+
     private final PaymentRepository paymentRepository;
+
+    public PaymentService(PaymentRepository paymentRepository) {
+        this.paymentRepository = paymentRepository;
+    }
     
     /**
      * Crear un nuevo pago.

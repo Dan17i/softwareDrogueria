@@ -4,7 +4,6 @@ import com.drogueria.bellavista.application.dto.NotificationDTO;
 import com.drogueria.bellavista.application.mapper.NotificationMapper;
 import com.drogueria.bellavista.domain.model.Notification;
 import com.drogueria.bellavista.domain.service.NotificationService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,12 +15,16 @@ import java.util.stream.Collectors;
  * Coordinates between controllers and domain services.
  */
 @Service
-@RequiredArgsConstructor
 @Transactional
 public class NotificationApplicationService {
 
     private final NotificationService notificationService;
     private final NotificationMapper mapper;
+
+    public NotificationApplicationService(NotificationService notificationService, NotificationMapper mapper) {
+        this.notificationService = notificationService;
+        this.mapper = mapper;
+    }
 
     /**
      * Get all notifications for a specific role.

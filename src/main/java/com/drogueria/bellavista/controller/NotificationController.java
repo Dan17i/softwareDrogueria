@@ -5,7 +5,6 @@ import com.drogueria.bellavista.application.service.NotificationApplicationServi
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.http.ResponseEntity;
@@ -19,13 +18,16 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/notifications")
-@RequiredArgsConstructor
 @Tag(name = "Notifications", description = "Notification management API")
 public class NotificationController {
 
     private static final String ROLE_PREFIX = "ROLE_";
 
     private final NotificationApplicationService notificationService;
+
+    public NotificationController(NotificationApplicationService notificationService) {
+        this.notificationService = notificationService;
+    }
 
     /**
      * Get all notifications for the current user's role.

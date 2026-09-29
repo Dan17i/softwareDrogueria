@@ -4,7 +4,6 @@ import com.drogueria.bellavista.domain.model.Customer;
 import com.drogueria.bellavista.domain.repository.CustomerRepository;
 import com.drogueria.bellavista.exception.BusinessException;
 import com.drogueria.bellavista.exception.ResourceNotFoundException;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,11 +15,14 @@ import java.util.List;
  * Servicio de dominio - Casos de uso de Clientes
  */
 @Service
-@RequiredArgsConstructor
 @Transactional
 public class CustomerService {
-    
+
     private final CustomerRepository customerRepository;
+
+    public CustomerService(CustomerRepository customerRepository) {
+        this.customerRepository = customerRepository;
+    }
     
     /**
      * Crear un nuevo cliente

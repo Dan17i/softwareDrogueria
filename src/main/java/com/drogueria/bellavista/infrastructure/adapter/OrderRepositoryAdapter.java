@@ -4,7 +4,6 @@ import com.drogueria.bellavista.domain.model.Order;
 import com.drogueria.bellavista.domain.repository.OrderRepository;
 import com.drogueria.bellavista.infrastructure.mapper.OrderMapper;
 import com.drogueria.bellavista.infrastructure.persistence.*;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -16,12 +15,17 @@ import java.util.stream.Collectors;
  * Adaptador - Implementa OrderRepository usando Spring Data JPA
  */
 @Component
-@RequiredArgsConstructor
 public class OrderRepositoryAdapter implements OrderRepository {
-    
+
     private final JpaOrderRepository jpaRepository;
     private final JpaOrderItemRepository jpaItemRepository;
     private final OrderMapper mapper;
+
+    public OrderRepositoryAdapter(JpaOrderRepository jpaRepository, JpaOrderItemRepository jpaItemRepository, OrderMapper mapper) {
+        this.jpaRepository = jpaRepository;
+        this.jpaItemRepository = jpaItemRepository;
+        this.mapper = mapper;
+    }
     
     @Override
     public Order save(Order order) {

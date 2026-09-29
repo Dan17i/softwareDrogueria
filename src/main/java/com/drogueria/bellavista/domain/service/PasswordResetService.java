@@ -4,8 +4,8 @@ import com.drogueria.bellavista.domain.model.PasswordResetToken;
 import com.drogueria.bellavista.domain.model.User;
 import com.drogueria.bellavista.domain.repository.PasswordResetTokenRepository;
 import com.drogueria.bellavista.exception.BusinessException;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,21 +15,25 @@ import java.util.UUID;
 /**
  * Service for password reset operations.
  * Handles token generation, validation, and password reset flow.
- * 
+ *
  * MÉTRICAS DE CALIDAD:
  * - Métrica 4.2: Seguridad en recuperación de contraseña
  * - Métrica 2.2: Mensajes claros y específicos
  */
-@Slf4j
 @Service
 @Transactional
-@RequiredArgsConstructor
 public class PasswordResetService {
-    
+
+    private static final Logger log = LoggerFactory.getLogger(PasswordResetService.class);
+    private static final int TOKEN_EXPIRY_HOURS = 1;
+
     private final PasswordResetTokenRepository tokenRepository;
     private final UserService userService;
-    
-    private static final int TOKEN_EXPIRY_HOURS = 1;
+
+    public PasswordResetService(PasswordResetTokenRepository tokenRepository, UserService userService) {
+        this.tokenRepository = tokenRepository;
+        this.userService = userService;
+    }
     
     /**
      * Create password reset token for user.

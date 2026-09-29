@@ -5,7 +5,6 @@ import com.drogueria.bellavista.application.mapper.CustomerUseCaseMapper;
 import com.drogueria.bellavista.domain.model.Customer;
 import com.drogueria.bellavista.domain.service.CustomerService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,7 +19,6 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/customers")
-@RequiredArgsConstructor
 public class CustomerController {
 
     private static final String STAFF_ROLES = "hasAnyRole('ADMIN','MANAGER','SALES')";
@@ -28,6 +26,11 @@ public class CustomerController {
 
     private final CustomerService customerService;
     private final CustomerUseCaseMapper mapper;
+
+    public CustomerController(CustomerService customerService, CustomerUseCaseMapper mapper) {
+        this.customerService = customerService;
+        this.mapper = mapper;
+    }
 
     @PostMapping
     @PreAuthorize(STAFF_ROLES)
@@ -154,24 +157,19 @@ public class CustomerController {
         java.math.BigDecimal availableCredit = customer.getCreditLimit()
                 .subtract(customer.getPendingBalance() != null ? customer.getPendingBalance() : java.math.BigDecimal.ZERO);
 
-        BalanceInfo balanceInfo = BalanceInfo.builder()
-                .creditLimit(customer.getCreditLimit())
-                .pendingBalance(customer.getPendingBalance())
-                .availableCredit(availableCredit)
-                .isMoroso(customer.isMoroso())
-                .build();
+        BalanceInfo balanceInfo = new BalanceInfo(
+                customer.getCreditLimit(),
+                customer.getPendingBalance(),
+                availableCredit,
+                customer.isMoroso());
 
         return ResponseEntity.ok(balanceInfo);
     }
 
-    @lombok.Data
-    @lombok.Builder
-    @lombok.NoArgsConstructor
-    @lombok.AllArgsConstructor
-    public static class BalanceInfo {
-        private java.math.BigDecimal creditLimit;
-        private java.math.BigDecimal pendingBalance;
-        private java.math.BigDecimal availableCredit;
-        private Boolean isMoroso;
+    public record BalanceInfo(
+            java.math.BigDecimal creditLimit,
+            java.math.BigDecimal pendingBalance,
+            java.math.BigDecimal availableCredit,
+            Boolean isMoroso) {
     }
 }

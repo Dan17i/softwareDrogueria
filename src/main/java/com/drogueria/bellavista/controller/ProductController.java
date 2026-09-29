@@ -5,7 +5,6 @@ import com.drogueria.bellavista.application.mapper.ProductUseCaseMapper;
 import com.drogueria.bellavista.domain.model.Product;
 import com.drogueria.bellavista.domain.service.ProductService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,13 +21,17 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/products")
-@RequiredArgsConstructor
 public class ProductController {
 
     private static final String INVENTORY_ROLES = "hasAnyRole('ADMIN','WAREHOUSE')";
 
     private final ProductService productService;
     private final ProductUseCaseMapper mapper;
+
+    public ProductController(ProductService productService, ProductUseCaseMapper mapper) {
+        this.productService = productService;
+        this.mapper = mapper;
+    }
 
     /**
      * Crear un nuevo producto

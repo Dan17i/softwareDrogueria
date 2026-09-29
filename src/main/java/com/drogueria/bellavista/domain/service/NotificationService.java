@@ -5,8 +5,8 @@ import com.drogueria.bellavista.domain.model.Product;
 import com.drogueria.bellavista.domain.repository.NotificationRepository;
 import com.drogueria.bellavista.domain.repository.ProductRepository;
 import com.drogueria.bellavista.exception.ResourceNotFoundException;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,13 +18,18 @@ import java.util.List;
  * Contiene toda la lógica de negocio relacionada con notificaciones del sistema
  */
 @Service
-@Slf4j
-@RequiredArgsConstructor
 @Transactional
 public class NotificationService {
 
+    private static final Logger log = LoggerFactory.getLogger(NotificationService.class);
+
     private final NotificationRepository notificationRepository;
     private final ProductRepository productRepository;
+
+    public NotificationService(NotificationRepository notificationRepository, ProductRepository productRepository) {
+        this.notificationRepository = notificationRepository;
+        this.productRepository = productRepository;
+    }
 
     /**
      * Obtener todas las notificaciones para un rol específico.

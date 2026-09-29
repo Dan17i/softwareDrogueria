@@ -4,7 +4,6 @@ import com.drogueria.bellavista.domain.model.Product;
 import com.drogueria.bellavista.domain.repository.ProductRepository;
 import com.drogueria.bellavista.exception.BusinessException;
 import com.drogueria.bellavista.exception.ResourceNotFoundException;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,11 +15,14 @@ import java.util.List;
  * Contiene toda la lógica de negocio de productos
  */
 @Service
-@RequiredArgsConstructor
 @Transactional
 public class ProductService {
-    
+
     private final ProductRepository productRepository;
+
+    public ProductService(ProductRepository productRepository) {
+        this.productRepository = productRepository;
+    }
     
     /**
      * Crear un nuevo producto

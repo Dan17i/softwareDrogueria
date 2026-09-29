@@ -4,7 +4,6 @@ import com.drogueria.bellavista.domain.model.GoodsReceipt;
 import com.drogueria.bellavista.domain.repository.GoodsReceiptRepository;
 import com.drogueria.bellavista.infrastructure.mapper.GoodsReceiptMapper;
 import com.drogueria.bellavista.infrastructure.persistence.*;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -15,12 +14,19 @@ import java.util.stream.Collectors;
  * Adapter: Implementa el puerto GoodsReceiptRepository usando JPA
  */
 @Component
-@RequiredArgsConstructor
 public class GoodsReceiptRepositoryAdapter implements GoodsReceiptRepository {
-    
+
     private final JpaGoodsReceiptRepository jpaGoodsReceiptRepository;
     private final JpaGoodsReceiptItemRepository jpaGoodsReceiptItemRepository;
     private final GoodsReceiptMapper mapper;
+
+    public GoodsReceiptRepositoryAdapter(JpaGoodsReceiptRepository jpaGoodsReceiptRepository,
+                                          JpaGoodsReceiptItemRepository jpaGoodsReceiptItemRepository,
+                                          GoodsReceiptMapper mapper) {
+        this.jpaGoodsReceiptRepository = jpaGoodsReceiptRepository;
+        this.jpaGoodsReceiptItemRepository = jpaGoodsReceiptItemRepository;
+        this.mapper = mapper;
+    }
     
     @Override
     public GoodsReceipt save(GoodsReceipt goodsReceipt) {

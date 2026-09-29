@@ -5,7 +5,6 @@ import com.drogueria.bellavista.application.mapper.OrderUseCaseMapper;
 import com.drogueria.bellavista.domain.model.Order;
 import com.drogueria.bellavista.domain.service.OrderService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,7 +22,6 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/orders")
-@RequiredArgsConstructor
 public class OrderController {
 
     private static final String READ_ROLES = "hasAnyRole('ADMIN','MANAGER','SALES','WAREHOUSE')";
@@ -31,6 +29,11 @@ public class OrderController {
 
     private final OrderService orderService;
     private final OrderUseCaseMapper mapper;
+
+    public OrderController(OrderService orderService, OrderUseCaseMapper mapper) {
+        this.orderService = orderService;
+        this.mapper = mapper;
+    }
 
     /**
      * Crear nueva orden
