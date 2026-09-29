@@ -79,9 +79,7 @@ class UserManagementIntegrationTest {
         userService.createUser("admin", "admin@bellavista.com", "admin123", "Admin", "Sistema", Role.ADMIN);
         
         // Login como admin
-        LoginRequestDTO adminLogin = new LoginRequestDTO();
-        adminLogin.setUsername("admin");
-        adminLogin.setPassword("admin123");
+        LoginRequestDTO adminLogin = new LoginRequestDTO("admin", "admin123");
         
         MvcResult adminResult = mockMvc.perform(post("/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -96,9 +94,7 @@ class UserManagementIntegrationTest {
         userService.createUser("testuser", "testuser@test.com", "password123", "Test", "User", Role.USER);
         
         // Login como usuario regular
-        LoginRequestDTO userLogin = new LoginRequestDTO();
-        userLogin.setUsername("testuser");
-        userLogin.setPassword("password123");
+        LoginRequestDTO userLogin = new LoginRequestDTO("testuser", "password123");
         
         MvcResult userResult = mockMvc.perform(post("/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -446,9 +442,7 @@ class UserManagementIntegrationTest {
             .andExpect(status().isOk());
         
         // 5. Usuario desactivado no puede hacer login
-        LoginRequestDTO loginAttempt = new LoginRequestDTO();
-        loginAttempt.setUsername("newuser");
-        loginAttempt.setPassword("password123");
+        LoginRequestDTO loginAttempt = new LoginRequestDTO("newuser", "password123");
         
         mockMvc.perform(post("/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)

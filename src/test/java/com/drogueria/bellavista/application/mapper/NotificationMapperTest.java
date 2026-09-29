@@ -108,9 +108,6 @@ class NotificationMapperTest {
         assertEquals("m", dto.getMessage());
         assertEquals("SYSTEM_ALERT", dto.getType());
         assertTrue(dto.getIsRead());
-
-        dto.setTitle("updated");
-        assertEquals("updated", dto.getTitle());
     }
 
     @Test
@@ -122,9 +119,6 @@ class NotificationMapperTest {
         assertEquals("m", req.getMessage());
         assertEquals("USER_ALERT", req.getType());
         assertEquals("ADMIN", req.getRequiredRole());
-
-        req.setMessage("updated");
-        assertEquals("updated", req.getMessage());
     }
 
     @Test
