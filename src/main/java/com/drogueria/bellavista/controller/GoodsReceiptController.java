@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,21 +20,26 @@ import java.util.stream.Collectors;
 
 /**
  * Controller: REST endpoints para Goods Receipt (Recepción de Mercancía)
+ * Lectura: ADMIN, WAREHOUSE, MANAGER. Escritura (crear/recibir/rechazar/eliminar): ADMIN, WAREHOUSE.
  */
 @RestController
 @RequestMapping("/goods-receipts")
 @RequiredArgsConstructor
 public class GoodsReceiptController {
-    
+
+    private static final String READ_ROLES = "hasAnyRole('ADMIN','WAREHOUSE','MANAGER')";
+    private static final String WRITE_ROLES = "hasAnyRole('ADMIN','WAREHOUSE')";
+
     private final GoodsReceiptService goodsReceiptService;
     private final OrderService orderService;
     private final SupplierService supplierService;
     private final GoodsReceiptUseCaseMapper mapper;
-    
+
     /**
      * POST /api/goods-receipts - Crear nueva recepción de mercancía
      */
     @PostMapping
+    @PreAuthorize(WRITE_ROLES)
     public ResponseEntity<GoodsReceiptDTO.Response> createGoodsReceipt(
             @Valid @RequestBody GoodsReceiptDTO.CreateRequest request) {
         
@@ -57,6 +63,7 @@ public class GoodsReceiptController {
      * GET /api/goods-receipts/{id} - Obtener recepción por ID
      */
     @GetMapping("/{id}")
+    @PreAuthorize(READ_ROLES)
     public ResponseEntity<GoodsReceiptDTO.Response> getGoodsReceiptById(@PathVariable Long id) {
         GoodsReceipt receipt = goodsReceiptService.getGoodsReceiptById(id);
         if (receipt == null) throw new ResourceNotFoundException("Goods Receipt not found with ID: " + id);
@@ -68,6 +75,7 @@ public class GoodsReceiptController {
      * GET /api/goods-receipts/number/{receiptNumber} - Obtener por número de recepción
      */
     @GetMapping("/number/{receiptNumber}")
+    @PreAuthorize(READ_ROLES)
     public ResponseEntity<GoodsReceiptDTO.Response> getGoodsReceiptByNumber(@PathVariable String receiptNumber) {
         GoodsReceipt receipt = goodsReceiptService.getGoodsReceiptByNumber(receiptNumber);
         if (receipt == null) throw new ResourceNotFoundException("Goods Receipt not found with number: " + receiptNumber);
@@ -79,6 +87,7 @@ public class GoodsReceiptController {
      * GET /api/goods-receipts/order/{orderId} - Obtener recepciones de una orden
      */
     @GetMapping("/order/{orderId}")
+    @PreAuthorize(READ_ROLES)
     public ResponseEntity<List<GoodsReceiptDTO.Response>> getGoodsReceiptsByOrder(@PathVariable Long orderId) {
         Order order = orderService.getOrderById(orderId);
         if (order == null) throw new ResourceNotFoundException("Order not found with ID: " + orderId);
@@ -93,6 +102,7 @@ public class GoodsReceiptController {
      * GET /api/goods-receipts/supplier/{supplierId} - Obtener recepciones de un proveedor
      */
     @GetMapping("/supplier/{supplierId}")
+    @PreAuthorize(READ_ROLES)
     public ResponseEntity<List<GoodsReceiptDTO.Response>> getGoodsReceiptsBySupplier(@PathVariable Long supplierId) {
         Supplier supplier = supplierService.getSupplierById(supplierId);
         if (supplier == null) throw new ResourceNotFoundException("Supplier not found with ID: " + supplierId);
@@ -107,6 +117,7 @@ public class GoodsReceiptController {
      * GET /api/goods-receipts/status/{status} - Obtener recepciones por estado
      */
     @GetMapping("/status/{status}")
+    @PreAuthorize(READ_ROLES)
     public ResponseEntity<List<GoodsReceiptDTO.Response>> getGoodsReceiptsByStatus(@PathVariable String status) {
         List<GoodsReceipt> receipts = goodsReceiptService.getGoodsReceiptsByStatus(status);
         return ResponseEntity.ok(receipts.stream()
@@ -118,6 +129,7 @@ public class GoodsReceiptController {
      * GET /api/goods-receipts/pending - Obtener recepciones pendientes
      */
     @GetMapping("/pending")
+    @PreAuthorize(READ_ROLES)
     public ResponseEntity<List<GoodsReceiptDTO.Response>> getPendingGoodsReceipts() {
         List<GoodsReceipt> receipts = goodsReceiptService.getPendingGoodsReceipts();
         return ResponseEntity.ok(receipts.stream()
@@ -129,6 +141,7 @@ public class GoodsReceiptController {
      * GET /api/goods-receipts - Obtener todas las recepciones
      */
     @GetMapping
+    @PreAuthorize(READ_ROLES)
     public ResponseEntity<List<GoodsReceiptDTO.Response>> getAllGoodsReceipts() {
         List<GoodsReceipt> receipts = goodsReceiptService.getAllGoodsReceipts();
         return ResponseEntity.ok(receipts.stream()
@@ -141,6 +154,7 @@ public class GoodsReceiptController {
      * Actualiza stock de producto y cambia status de la recepción
      */
     @PatchMapping("/{id}/receive")
+    @PreAuthorize(WRITE_ROLES)
     public ResponseEntity<GoodsReceiptDTO.Response> receiveGoodsReceipt(@PathVariable Long id) {
         GoodsReceipt receipt = goodsReceiptService.getGoodsReceiptById(id);
         if (receipt == null) throw new ResourceNotFoundException("Goods Receipt not found with ID: " + id);
@@ -158,6 +172,7 @@ public class GoodsReceiptController {
      * Cambia status a REJECTED sin afectar stock
      */
     @PatchMapping("/{id}/reject")
+    @PreAuthorize(WRITE_ROLES)
     public ResponseEntity<GoodsReceiptDTO.Response> rejectGoodsReceipt(
             @PathVariable Long id,
             @RequestParam(required = false) String reason) {
@@ -178,6 +193,7 @@ public class GoodsReceiptController {
      * Solo se pueden eliminar recepciones en estado PENDING
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize(WRITE_ROLES)
     public ResponseEntity<Void> deleteGoodsReceipt(@PathVariable Long id) {
         GoodsReceipt receipt = goodsReceiptService.getGoodsReceiptById(id);
         if (receipt == null) throw new ResourceNotFoundException("Goods Receipt not found with ID: " + id);

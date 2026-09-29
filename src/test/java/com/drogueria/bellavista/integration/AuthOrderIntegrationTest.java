@@ -1,5 +1,7 @@
 package com.drogueria.bellavista.integration;
 
+import com.drogueria.bellavista.domain.model.Role;
+import com.drogueria.bellavista.domain.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeAll;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,23 +62,18 @@ public class AuthOrderIntegrationTest {
     @Autowired
     private TestRestTemplate restTemplate;
 
+    @Autowired
+    private UserService userService;
+
     private String baseUrl() {
         return "http://localhost:" + port + "/api";
     }
 
     @Test
     void authAndOrderFlow() throws Exception {
-        // 1) Register user
-        Map<String, Object> reg = new HashMap<>();
-        reg.put("username", "testuser");
-        reg.put("email", "testuser@example.com");
-        reg.put("password", "password123");
-        reg.put("firstName", "Test");
-        reg.put("lastName", "User");
-
-        ResponseEntity<Map> regResp = restTemplate.postForEntity(baseUrl() + "/auth/register", reg, Map.class);
-        assertThat(regResp.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(regResp.getBody()).containsKey("id");
+        // 1) Crear usuario ADMIN directamente (el flujo ejercita creación de producto/cliente/orden,
+        // operaciones que ahora requieren rol de staff, no el rol USER por defecto del auto-registro).
+        userService.createUser("testuser", "testuser@example.com", "password123", "Test", "User", Role.ADMIN);
 
         // 2) Login
         Map<String, Object> login = new HashMap<>();

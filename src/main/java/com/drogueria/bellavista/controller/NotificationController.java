@@ -6,6 +6,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +23,8 @@ import java.util.List;
 @Tag(name = "Notifications", description = "Notification management API")
 public class NotificationController {
 
+    private static final String ROLE_PREFIX = "ROLE_";
+
     private final NotificationApplicationService notificationService;
 
     /**
@@ -28,11 +32,9 @@ public class NotificationController {
      */
     @GetMapping
     @Operation(summary = "Get notifications for user role",
-               description = "Retrieve all notifications accessible to the current user's role")
-    public ResponseEntity<List<NotificationDTO.Response>> getNotifications(
-            @Parameter(description = "User role (automatically determined from authentication)")
-            @RequestParam(required = false, defaultValue = "USER") String role) {
-        List<NotificationDTO.Response> notifications = notificationService.getNotificationsForRole(role);
+               description = "Retrieve all notifications accessible to the current authenticated user's role")
+    public ResponseEntity<List<NotificationDTO.Response>> getNotifications() {
+        List<NotificationDTO.Response> notifications = notificationService.getNotificationsForRole(currentRole());
         return ResponseEntity.ok(notifications);
     }
 
@@ -41,12 +43,23 @@ public class NotificationController {
      */
     @GetMapping("/unread")
     @Operation(summary = "Get unread notifications",
-               description = "Retrieve unread notifications for the current user's role")
-    public ResponseEntity<List<NotificationDTO.Response>> getUnreadNotifications(
-            @Parameter(description = "User role (automatically determined from authentication)")
-            @RequestParam(required = false, defaultValue = "USER") String role) {
-        List<NotificationDTO.Response> notifications = notificationService.getUnreadNotificationsForRole(role);
+               description = "Retrieve unread notifications for the current authenticated user's role")
+    public ResponseEntity<List<NotificationDTO.Response>> getUnreadNotifications() {
+        List<NotificationDTO.Response> notifications = notificationService.getUnreadNotificationsForRole(currentRole());
         return ResponseEntity.ok(notifications);
+    }
+
+    /**
+     * Extrae el rol del usuario autenticado desde el JWT (SecurityContext),
+     * nunca de un parámetro suministrado por el cliente.
+     */
+    private String currentRole() {
+        return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .filter(authority -> authority.startsWith(ROLE_PREFIX))
+                .map(authority -> authority.substring(ROLE_PREFIX.length()))
+                .findFirst()
+                .orElse("USER");
     }
 
     /**

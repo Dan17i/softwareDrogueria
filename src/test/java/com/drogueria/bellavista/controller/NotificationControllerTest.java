@@ -2,6 +2,7 @@ package com.drogueria.bellavista.controller;
 
 import com.drogueria.bellavista.application.dto.NotificationDTO;
 import com.drogueria.bellavista.application.service.NotificationApplicationService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,6 +11,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -34,12 +38,23 @@ class NotificationControllerTest {
             .build();
     }
 
+    @AfterEach
+    void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
+    }
+
+    private void authenticateAs(String role) {
+        SecurityContextHolder.getContext().setAuthentication(
+            new TestingAuthenticationToken("test-user", null, List.of(new SimpleGrantedAuthority("ROLE_" + role))));
+    }
+
     @Test
-    @DisplayName("✅ getNotifications - retorna lista y 200")
+    @DisplayName("✅ getNotifications - rol tomado del JWT autenticado, retorna lista y 200")
     void shouldGetNotificationsForRole() {
+        authenticateAs("ADMIN");
         when(notificationService.getNotificationsForRole("ADMIN")).thenReturn(List.of(response));
 
-        ResponseEntity<List<NotificationDTO.Response>> result = controller.getNotifications("ADMIN");
+        ResponseEntity<List<NotificationDTO.Response>> result = controller.getNotifications();
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertNotNull(result.getBody());
@@ -48,11 +63,12 @@ class NotificationControllerTest {
     }
 
     @Test
-    @DisplayName("✅ getNotifications - rol USER por defecto")
+    @DisplayName("✅ getNotifications - rol USER autenticado")
     void shouldGetNotificationsDefaultRole() {
+        authenticateAs("USER");
         when(notificationService.getNotificationsForRole("USER")).thenReturn(List.of());
 
-        ResponseEntity<List<NotificationDTO.Response>> result = controller.getNotifications("USER");
+        ResponseEntity<List<NotificationDTO.Response>> result = controller.getNotifications();
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertTrue(result.getBody().isEmpty());
@@ -61,9 +77,10 @@ class NotificationControllerTest {
     @Test
     @DisplayName("✅ getUnreadNotifications - retorna no leídas y 200")
     void shouldGetUnreadNotifications() {
+        authenticateAs("WAREHOUSE");
         when(notificationService.getUnreadNotificationsForRole("WAREHOUSE")).thenReturn(List.of(response));
 
-        ResponseEntity<List<NotificationDTO.Response>> result = controller.getUnreadNotifications("WAREHOUSE");
+        ResponseEntity<List<NotificationDTO.Response>> result = controller.getUnreadNotifications();
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertEquals(1, result.getBody().size());

@@ -63,12 +63,13 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
-			.requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/orders/**", "/customers/**", "/api/notifications/**").permitAll()
+                        .requestMatchers("/auth/register", "/auth/login", "/auth/forgot-password",
+                                "/auth/reset-password", "/auth/dev-create-admin").permitAll()
                         .requestMatchers("/auth/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/h2-console/**", "/swagger-ui/**", "/v3/api-docs/**", "/actuator/health").permitAll()
-                                .requestMatchers("/actuator/**").permitAll()  // ⬅️ AGREGAR ESTA LÍNEA
-                                .anyRequest().authenticated()
+                        .requestMatchers("/h2-console/**", "/swagger-ui/**", "/v3/api-docs/**", "/actuator/**").permitAll()
+                        // Sin permitAll para /orders/**, /customers/** ni /api/notifications/**:
+                        // requieren autenticación + el @PreAuthorize por rol de cada endpoint.
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .httpBasic(Customizer.withDefaults());

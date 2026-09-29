@@ -8,20 +8,29 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Controlador REST - Clientes
+ * PII y datos de crédito: acceso restringido al personal que gestiona ventas/clientes.
+ */
 @RestController
-@RequestMapping("/customers")  // ← CAMBIADO
+@RequestMapping("/customers")
 @RequiredArgsConstructor
 public class CustomerController {
+
+    private static final String STAFF_ROLES = "hasAnyRole('ADMIN','MANAGER','SALES')";
+    private static final String MANAGEMENT_ROLES = "hasAnyRole('ADMIN','MANAGER')";
 
     private final CustomerService customerService;
     private final CustomerUseCaseMapper mapper;
 
     @PostMapping
+    @PreAuthorize(STAFF_ROLES)
     public ResponseEntity<CustomerDTO.Response> createCustomer(
             @Valid @RequestBody CustomerDTO.CreateRequest request) {
 
@@ -33,6 +42,7 @@ public class CustomerController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize(STAFF_ROLES)
     public ResponseEntity<CustomerDTO.Response> updateCustomer(
             @PathVariable Long id,
             @Valid @RequestBody CustomerDTO.UpdateRequest request) {
@@ -45,6 +55,7 @@ public class CustomerController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize(STAFF_ROLES)
     public ResponseEntity<CustomerDTO.Response> getCustomerById(@PathVariable Long id) {
         Customer customer = customerService.getCustomerById(id);
         CustomerDTO.Response response = mapper.toResponse(customer);
@@ -52,6 +63,7 @@ public class CustomerController {
     }
 
     @GetMapping("/code/{code}")
+    @PreAuthorize(STAFF_ROLES)
     public ResponseEntity<CustomerDTO.Response> getCustomerByCode(@PathVariable String code) {
         Customer customer = customerService.getCustomerByCode(code);
         CustomerDTO.Response response = mapper.toResponse(customer);
@@ -59,6 +71,7 @@ public class CustomerController {
     }
 
     @GetMapping("/email/{email}")
+    @PreAuthorize(STAFF_ROLES)
     public ResponseEntity<CustomerDTO.Response> getCustomerByEmail(@PathVariable String email) {
         Customer customer = customerService.getCustomerByEmail(email);
         CustomerDTO.Response response = mapper.toResponse(customer);
@@ -66,6 +79,7 @@ public class CustomerController {
     }
 
     @GetMapping
+    @PreAuthorize(STAFF_ROLES)
     public ResponseEntity<List<CustomerDTO.Response>> getAllCustomers() {
         List<Customer> customers = customerService.getAllCustomers();
         List<CustomerDTO.Response> responses = customers.stream()
@@ -75,6 +89,7 @@ public class CustomerController {
     }
 
     @GetMapping("/status/active")
+    @PreAuthorize(STAFF_ROLES)
     public ResponseEntity<List<CustomerDTO.Response>> getActiveCustomers() {
         List<Customer> customers = customerService.getActiveCustomers();
         List<CustomerDTO.Response> responses = customers.stream()
@@ -84,6 +99,7 @@ public class CustomerController {
     }
 
     @GetMapping("/type/{customerType}")
+    @PreAuthorize(STAFF_ROLES)
     public ResponseEntity<List<CustomerDTO.Response>> getCustomersByType(
             @PathVariable String customerType) {
 
@@ -95,6 +111,7 @@ public class CustomerController {
     }
 
     @GetMapping("/status/morosos")
+    @PreAuthorize(MANAGEMENT_ROLES)
     public ResponseEntity<List<CustomerDTO.Response>> getMorosos() {
         List<Customer> customers = customerService.getMorosos();
         List<CustomerDTO.Response> responses = customers.stream()
@@ -104,6 +121,7 @@ public class CustomerController {
     }
 
     @PatchMapping("/{id}/deactivate")
+    @PreAuthorize(MANAGEMENT_ROLES)
     public ResponseEntity<CustomerDTO.Response> deactivateCustomer(@PathVariable Long id) {
         Customer customer = customerService.deactivateCustomer(id);
         CustomerDTO.Response response = mapper.toResponse(customer);
@@ -111,6 +129,7 @@ public class CustomerController {
     }
 
     @PatchMapping("/{id}/activate")
+    @PreAuthorize(MANAGEMENT_ROLES)
     public ResponseEntity<CustomerDTO.Response> activateCustomer(@PathVariable Long id) {
         Customer customer = customerService.activateCustomer(id);
         CustomerDTO.Response response = mapper.toResponse(customer);
@@ -118,6 +137,7 @@ public class CustomerController {
     }
 
     @GetMapping("/{id}/credit-available/{amount}")
+    @PreAuthorize(STAFF_ROLES)
     public ResponseEntity<Boolean> hasCreditAvailable(
             @PathVariable Long id,
             @PathVariable java.math.BigDecimal amount) {
@@ -127,6 +147,7 @@ public class CustomerController {
     }
 
     @GetMapping("/{id}/balance")
+    @PreAuthorize(STAFF_ROLES)
     public ResponseEntity<BalanceInfo> getCustomerBalance(@PathVariable Long id) {
         Customer customer = customerService.getCustomerById(id);
 

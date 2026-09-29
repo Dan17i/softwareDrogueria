@@ -33,7 +33,6 @@ public class NotificationIntegrationTest {
     @WithMockUser(roles = "USER")
     public void testGetNotificationsForUserRole() throws Exception {
         mockMvc.perform(get("/api/notifications")
-                .param("role", "USER")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
@@ -43,7 +42,6 @@ public class NotificationIntegrationTest {
     @WithMockUser(roles = "USER")
     public void testGetUnreadNotifications() throws Exception {
         mockMvc.perform(get("/api/notifications/unread")
-                .param("role", "USER")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
@@ -137,7 +135,6 @@ public class NotificationIntegrationTest {
     @WithMockUser(roles = "USER")
     public void testNotificationsEndpointReturnsValidJson() throws Exception {
         mockMvc.perform(get("/api/notifications")
-                .param("role", "USER")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -148,7 +145,6 @@ public class NotificationIntegrationTest {
     @WithMockUser(roles = "USER")
     public void testUnreadNotificationsEndpointReturnsValidJson() throws Exception {
         mockMvc.perform(get("/api/notifications/unread")
-                .param("role", "USER")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))

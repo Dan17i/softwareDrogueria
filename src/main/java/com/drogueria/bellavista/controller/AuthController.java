@@ -2,7 +2,6 @@ package com.drogueria.bellavista.controller;
 
 import com.drogueria.bellavista.application.dto.*;
 import com.drogueria.bellavista.application.service.AuthService;
-import com.drogueria.bellavista.domain.model.Role;
 import com.drogueria.bellavista.domain.model.User;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -82,33 +81,6 @@ public class AuthController {
             .build());
     }
 
-    @PostMapping("/dev-create-admin")
-    public ResponseEntity<?> createAdmin() {
-        try {
-            // Primero verificar si ya existe
-            try {
-                User existing = authService.getUserByUsername("admin");
-                return ResponseEntity.ok("Admin ya existe con ID: " + existing.getId());
-            } catch (Exception e) {
-                // No existe, crear uno nuevo directamente sin enviar email
-            }
-            
-            // Crear admin directamente usando UserService (sin email)
-            User admin = authService.registerUserWithRole(
-                    "admin",
-                    "admin@bellavista.com",
-                    "admin123",
-                    "Admin",
-                    "Sistema",
-                    Role.ADMIN
-            );
-            return ResponseEntity.ok("Admin creado correctamente con ID: " + admin.getId());
-        } catch (Exception e) {
-            // Retornar el error completo para debugging
-            return ResponseEntity.status(500).body("Error al crear admin: " + e.getClass().getName() + " - " + e.getMessage());
-        }
-    }
-    
     @PostMapping("/admin/create-user")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponseDTO> createUserWithRole(@Valid @RequestBody RegisterWithRoleRequestDTO req) {

@@ -1,5 +1,7 @@
 package com.drogueria.bellavista.integration;
 
+import com.drogueria.bellavista.domain.model.Role;
+import com.drogueria.bellavista.domain.service.UserService;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -46,6 +48,9 @@ public class ProductIntegrationTest {
     @Autowired
     private TestRestTemplate restTemplate;
 
+    @Autowired
+    private UserService userService;
+
     private static String token;
     private static Long productId;
 
@@ -66,17 +71,12 @@ public class ProductIntegrationTest {
 
     @Test
     @Order(1)
-    @DisplayName("Setup: Registrar usuario y obtener token")
+    @DisplayName("Setup: Crear usuario WAREHOUSE y obtener token")
     void setupUserAndGetToken() {
-        // Registrar
-        Map<String, Object> reg = new HashMap<>();
-        reg.put("username", "productuser");
-        reg.put("email", "productuser@test.com");
-        reg.put("password", "password123");
-        reg.put("firstName", "Product");
-        reg.put("lastName", "Tester");
-
-        restTemplate.postForEntity(baseUrl() + "/auth/register", reg, Map.class);
+        // Crear directamente con rol WAREHOUSE: la gestión de productos/stock
+        // ahora requiere ADMIN o WAREHOUSE, no el rol USER del auto-registro.
+        userService.createUser("productuser", "productuser@test.com", "password123",
+                "Product", "Tester", Role.WAREHOUSE);
 
         // Login
         Map<String, Object> login = new HashMap<>();

@@ -128,45 +128,6 @@ class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("✅ createAdmin - admin ya existe → retorna 200 con mensaje")
-    void shouldReturnExistingAdminMessage() {
-        when(authService.getUserByUsername("admin")).thenReturn(
-            User.builder().id(99L).username("admin").build());
-
-        ResponseEntity<?> response = controller.createAdmin();
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertTrue(response.getBody().toString().contains("ya existe"));
-    }
-
-    @Test
-    @DisplayName("✅ createAdmin - admin no existe → crea y retorna 200")
-    void shouldCreateNewAdmin() {
-        when(authService.getUserByUsername("admin"))
-            .thenThrow(new RuntimeException("not found"));
-        when(authService.registerUserWithRole(eq("admin"), any(), any(), any(), any(), eq(Role.ADMIN)))
-            .thenReturn(User.builder().id(1L).username("admin").build());
-
-        ResponseEntity<?> response = controller.createAdmin();
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertTrue(response.getBody().toString().contains("creado"));
-    }
-
-    @Test
-    @DisplayName("❌ createAdmin - excepción en registerUserWithRole → retorna 500")
-    void shouldReturn500WhenCreateAdminFails() {
-        when(authService.getUserByUsername("admin"))
-            .thenThrow(new RuntimeException("not found"));
-        when(authService.registerUserWithRole(any(), any(), any(), any(), any(), any()))
-            .thenThrow(new RuntimeException("DB error"));
-
-        ResponseEntity<?> response = controller.createAdmin();
-
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-    }
-
-    @Test
     @DisplayName("✅ createUserWithRole - ADMIN crea usuario con rol → retorna 200")
     void shouldCreateUserWithRole() {
         User adminUser = User.builder().id(2L).username("nuevo")

@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,20 +17,25 @@ import java.util.stream.Collectors;
 /**
  * Controlador REST - Productos
  * Puerto de entrada (Input Adapter)
+ * Lectura: cualquier rol autenticado (varios roles necesitan consultar el catálogo).
+ * Escritura/inventario: ADMIN y WAREHOUSE.
  */
 @RestController
 @RequestMapping("/products")
 @RequiredArgsConstructor
 public class ProductController {
-    
+
+    private static final String INVENTORY_ROLES = "hasAnyRole('ADMIN','WAREHOUSE')";
+
     private final ProductService productService;
     private final ProductUseCaseMapper mapper;
-    
+
     /**
      * Crear un nuevo producto
      * POST /api/products
      */
     @PostMapping
+    @PreAuthorize(INVENTORY_ROLES)
     public ResponseEntity<ProductDTO.Response> createProduct(
             @Valid @RequestBody ProductDTO.CreateRequest request) {
         
@@ -45,6 +51,7 @@ public class ProductController {
      * PUT /api/products/{id}
      */
     @PutMapping("/{id}")
+    @PreAuthorize(INVENTORY_ROLES)
     public ResponseEntity<ProductDTO.Response> updateProduct(
             @PathVariable Long id,
             @Valid @RequestBody ProductDTO.UpdateRequest request) {
@@ -148,6 +155,7 @@ public class ProductController {
      * POST /api/products/{id}/reduce-stock
      */
     @PostMapping("/{id}/reduce-stock")
+    @PreAuthorize(INVENTORY_ROLES)
     public ResponseEntity<ProductDTO.Response> reduceStock(
             @PathVariable Long id,
             @Valid @RequestBody ProductDTO.StockAdjustment adjustment) {
@@ -163,6 +171,7 @@ public class ProductController {
      * POST /api/products/{id}/increase-stock
      */
     @PostMapping("/{id}/increase-stock")
+    @PreAuthorize(INVENTORY_ROLES)
     public ResponseEntity<ProductDTO.Response> increaseStock(
             @PathVariable Long id,
             @Valid @RequestBody ProductDTO.StockAdjustment adjustment) {
@@ -178,6 +187,7 @@ public class ProductController {
      * PATCH /api/products/{id}/toggle-status
      */
     @PatchMapping("/{id}/toggle-status")
+    @PreAuthorize(INVENTORY_ROLES)
     public ResponseEntity<ProductDTO.Response> toggleProductStatus(@PathVariable Long id) {
         Product product = productService.toggleProductStatus(id);
         ProductDTO.Response response = mapper.toResponse(product);
@@ -189,6 +199,7 @@ public class ProductController {
      * DELETE /api/products/{id}
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
