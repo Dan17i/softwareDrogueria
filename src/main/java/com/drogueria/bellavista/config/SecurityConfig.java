@@ -5,6 +5,8 @@ import com.drogueria.bellavista.infrastructure.security.JwtUtils;
 import com.drogueria.bellavista.infrastructure.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -25,10 +27,12 @@ public class SecurityConfig {
 
     private final AuthService authService;
     private final JwtUtils jwtUtils;
+    private final Environment environment;
 
-    public SecurityConfig(AuthService authService, JwtUtils jwtUtils) {
+    public SecurityConfig(AuthService authService, JwtUtils jwtUtils, Environment environment) {
         this.authService = authService;
         this.jwtUtils = jwtUtils;
+        this.environment = environment;
     }
 
     @Bean
@@ -51,14 +55,19 @@ public class SecurityConfig {
     @Bean
     @SuppressWarnings("java:S4502") // Safe: stateless JWT API — no session cookies, CSRF vector does not apply
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        boolean dev = environment.acceptsProfiles(Profiles.of("dev", "test"));
         http
                 .cors(Customizer.withDefaults())
                 // CSRF disabled: API is stateless (SessionCreationPolicy.STATELESS) and authenticates via Bearer JWT tokens,
                 // not browser session cookies. No CSRF attack vector exists in this configuration.
                 .csrf(csrf -> csrf.disable())
 
-                // 👇 ESTA LÍNEA ES LA CLAVE PARA H2
-                .headers(headers -> headers.frameOptions(frame -> frame.disable()))
+                // frameOptions off solo para la consola H2 (dev/test)
+                .headers(headers -> {
+                    if (dev) {
+                        headers.frameOptions(frame -> frame.disable());
+                    }
+                })
 
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
@@ -66,13 +75,20 @@ public class SecurityConfig {
                         .requestMatchers("/auth/register", "/auth/login", "/auth/forgot-password",
                                 "/auth/reset-password", "/auth/dev-create-admin").permitAll()
                         .requestMatchers("/auth/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/h2-console/**", "/swagger-ui/**", "/v3/api-docs/**", "/actuator/**").permitAll()
+                        .requestMatchers("/actuator/health/**", "/actuator/info").permitAll()
+                        .requestMatchers("/h2-console/**", "/swagger-ui/**", "/v3/api-docs/**", "/actuator/**")
+                                .access((authentication, ctx) -> new org.springframework.security.authorization.AuthorizationDecision(
+                                        dev || authentication.get().getAuthorities().stream()
+                                                .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()))))
                         // Sin permitAll para /orders/**, /customers/** ni /api/notifications/**:
                         // requieren autenticación + el @PreAuthorize por rol de cada endpoint.
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
-                .httpBasic(Customizer.withDefaults());
+                ;
+        if (dev) {
+            http.httpBasic(Customizer.withDefaults());
+        }
 
         return http.build();
     }

@@ -36,11 +36,11 @@ services:
       SPRING_DATASOURCE_USERNAME: ${DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
       APP_JWT_SECRET: ${APP_JWT_SECRET}
-      MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+      MAIL_HOST: ${MAIL_HOST:?MAIL_HOST requerido (SES SMTP endpoint)}
       MAIL_PORT: ${MAIL_PORT:-587}
-      MAIL_USERNAME: ${MAIL_USERNAME:-}
-      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
-      MAIL_FROM: ${MAIL_FROM:-noreply@bellavista.com}
+      MAIL_USERNAME: ${MAIL_USERNAME:?MAIL_USERNAME requerido (SES SMTP user)}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:?MAIL_PASSWORD requerido (SES SMTP password)}
+      MAIL_FROM: ${MAIL_FROM:?MAIL_FROM requerido (identidad verificada en SES)}
       FRONTEND_URL: ${FRONTEND_URL:-https://drogueria-bellavista.netlify.app}
     ports:
       - "8080:8080"

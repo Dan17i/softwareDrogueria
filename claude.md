@@ -1,5 +1,9 @@
 # Proyecto: Droguería Bellavista (Invetoryrx)
 
+> **PRIORIDAD MÁXIMA: SIEMPRE leer `PROGRESS.md` ANTES de hacer cualquier cambio. Al terminar cada tarea: actualizarlo (Hecho/Pendiente/Bitácora) e incluirlo en el commit.**
+>
+> **Después de CADA cambio: redactar un commit (nombre + mensaje, estilo Conventional Commits en español) para que el usuario lo envíe manualmente. NO ejecutar `git commit` ni `git push`.**
+
 ## Contexto Técnico Crítico
 
 - **Stack:** Java 21, Spring Boot 3.2.2, Maven 3.8+, Docker Compose
