@@ -38,16 +38,19 @@
 ### P3 — Consistencia
 - [x] Lombok eliminado: 22 clases (domain/model + entities) con getters/setters/equals/hashCode/toString/Builder manuales, 2 mappers con constructor, `pom.xml` limpio. Quitados 4 tests `canEqual` (método solo de Lombok)
 ### P4 — Calidad/CI
-- [ ] `deploy.yml` usa `-DskipTests` → job `mvn verify` antes de build
-- [ ] Tag imagen con SHA (no solo `latest`)
-- [ ] Más tests: Order/Product/Supplier controllers, Stripe, email (GreenMail); revisar `AuthServiceTest` duplicado (application vs domain)
+- [x] `deploy.yml`: job `test` (`mvn -B verify`, con Testcontainers) bloquea el job `build-and-deploy` (`needs: test`)
+- [x] Imagen publicada con tags `latest` y `${{ github.sha }}` (rollback: cambiar tag en compose del EC2)
+- [x] `AuthServiceTest` duplicado eliminado (domain/service era subconjunto del de application/service)
+- [x] Surefire fija `api.version=1.44` (Docker 29); Testcontainers 1.19.0 → 1.21.4
+- [ ] Más tests: Order/Product/Supplier controllers, Stripe, email (GreenMail)
 ### P5 — Operación
 - [ ] Alertas Grafana, backups PostgreSQL, limpiar `infra/docker-compose.yml.save` y `render.yaml`
 
-## Cómo correr tests (Windows + Docker Desktop 29)
-`JAVA_TOOL_OPTIONS="-Dapi.version=1.44" mvn -o verify` — Testcontainers 1.19 usa API Docker 1.32 y Docker Desktop 29 exige >=1.44 (sin esto: "Could not find a valid Docker environment"). Pendiente: subir Testcontainers (>=1.20) o fijar `api.version` en surefire.
+## Cómo correr tests
+`mvn verify` (necesita Docker Desktop activo para Testcontainers).
 
 ## Bitácora (más reciente arriba)
+- 2026-10-06 — P4 CI: job `test` antes del deploy, tags SHA, Testcontainers 1.21.4 + surefire api.version, test duplicado eliminado. `mvn verify`: 510 OK. Sin commit.
 - 2026-10-06 — Integración corrida con Docker: 515 tests OK. Fix: SecurityConfig devolvía 403 en vez de 401 sin token (al quitar httpBasic en prod) → `HttpStatusEntryPoint(401)`. Sin commit.
 - 2026-10-06 — P0 config mail (prod/compose/.env.example) + P1 JWT secret y SecurityConfig por perfil. Compila; 483 tests OK, 5 integration fallan solo por Docker no disponible local (Testcontainers). Sin commit.
 - 2026-10-06 — Revisión general; creado PROGRESS.md; definida ruta P0–P5. Sin cambios de código.
