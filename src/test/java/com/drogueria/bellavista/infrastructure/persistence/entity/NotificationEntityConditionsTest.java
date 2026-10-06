@@ -43,12 +43,6 @@ class NotificationEntityConditionsTest {
         assertNotEquals(full(), "string");
     }
 
-    @Test
-    @DisplayName("🧪 canEqual - mismo tipo → true")
-    void shouldCanEqualSameType() {
-        assertTrue(full().canEqual(full()));
-    }
-
     // ── Branch D (both non-null, same value) ─────────────────────────────────
 
     @Test

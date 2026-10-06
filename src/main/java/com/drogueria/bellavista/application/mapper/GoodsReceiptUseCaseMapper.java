@@ -5,7 +5,6 @@ import com.drogueria.bellavista.domain.model.GoodsReceipt;
 import com.drogueria.bellavista.domain.model.GoodsReceiptItem;
 import com.drogueria.bellavista.domain.model.Order;
 import com.drogueria.bellavista.domain.model.Supplier;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;
@@ -14,7 +13,6 @@ import java.util.stream.Collectors;
  * Mapper: Convierte entre DTOs y Modelos de Dominio de Goods Receipt
  */
 @Component
-@RequiredArgsConstructor
 public class GoodsReceiptUseCaseMapper {
     
     /**

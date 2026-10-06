@@ -36,7 +36,7 @@
 - [ ] `ddl-auto: update` en prod → Flyway
 - [ ] No ejecutar `data.sql` en prod
 ### P3 — Consistencia
-- [ ] Quitar Lombok restante (24 archivos: `domain/model/*`, mappers; dependencia en `pom.xml`)
+- [x] Lombok eliminado: 22 clases (domain/model + entities) con getters/setters/equals/hashCode/toString/Builder manuales, 2 mappers con constructor, `pom.xml` limpio. Quitados 4 tests `canEqual` (método solo de Lombok)
 ### P4 — Calidad/CI
 - [ ] `deploy.yml` usa `-DskipTests` → job `mvn verify` antes de build
 - [ ] Tag imagen con SHA (no solo `latest`)

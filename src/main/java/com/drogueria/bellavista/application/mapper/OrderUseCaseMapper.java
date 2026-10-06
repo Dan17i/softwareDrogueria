@@ -5,7 +5,6 @@ import com.drogueria.bellavista.domain.model.Order;
 import com.drogueria.bellavista.domain.model.OrderItem;
 import com.drogueria.bellavista.domain.model.Product;
 import com.drogueria.bellavista.domain.service.ProductService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;
@@ -14,10 +13,13 @@ import java.util.stream.Collectors;
  * Mapper - Convierte entre OrderDTO (Request/Response) ↔ Order (Dominio)
  */
 @Component
-@RequiredArgsConstructor
 public class OrderUseCaseMapper {
     
     private final ProductService productService;
+
+    public OrderUseCaseMapper(ProductService productService) {
+        this.productService = productService;
+    }
     
     public Order toDomain(OrderDTO.CreateRequest request) {
         if (request == null) return null;

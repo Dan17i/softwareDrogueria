@@ -42,12 +42,6 @@ class NotificationConditionsTest {
         assertNotEquals(full(), "string");
     }
 
-    @Test
-    @DisplayName("🧪 canEqual - mismo tipo → true")
-    void shouldCanEqualSameType() {
-        assertTrue(full().canEqual(full()));
-    }
-
     // ── Branch D (both non-null, same value) — covered by base equality ───────
 
     @Test
