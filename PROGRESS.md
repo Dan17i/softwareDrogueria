@@ -42,7 +42,8 @@
 - [x] Imagen publicada con tags `latest` y `${{ github.sha }}` (rollback: cambiar tag en compose del EC2)
 - [x] `AuthServiceTest` duplicado eliminado (domain/service era subconjunto del de application/service)
 - [x] Surefire fija `api.version=1.44` (Docker 29); Testcontainers 1.19.0 → 1.21.4
-- [ ] Más tests: Order/Product/Supplier controllers, Stripe, email (GreenMail)
+- [x] Tests de controllers Customer/Order/Product/Supplier (incluyen guardas de `@PreAuthorize`). EmailService y Payment ya tenían tests; Stripe no tiene controller
+- [ ] Tests de mappers con baja cobertura (`GoodsReceiptMapper`, `GoodsReceiptUseCaseMapper`, `SupplierMapper`, `SupplierUseCaseMapper`) y adapters (`GoodsReceiptRepositoryAdapter`, `OrderRepositoryAdapter`)
 ### P5 — Operación
 - [ ] Alertas Grafana, backups PostgreSQL, limpiar `infra/docker-compose.yml.save` y `render.yaml`
 
@@ -50,6 +51,7 @@
 `mvn verify` (necesita Docker Desktop activo para Testcontainers).
 
 ## Bitácora (más reciente arriba)
+- 2026-10-06 — P4 tests: +4 ControllerTest (Customer, Order, Product, Supplier). `mvn verify`: 543 OK. Sin commit.
 - 2026-10-06 — P4 CI: job `test` antes del deploy, tags SHA, Testcontainers 1.21.4 + surefire api.version, test duplicado eliminado. `mvn verify`: 510 OK. Sin commit.
 - 2026-10-06 — Integración corrida con Docker: 515 tests OK. Fix: SecurityConfig devolvía 403 en vez de 401 sin token (al quitar httpBasic en prod) → `HttpStatusEntryPoint(401)`. Sin commit.
 - 2026-10-06 — P0 config mail (prod/compose/.env.example) + P1 JWT secret y SecurityConfig por perfil. Compila; 483 tests OK, 5 integration fallan solo por Docker no disponible local (Testcontainers). Sin commit.
