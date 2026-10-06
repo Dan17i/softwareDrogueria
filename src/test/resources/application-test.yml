@@ -1,4 +1,6 @@
 spring:
+  flyway:
+    enabled: false
   application:
     name: drogueria-bellavista-test
 

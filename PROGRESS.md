@@ -33,8 +33,12 @@
 - [ ] Verificar en EC2: Prometheus/Grafana scrapeaban `/actuator/prometheus` sin auth (prod solo expone `health`; si se usa, darle auth)
 - [ ] Rate limit `/auth/login`, `/auth/forgot-password`
 ### P2 — Datos
-- [ ] `ddl-auto: update` en prod → Flyway
-- [ ] No ejecutar `data.sql` en prod
+- [x] Flyway 9 (Boot-managed) en prod: `db/migration/V1__baseline_schema.sql` (generado por Hibernate, 11 tablas), `baseline-on-migrate` + `baseline-version: 1` (BD existente se marca V1 sin re-ejecutar), `ddl-auto: none`. Flyway desactivado en dev/test (siguen con ddl-auto)
+- [x] `data.sql` no corre en prod (`sql.init.mode: never`, ya estaba)
+- [x] Tests: `FlywayMigrationTest` (BD vacía y BD existente) + `SchemaMatchesEntitiesTest` (esquema Flyway pasa `ddl-auto=validate`; falla si cambias una entidad sin migración)
+- [ ] Antes del 1er deploy con Flyway: respaldar BD prod (`pg_dump`) y comparar esquema real vs V1 (`pg_dump -s`); luego cambiar prod a `ddl-auto: validate`
+- [ ] REGLA: todo cambio de entidad → nuevo `V{n}__desc.sql` (nunca editar V1)
+- [ ] Limpieza: `application-dev.yml` tiene password de BD hardcodeado; carpeta `bin/` está versionada con copias viejas (`bin/.kilo/worktrees/...`)
 ### P3 — Consistencia
 - [x] Lombok eliminado: 22 clases (domain/model + entities) con getters/setters/equals/hashCode/toString/Builder manuales, 2 mappers con constructor, `pom.xml` limpio. Quitados 4 tests `canEqual` (método solo de Lombok)
 ### P4 — Calidad/CI
@@ -51,6 +55,7 @@
 `mvn verify` (necesita Docker Desktop activo para Testcontainers).
 
 ## Bitácora (más reciente arriba)
+- 2026-10-06 — P2 Flyway: V1 baseline + config prod + 3 tests. `mvn verify`: 546 OK. Sin commit.
 - 2026-10-06 — P4 tests: +4 ControllerTest (Customer, Order, Product, Supplier). `mvn verify`: 543 OK. Sin commit.
 - 2026-10-06 — P4 CI: job `test` antes del deploy, tags SHA, Testcontainers 1.21.4 + surefire api.version, test duplicado eliminado. `mvn verify`: 510 OK. Sin commit.
 - 2026-10-06 — Integración corrida con Docker: 515 tests OK. Fix: SecurityConfig devolvía 403 en vez de 401 sin token (al quitar httpBasic en prod) → `HttpStatusEntryPoint(401)`. Sin commit.
