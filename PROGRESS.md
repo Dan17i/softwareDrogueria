@@ -44,7 +44,11 @@
 ### P5 — Operación
 - [ ] Alertas Grafana, backups PostgreSQL, limpiar `infra/docker-compose.yml.save` y `render.yaml`
 
+## Cómo correr tests (Windows + Docker Desktop 29)
+`JAVA_TOOL_OPTIONS="-Dapi.version=1.44" mvn -o verify` — Testcontainers 1.19 usa API Docker 1.32 y Docker Desktop 29 exige >=1.44 (sin esto: "Could not find a valid Docker environment"). Pendiente: subir Testcontainers (>=1.20) o fijar `api.version` en surefire.
+
 ## Bitácora (más reciente arriba)
+- 2026-10-06 — Integración corrida con Docker: 515 tests OK. Fix: SecurityConfig devolvía 403 en vez de 401 sin token (al quitar httpBasic en prod) → `HttpStatusEntryPoint(401)`. Sin commit.
 - 2026-10-06 — P0 config mail (prod/compose/.env.example) + P1 JWT secret y SecurityConfig por perfil. Compila; 483 tests OK, 5 integration fallan solo por Docker no disponible local (Testcontainers). Sin commit.
 - 2026-10-06 — Revisión general; creado PROGRESS.md; definida ruta P0–P5. Sin cambios de código.
 - (previo, git) 38a16f9 DTOs→record · df23673 Lombok fuera de services/ctrl/config/adapters · 57a9f9e N+1 · e49d4c3 bugs negocio · e5989c9 seguridad
