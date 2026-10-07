@@ -6,7 +6,8 @@
 ## Mapa rápido
 - Código: `src/main/java/com/drogueria/bellavista/{domain,application,infrastructure,controller,config,exception}`
 - Config: `src/main/resources/application{,-dev,-prod}.yml`, `schema.sql`, `data.sql`
-- CI/CD: `.github/workflows/{deploy,sonarcloud}.yml` (push main → GHCR → SSH EC2)
+- CI/CD: `.github/workflows/{deploy,sonarcloud}.yml` (push main → tests → GHCR → SSH, el SSH solo corre si la variable de repo `DEPLOY_ENABLED=true`)
+- **Hosting: la instancia EC2 ya NO existe** (free tier vencido, 2026-10). Deploy en pausa; hay que elegir hosting nuevo (VPS barato recomendado) y volver a poner `DEPLOY_ENABLED=true` + secrets `EC2_HOST`/`EC2_SSH_KEY`
 - Docs: `docs/`, requests: `http/`
 - Tests: 40 archivos / 156 clases main (snapshot 2026-10-06)
 
@@ -63,7 +64,16 @@
 - [x] Gate tras 1er push: coverage 70.3% (faltaban GoodsReceiptRepositoryAdapter, GoodsReceiptUseCaseMapper, RateLimitFilter) → tests añadidos; 2 issues de PojoContractTest (S5863, S1872) corregidos
 - [ ] Verificar el gate tras el siguiente push
 
+## Portafolio (rama `docs/portafolio`, 2026-10-06)
+- [x] README profesional (badges CI + Sonar, Mermaid, ejecución con Compose, variables, curl)
+- [x] `.env.example` completo; `docker-compose.yml` con `build: .` + `STRIPE_*`/`APP_DOCS_PUBLIC`; `docker-compose.demo.yml` con Mailpit
+- [x] OpenAPI: `OpenApiConfig` (JWT bearerAuth) + `app.docs.public` (Swagger cerrado por defecto salvo dev/test/ADMIN); tests de apertura y cierre
+- [ ] NO verificado de punta a punta: `docker compose -f docker-compose.yml -f docker-compose.demo.yml up --build` (Docker Hub inaccesible en este equipo por DNS); confirmar que los correos llegan a Mailpit (:8025) y que las vars `SPRING_MAIL_PROPERTIES_MAIL_SMTP_*` aplican
+- [ ] Posibles chocan con contenedores viejos `drogueria_*` (abril) por `container_name` fijo: `docker rm drogueria_app drogueria_db drogueria_redis`
+- [ ] Anomalía: `NotificationController` mapea `/api/notifications` DENTRO del context path `/api` → URL real `/api/api/notifications`. Revisar con el frontend antes de cambiar
+
 ## Bitácora (más reciente arriba)
+- 2026-10-06 — Rama docs/portafolio: .env.example, compose demo, OpenAPI/Swagger, README. 585 tests OK. Push de rama, PR lo abre el usuario.
 - 2026-10-06 — Sonar 2ª vuelta: cobertura new code 70.3% → tests de adapter/mapper/RateLimitFilter (Window, limpieza), PojoContractTest sin issues. 581 tests OK. Sin commit.
 - 2026-10-06 — Sonar: 12 bugs corregidos, PojoContractTest, exclusiones cpd/coverage. 575 tests OK. Sin commit.
 - 2026-10-06 — Limpieza de secretos y archivos basura versionados (ver P2/Limpieza). Se detectó `infra/.env.save` con credenciales de prod en el historial. Sin commit.
