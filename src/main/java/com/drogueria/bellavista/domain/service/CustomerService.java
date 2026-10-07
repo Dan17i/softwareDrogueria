@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.List;
 
 /**
@@ -28,6 +29,7 @@ public class CustomerService {
      * Crear un nuevo cliente
      */
     public Customer createCustomer(Customer customer) {
+        Objects.requireNonNull(customer, "customer es requerido");
         // Validar que no exista un cliente con el mismo código
         if (customerRepository.existsByCode(customer.getCode())) {
             throw new BusinessException("Ya existe un cliente con el código: " + customer.getCode());
@@ -56,6 +58,7 @@ public class CustomerService {
      * Actualizar un cliente existente
      */
     public Customer updateCustomer(Long id, Customer customerData) {
+        Objects.requireNonNull(customerData, "customerData es requerido");
         Customer existingCustomer = customerRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Customer", "id", id));
         

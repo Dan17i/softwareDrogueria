@@ -6,6 +6,7 @@ import com.drogueria.bellavista.infrastructure.mapper.GoodsReceiptMapper;
 import com.drogueria.bellavista.infrastructure.persistence.*;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -30,6 +31,7 @@ public class GoodsReceiptRepositoryAdapter implements GoodsReceiptRepository {
     
     @Override
     public GoodsReceipt save(GoodsReceipt goodsReceipt) {
+        Objects.requireNonNull(goodsReceipt, "goodsReceipt es requerido");
         // Convertir a Entity
         GoodsReceiptEntity entity = mapper.toEntity(goodsReceipt);
         GoodsReceiptEntity savedEntity = jpaGoodsReceiptRepository.save(entity);

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.List;
 
 /**
@@ -28,6 +29,7 @@ public class ProductService {
      * Crear un nuevo producto
      */
     public Product createProduct(Product product) {
+        Objects.requireNonNull(product, "product es requerido");
         // Validar que no exista un producto con el mismo código
         if (productRepository.existsByCode(product.getCode())) {
             throw new BusinessException("Ya existe un producto con el código: " + product.getCode());
@@ -45,6 +47,7 @@ public class ProductService {
      * Actualizar un producto existente
      */
     public Product updateProduct(Long id, Product productData) {
+        Objects.requireNonNull(productData, "productData es requerido");
         Product existingProduct = productRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
         

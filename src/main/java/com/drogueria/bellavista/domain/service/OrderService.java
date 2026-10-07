@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.List;
 import java.util.UUID;
 
@@ -52,6 +53,7 @@ public class OrderService {
      * - Métrica 2.3: Auditoría completa con createdAt y createdBy (meta 100%)
      */
     public Order createOrder(Order order) {
+        Objects.requireNonNull(order, "order es requerido");
         log.info("Creating order for customerId={}", order.getCustomerId());
         // Validar cliente
         Customer customer = customerService.getCustomerById(order.getCustomerId());

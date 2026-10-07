@@ -7,6 +7,7 @@ import com.drogueria.bellavista.domain.model.Order;
 import com.drogueria.bellavista.domain.model.Supplier;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -70,7 +71,7 @@ public class GoodsReceiptUseCaseMapper {
             .updatedAt(receipt.getUpdatedAt())
             .totalLineItems(receipt.getTotalLineItems())
             .totalReceivedQuantity(receipt.getTotalReceivedQuantity())
-            .items(receipt.getItems().stream()
+            .items(receipt.getItems() == null ? List.of() : receipt.getItems().stream()
                 .map(this::itemToResponse)
                 .collect(Collectors.toList()))
             .build();

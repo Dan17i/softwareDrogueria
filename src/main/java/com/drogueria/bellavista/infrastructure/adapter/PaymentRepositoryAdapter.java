@@ -8,6 +8,7 @@ import com.drogueria.bellavista.infrastructure.persistence.repository.PaymentJpa
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -25,6 +26,7 @@ public class PaymentRepositoryAdapter implements PaymentRepository {
     
     @Override
     public Payment save(Payment payment) {
+        Objects.requireNonNull(payment, "payment es requerido");
         PaymentEntity entity = mapper.toDomain(payment);
         PaymentEntity saved = jpaRepository.save(entity);
         return mapper.fromDomain(saved);

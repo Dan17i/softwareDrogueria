@@ -7,6 +7,7 @@ import com.drogueria.bellavista.infrastructure.persistence.*;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -29,6 +30,7 @@ public class OrderRepositoryAdapter implements OrderRepository {
     
     @Override
     public Order save(Order order) {
+        Objects.requireNonNull(order, "order es requerido");
         // Guardar orden
         OrderEntity orderEntity = mapper.toEntity(order);
         OrderEntity savedOrderEntity = jpaRepository.save(orderEntity);

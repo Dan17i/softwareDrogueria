@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.List;
 
 /**
@@ -27,6 +28,7 @@ public class SupplierService {
      * Crear nuevo proveedor
      */
     public Supplier createSupplier(Supplier supplier) {
+        Objects.requireNonNull(supplier, "supplier es requerido");
         if (supplierRepository.existsByCode(supplier.getCode())) {
             throw new BusinessException("Ya existe un proveedor con el código: " + supplier.getCode());
         }
@@ -46,6 +48,7 @@ public class SupplierService {
      * Actualizar proveedor
      */
     public Supplier updateSupplier(Long id, Supplier supplierData) {
+        Objects.requireNonNull(supplierData, "supplierData es requerido");
         Supplier existingSupplier = supplierRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Supplier", "id", id));
         

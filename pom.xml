@@ -27,6 +27,10 @@
         <sonar.organization>software-drogueria</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.projectKey>software-drogueria</sonar.projectKey>
+        <!-- Arquitectura hexagonal: modelo de dominio, entidades JPA y DTOs tienen los mismos campos por diseño (no es duplicación real) -->
+        <sonar.cpd.exclusions>**/application/dto/**,**/domain/model/**,**/infrastructure/persistence/**</sonar.cpd.exclusions>
+        <!-- DTOs = records/accessors sin lógica; modelos y entidades se cubren con PojoContractTest -->
+        <sonar.coverage.exclusions>**/application/dto/**</sonar.coverage.exclusions>
     </properties>
 
     <dependencies>

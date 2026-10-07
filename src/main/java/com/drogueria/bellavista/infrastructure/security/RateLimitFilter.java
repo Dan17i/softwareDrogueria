@@ -33,7 +33,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private final Map<String, Rule> rules;
     private final LongSupplier clock;
     private final long maxWindowMillis;
-    private final Map<String, Deque<Long>> hits = new ConcurrentHashMap<>();
+    private final Map<String, Window> hits = new ConcurrentHashMap<>();
 
     public RateLimitFilter(Map<String, Rule> rules) {
         this(rules, System::currentTimeMillis);
@@ -73,24 +73,28 @@ public class RateLimitFilter extends OncePerRequestFilter {
     /** Registra el intento. Retorna 0 si se permite, o los ms de espera si se excedió el límite. */
     private long registerHit(String key, Rule rule, long now) {
         if (hits.size() > CLEANUP_THRESHOLD) {
-            hits.values().removeIf(q -> isStale(q, now, maxWindowMillis));
+            hits.values().removeIf(w -> w.isStale(now, maxWindowMillis));
         }
-        Deque<Long> queue = hits.computeIfAbsent(key, k -> new ArrayDeque<>());
-        synchronized (queue) {
-            while (!queue.isEmpty() && now - queue.peekFirst() >= rule.windowMillis()) {
-                queue.pollFirst();
-            }
-            if (queue.size() >= rule.maxRequests()) {
-                return rule.windowMillis() - (now - queue.peekFirst());
-            }
-            queue.addLast(now);
-            return 0;
-        }
+        return hits.computeIfAbsent(key, k -> new Window()).register(rule, now);
     }
 
-    private boolean isStale(Deque<Long> queue, long now, long windowMillis) {
-        synchronized (queue) {
-            return queue.isEmpty() || now - queue.peekLast() >= windowMillis;
+    /** Marcas de tiempo de una clave (IP + ruta). El acceso se serializa con synchronized sobre la propia instancia. */
+    private static final class Window {
+        private final Deque<Long> timestamps = new ArrayDeque<>();
+
+        synchronized long register(Rule rule, long now) {
+            while (!timestamps.isEmpty() && now - timestamps.peekFirst() >= rule.windowMillis()) {
+                timestamps.pollFirst();
+            }
+            if (timestamps.size() >= rule.maxRequests() && !timestamps.isEmpty()) {
+                return rule.windowMillis() - (now - timestamps.peekFirst());
+            }
+            timestamps.addLast(now);
+            return 0;
+        }
+
+        synchronized boolean isStale(long now, long windowMillis) {
+            return timestamps.isEmpty() || now - timestamps.peekLast() >= windowMillis;
         }
     }
 }
