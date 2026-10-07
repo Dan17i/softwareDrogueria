@@ -74,7 +74,8 @@ class PojoContractTest {
         assertEquals(bean, viaBuilder);
 
         // equals / hashCode / toString
-        assertEquals(bean, bean);
+        Object alias = bean;
+        assertEquals(bean, alias);
         assertEquals(bean.hashCode(), viaCtor.hashCode());
         assertNotEquals(null, bean);
         assertNotEquals("otra clase", bean);
@@ -94,13 +95,8 @@ class PojoContractTest {
         return result;
     }
 
-    private static Class<?> builderClass(Class<?> type) {
-        for (Class<?> c : type.getDeclaredClasses()) {
-            if (c.getSimpleName().equals("Builder")) {
-                return c;
-            }
-        }
-        throw new AssertionError("Sin Builder en " + type.getName());
+    private static Class<?> builderClass(Class<?> type) throws ClassNotFoundException {
+        return Class.forName(type.getName() + "$Builder");
     }
 
     private static void invokeSetter(Class<?> type, Object bean, Field f, Object value) throws Exception {

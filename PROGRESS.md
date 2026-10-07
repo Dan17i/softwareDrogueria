@@ -60,9 +60,11 @@
 - Quality gate (new code): coverage >=80, duplicación <=3, reliability A. Tras quitar Lombok falló por boilerplate escrito a mano.
 - [x] 12 bugs de Reliability corregidos: 11x S2259 (flujos null: mappers devuelven null y el servicio dereferencia → `Objects.requireNonNull` en services/adapters; `GoodsReceipt.getItems()` null-safe en mapper) y S2445 (`RateLimitFilter` ya no sincroniza sobre un parámetro)
 - [x] `PojoContractTest` cubre getters/setters/ctor/Builder/equals/hashCode/toString de 22 clases; `pom.xml`: `sonar.cpd.exclusions` (dto, model, persistence) y `sonar.coverage.exclusions` (dto)
-- [ ] Verificar el gate tras el siguiente push; si coverage <80 mirar `new_coverage` por archivo
+- [x] Gate tras 1er push: coverage 70.3% (faltaban GoodsReceiptRepositoryAdapter, GoodsReceiptUseCaseMapper, RateLimitFilter) → tests añadidos; 2 issues de PojoContractTest (S5863, S1872) corregidos
+- [ ] Verificar el gate tras el siguiente push
 
 ## Bitácora (más reciente arriba)
+- 2026-10-06 — Sonar 2ª vuelta: cobertura new code 70.3% → tests de adapter/mapper/RateLimitFilter (Window, limpieza), PojoContractTest sin issues. 581 tests OK. Sin commit.
 - 2026-10-06 — Sonar: 12 bugs corregidos, PojoContractTest, exclusiones cpd/coverage. 575 tests OK. Sin commit.
 - 2026-10-06 — Limpieza de secretos y archivos basura versionados (ver P2/Limpieza). Se detectó `infra/.env.save` con credenciales de prod en el historial. Sin commit.
 - 2026-10-06 — P1 rate limit auth: RateLimitFilter + tests unit/integración. `mvn verify` OK. Sin commit.

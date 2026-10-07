@@ -24,7 +24,7 @@ import java.util.function.LongSupplier;
 public class RateLimitFilter extends OncePerRequestFilter {
 
     private static final Logger log = LoggerFactory.getLogger(RateLimitFilter.class);
-    private static final int CLEANUP_THRESHOLD = 10_000;
+    private static final int DEFAULT_CLEANUP_THRESHOLD = 10_000;
 
     /** Límite de una ruta: máximo de peticiones dentro de la ventana. */
     public record Rule(int maxRequests, long windowMillis) {
@@ -33,6 +33,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private final Map<String, Rule> rules;
     private final LongSupplier clock;
     private final long maxWindowMillis;
+    private final int cleanupThreshold;
     private final Map<String, Window> hits = new ConcurrentHashMap<>();
 
     public RateLimitFilter(Map<String, Rule> rules) {
@@ -40,8 +41,13 @@ public class RateLimitFilter extends OncePerRequestFilter {
     }
 
     RateLimitFilter(Map<String, Rule> rules, LongSupplier clock) {
+        this(rules, clock, DEFAULT_CLEANUP_THRESHOLD);
+    }
+
+    RateLimitFilter(Map<String, Rule> rules, LongSupplier clock, int cleanupThreshold) {
         this.rules = Map.copyOf(rules);
         this.clock = clock;
+        this.cleanupThreshold = cleanupThreshold;
         this.maxWindowMillis = this.rules.values().stream().mapToLong(Rule::windowMillis).max().orElse(0);
     }
 
@@ -72,29 +78,32 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
     /** Registra el intento. Retorna 0 si se permite, o los ms de espera si se excedió el límite. */
     private long registerHit(String key, Rule rule, long now) {
-        if (hits.size() > CLEANUP_THRESHOLD) {
+        if (hits.size() > cleanupThreshold) {
             hits.values().removeIf(w -> w.isStale(now, maxWindowMillis));
         }
         return hits.computeIfAbsent(key, k -> new Window()).register(rule, now);
     }
 
     /** Marcas de tiempo de una clave (IP + ruta). El acceso se serializa con synchronized sobre la propia instancia. */
-    private static final class Window {
+    static final class Window {
         private final Deque<Long> timestamps = new ArrayDeque<>();
 
         synchronized long register(Rule rule, long now) {
-            while (!timestamps.isEmpty() && now - timestamps.peekFirst() >= rule.windowMillis()) {
+            Long oldest = timestamps.peekFirst();
+            while (oldest != null && now - oldest >= rule.windowMillis()) {
                 timestamps.pollFirst();
+                oldest = timestamps.peekFirst();
             }
-            if (timestamps.size() >= rule.maxRequests() && !timestamps.isEmpty()) {
-                return rule.windowMillis() - (now - timestamps.peekFirst());
+            if (oldest != null && timestamps.size() >= rule.maxRequests()) {
+                return rule.windowMillis() - (now - oldest);
             }
             timestamps.addLast(now);
             return 0;
         }
 
         synchronized boolean isStale(long now, long windowMillis) {
-            return timestamps.isEmpty() || now - timestamps.peekLast() >= windowMillis;
+            Long last = timestamps.peekLast();
+            return last == null || now - last >= windowMillis;
         }
     }
 }

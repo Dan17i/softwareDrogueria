@@ -104,4 +104,34 @@ class RateLimitFilterTest {
         }
         verify(chain, times(20)).doFilter(any(), any());
     }
+
+    @Test
+    @DisplayName("limpia las ventanas vencidas al superar el umbral de claves")
+    void shouldCleanupStaleWindows() throws Exception {
+        filter = new RateLimitFilter(Map.of("/auth/login", new RateLimitFilter.Rule(1, 60_000L)), now::get, 1);
+        call("POST", "/auth/login", "1.1.1.1");
+        call("POST", "/auth/login", "2.2.2.2");
+        now.addAndGet(120_000L);
+
+        assertEquals(200, call("POST", "/auth/login", "3.3.3.3").getStatus());
+        assertEquals(200, call("POST", "/auth/login", "1.1.1.1").getStatus());
+    }
+
+    @Test
+    @DisplayName("conserva ventanas vigentes durante la limpieza")
+    void shouldKeepActiveWindowsOnCleanup() throws Exception {
+        filter = new RateLimitFilter(Map.of("/auth/login", new RateLimitFilter.Rule(1, 60_000L)), now::get, 1);
+        call("POST", "/auth/login", "1.1.1.1");
+        call("POST", "/auth/login", "2.2.2.2");
+
+        call("POST", "/auth/login", "3.3.3.3");
+
+        assertEquals(429, call("POST", "/auth/login", "1.1.1.1").getStatus());
+    }
+
+    @Test
+    @DisplayName("Window vacía se considera vencida")
+    void emptyWindowShouldBeStale() {
+        assertTrue(new RateLimitFilter.Window().isStale(now.get(), 60_000L));
+    }
 }
