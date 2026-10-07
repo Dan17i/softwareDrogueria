@@ -56,3 +56,8 @@ mvn_output.log
 bin/
 .kilo/
 .claude/settings.local.json
+
+# Notas de trabajo con el asistente: solo locales, no se publican
+claude.md
+CLAUDE.md
+PROGRESS.md
