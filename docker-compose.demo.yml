@@ -1,0 +1,35 @@
+# Overlay para demos locales: correo de prueba con Mailpit (no envía correos reales).
+#
+#   docker compose -f docker-compose.yml -f docker-compose.demo.yml up --build
+#
+# - API:        http://localhost:8080/api
+# - Swagger UI: http://localhost:8080/api/swagger-ui/index.html
+# - Mailpit:    http://localhost:8025  (bandeja con los correos que envía la app)
+
+services:
+  app:
+    depends_on:
+      mailpit:
+        condition: service_started
+    environment:
+      MAIL_HOST: mailpit
+      MAIL_PORT: "1025"
+      MAIL_USERNAME: demo
+      MAIL_PASSWORD: demo
+      MAIL_FROM: no-reply@drogueria.local
+      # Mailpit no usa autenticación ni STARTTLS
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: "false"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "false"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_REQUIRED: "false"
+      # Swagger UI abierto, solo para la demo
+      APP_DOCS_PUBLIC: "true"
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: drogueria_mailpit
+    restart: unless-stopped
+    ports:
+      - "8025:8025"
+    networks:
+      - drogueria_net
+    mem_limit: 64m
