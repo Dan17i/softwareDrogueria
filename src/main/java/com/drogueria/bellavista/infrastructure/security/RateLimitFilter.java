@@ -1,0 +1,96 @@
+package com.drogueria.bellavista.infrastructure.security;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.LongSupplier;
+
+/**
+ * Limita intentos por IP en endpoints de autenticación (fuerza bruta, abuso de correos de reset).
+ * Ventana deslizante en memoria: válido para una sola instancia de la app.
+ * Usa getRemoteAddr(): no confía en X-Forwarded-For (spoofeable) salvo que el servidor lo reescriba.
+ */
+public class RateLimitFilter extends OncePerRequestFilter {
+
+    private static final Logger log = LoggerFactory.getLogger(RateLimitFilter.class);
+    private static final int CLEANUP_THRESHOLD = 10_000;
+
+    /** Límite de una ruta: máximo de peticiones dentro de la ventana. */
+    public record Rule(int maxRequests, long windowMillis) {
+    }
+
+    private final Map<String, Rule> rules;
+    private final LongSupplier clock;
+    private final long maxWindowMillis;
+    private final Map<String, Deque<Long>> hits = new ConcurrentHashMap<>();
+
+    public RateLimitFilter(Map<String, Rule> rules) {
+        this(rules, System::currentTimeMillis);
+    }
+
+    RateLimitFilter(Map<String, Rule> rules, LongSupplier clock) {
+        this.rules = Map.copyOf(rules);
+        this.clock = clock;
+        this.maxWindowMillis = this.rules.values().stream().mapToLong(Rule::windowMillis).max().orElse(0);
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return !"POST".equals(request.getMethod()) || !rules.containsKey(request.getServletPath());
+    }
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+            throws ServletException, IOException {
+        String path = request.getServletPath();
+        Rule rule = rules.get(path);
+        long now = clock.getAsLong();
+        long retryAfterMillis = registerHit(request.getRemoteAddr() + "|" + path, rule, now);
+
+        if (retryAfterMillis > 0) {
+            log.warn("Rate limit excedido: ip={} path={}", request.getRemoteAddr(), path);
+            response.setStatus(429);
+            response.setHeader("Retry-After", String.valueOf((retryAfterMillis + 999) / 1000));
+            response.setContentType("application/json;charset=UTF-8");
+            response.getOutputStream().write(
+                    "{\"message\":\"Demasiados intentos. Intenta de nuevo más tarde.\"}".getBytes(StandardCharsets.UTF_8));
+            return;
+        }
+        chain.doFilter(request, response);
+    }
+
+    /** Registra el intento. Retorna 0 si se permite, o los ms de espera si se excedió el límite. */
+    private long registerHit(String key, Rule rule, long now) {
+        if (hits.size() > CLEANUP_THRESHOLD) {
+            hits.values().removeIf(q -> isStale(q, now, maxWindowMillis));
+        }
+        Deque<Long> queue = hits.computeIfAbsent(key, k -> new ArrayDeque<>());
+        synchronized (queue) {
+            while (!queue.isEmpty() && now - queue.peekFirst() >= rule.windowMillis()) {
+                queue.pollFirst();
+            }
+            if (queue.size() >= rule.maxRequests()) {
+                return rule.windowMillis() - (now - queue.peekFirst());
+            }
+            queue.addLast(now);
+            return 0;
+        }
+    }
+
+    private boolean isStale(Deque<Long> queue, long now, long windowMillis) {
+        synchronized (queue) {
+            return queue.isEmpty() || now - queue.peekLast() >= windowMillis;
+        }
+    }
+}

@@ -3,6 +3,7 @@ package com.drogueria.bellavista.config;
 import com.drogueria.bellavista.application.service.AuthService;
 import com.drogueria.bellavista.infrastructure.security.JwtUtils;
 import com.drogueria.bellavista.infrastructure.security.JwtAuthenticationFilter;
+import com.drogueria.bellavista.infrastructure.security.RateLimitFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -16,6 +17,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.util.Arrays;
+import java.util.Map;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -52,9 +54,26 @@ public class SecurityConfig {
         return new JwtAuthenticationFilter(jwtUtils, authService);
     }
 
+    /**
+     * Límites por IP en endpoints públicos de autenticación. Configurable con app.rate-limit.*
+     * (login: 10/min, forgot-password: 5/15min, register y reset-password: 10/15min por defecto).
+     */
+    private RateLimitFilter rateLimitFilter() {
+        long minute = 60_000L;
+        int loginMax = environment.getProperty("app.rate-limit.login-max", Integer.class, 10);
+        int forgotMax = environment.getProperty("app.rate-limit.forgot-password-max", Integer.class, 5);
+        int otherMax = environment.getProperty("app.rate-limit.register-max", Integer.class, 10);
+        return new RateLimitFilter(Map.of(
+                "/auth/login", new RateLimitFilter.Rule(loginMax, minute),
+                "/auth/forgot-password", new RateLimitFilter.Rule(forgotMax, 15 * minute),
+                "/auth/register", new RateLimitFilter.Rule(otherMax, 15 * minute),
+                "/auth/reset-password", new RateLimitFilter.Rule(otherMax, 15 * minute)));
+    }
+
     @Bean
     @SuppressWarnings("java:S4502") // Safe: stateless JWT API — no session cookies, CSRF vector does not apply
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        boolean rateLimitEnabled = environment.getProperty("app.rate-limit.enabled", Boolean.class, true);
         boolean dev = environment.acceptsProfiles(Profiles.of("dev", "test"));
         http
                 .cors(Customizer.withDefaults())
@@ -89,6 +108,9 @@ public class SecurityConfig {
                 )
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 ;
+        if (rateLimitEnabled) {
+            http.addFilterBefore(rateLimitFilter(), JwtAuthenticationFilter.class);
+        }
         if (dev) {
             http.httpBasic(Customizer.withDefaults());
         }

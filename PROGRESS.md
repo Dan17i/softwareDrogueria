@@ -31,7 +31,7 @@
 - [ ] ROTAR `APP_JWT_SECRET` en EC2 (el viejo está en el historial git)
 - [x] `SecurityConfig`: actuator/h2/swagger solo dev/test o ROLE_ADMIN; `health`/`info` públicos; `httpBasic` y `frameOptions.disable` solo dev/test
 - [ ] Verificar en EC2: Prometheus/Grafana scrapeaban `/actuator/prometheus` sin auth (prod solo expone `health`; si se usa, darle auth)
-- [ ] Rate limit `/auth/login`, `/auth/forgot-password`
+- [x] Rate limit por IP (`RateLimitFilter`, memoria, 1 instancia): login 10/min, forgot-password 5/15min, register y reset-password 10/15min → 429 + `Retry-After`. Config `app.rate-limit.{enabled,login-max,forgot-password-max,register-max}`; desactivado en tests. Usa `getRemoteAddr()`: si hay proxy/ALB delante, configurar `server.forward-headers-strategy` o todas las IPs serán la del proxy
 ### P2 — Datos
 - [x] Flyway 9 (Boot-managed) en prod: `db/migration/V1__baseline_schema.sql` (generado por Hibernate, 11 tablas), `baseline-on-migrate` + `baseline-version: 1` (BD existente se marca V1 sin re-ejecutar), `ddl-auto: none`. Flyway desactivado en dev/test (siguen con ddl-auto)
 - [x] `data.sql` no corre en prod (`sql.init.mode: never`, ya estaba)
@@ -55,6 +55,7 @@
 `mvn verify` (necesita Docker Desktop activo para Testcontainers).
 
 ## Bitácora (más reciente arriba)
+- 2026-10-06 — P1 rate limit auth: RateLimitFilter + tests unit/integración. `mvn verify` OK. Sin commit.
 - 2026-10-06 — P2 Flyway: V1 baseline + config prod + 3 tests. `mvn verify`: 546 OK. Sin commit.
 - 2026-10-06 — P4 tests: +4 ControllerTest (Customer, Order, Product, Supplier). `mvn verify`: 543 OK. Sin commit.
 - 2026-10-06 — P4 CI: job `test` antes del deploy, tags SHA, Testcontainers 1.21.4 + surefire api.version, test duplicado eliminado. `mvn verify`: 510 OK. Sin commit.

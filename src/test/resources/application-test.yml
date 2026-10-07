@@ -37,6 +37,8 @@ server:
 
 # Configuración JWT para tests (no necesita variable de entorno)
 app:
+  rate-limit:
+    enabled: false
   jwt:
     secret: test-secret-key-with-at-least-32-characters-for-testing-purposes-only
     expiration: 86400000
