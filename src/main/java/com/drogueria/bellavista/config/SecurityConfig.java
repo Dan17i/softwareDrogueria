@@ -8,12 +8,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
+import org.springframework.security.authorization.AuthorizationDecision;
+import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.util.Arrays;
@@ -70,11 +73,20 @@ public class SecurityConfig {
                 "/auth/reset-password", new RateLimitFilter.Rule(otherMax, 15 * minute)));
     }
 
+    /** Acceso libre si {@code allowed}; en caso contrario solo usuarios con ROLE_ADMIN. */
+    private static AuthorizationManager<RequestAuthorizationContext> adminOrAllowed(boolean allowed) {
+        return (authentication, context) -> new AuthorizationDecision(
+                allowed || authentication.get().getAuthorities().stream()
+                        .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority())));
+    }
+
     @Bean
     @SuppressWarnings("java:S4502") // Safe: stateless JWT API — no session cookies, CSRF vector does not apply
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         boolean rateLimitEnabled = environment.getProperty("app.rate-limit.enabled", Boolean.class, true);
         boolean dev = environment.acceptsProfiles(Profiles.of("dev", "test"));
+        // Swagger UI: abierto en dev/test o si app.docs.public=true (demos); si no, solo ADMIN
+        boolean docsPublic = dev || environment.getProperty("app.docs.public", Boolean.class, false);
         http
                 .cors(Customizer.withDefaults())
                 // CSRF disabled: API is stateless (SessionCreationPolicy.STATELESS) and authenticates via Bearer JWT tokens,
@@ -98,10 +110,10 @@ public class SecurityConfig {
                                 "/auth/reset-password", "/auth/dev-create-admin").permitAll()
                         .requestMatchers("/auth/admin/**").hasRole("ADMIN")
                         .requestMatchers("/actuator/health/**", "/actuator/info").permitAll()
-                        .requestMatchers("/h2-console/**", "/swagger-ui/**", "/v3/api-docs/**", "/actuator/**")
-                                .access((authentication, ctx) -> new org.springframework.security.authorization.AuthorizationDecision(
-                                        dev || authentication.get().getAuthorities().stream()
-                                                .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()))))
+                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**")
+                                .access(adminOrAllowed(docsPublic))
+                        .requestMatchers("/h2-console/**", "/actuator/**")
+                                .access(adminOrAllowed(dev))
                         // Sin permitAll para /orders/**, /customers/** ni /api/notifications/**:
                         // requieren autenticación + el @PreAuthorize por rol de cada endpoint.
                         .anyRequest().authenticated()

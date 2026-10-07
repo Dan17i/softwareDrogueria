@@ -1,724 +1,214 @@
-# 🏥 Droguería Bellavista - Backend API
+# 🏥 Droguería Bellavista — API REST
 
-Sistema de gestión para droguería construido con **Spring Boot 3.2.2** y **Java 21**, siguiendo arquitectura hexagonal (Clean Architecture).
+[![CI/CD](https://github.com/Dan17i/softwareDrogueria/actions/workflows/deploy.yml/badge.svg)](https://github.com/Dan17i/softwareDrogueria/actions/workflows/deploy.yml)
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=Dan17i_softwareDrogueria&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Dan17i_softwareDrogueria)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Dan17i_softwareDrogueria&metric=coverage)](https://sonarcloud.io/summary/new_code?id=Dan17i_softwareDrogueria)
+![Java 21](https://img.shields.io/badge/Java-21-orange)
+![Spring Boot 3.2](https://img.shields.io/badge/Spring%20Boot-3.2.2-brightgreen)
+![PostgreSQL 15](https://img.shields.io/badge/PostgreSQL-15-blue)
 
-[![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://openjdk.org/projects/jdk/21/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.2-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue.svg)](https://www.postgresql.org/)
-[![Tests](https://img.shields.io/badge/Tests-150%20passed-success.svg)]()
-[![Deploy](https://img.shields.io/badge/Deploy-AWS%20EC2-orange.svg)](http://3.83.244.10:8080/api/actuator/health)
+Backend de un sistema de gestión para droguerías: inventario, clientes, proveedores, órdenes, recepción de mercancía, pagos con Stripe y notificaciones. Construido con **Spring Boot 3 / Java 21** siguiendo una **arquitectura hexagonal** (puertos y adaptadores).
 
----
-
-## 📋 Tabla de Contenidos
-
-- [Demo en Producción](#-demo-en-producción)
-- [Características Principales](#-características-principales)
-- [Tecnologías](#-tecnologías)
-- [Arquitectura](#-arquitectura)
-- [Instalación Local](#-instalación-local)
-- [Configuración](#-configuración)
-- [API Endpoints](#-api-endpoints)
-- [Seguridad](#-seguridad)
-- [Sistema de Email](#-sistema-de-email)
-- [Configuración de Stripe](#-configuración-de-stripe)
-- [Testing](#-testing)
-- [Despliegue](#-despliegue)
-- [Documentación](#-documentación)
-- [Estructura del Proyecto](#-estructura-del-proyecto)
-- [Contribución](#-contribución)
+> **Documentación interactiva:** al ejecutar el proyecto, Swagger UI está en `http://localhost:8080/api/swagger-ui/index.html`.
 
 ---
 
-## 🌐 Demo en Producción
+## ✨ Características
 
-La API está desplegada y disponible en:
+- **Autenticación y roles:** JWT con cierre de sesión (lista negra en Redis) y cinco roles: `ADMIN`, `MANAGER`, `SALES`, `WAREHOUSE`, `USER`. Cada endpoint exige el rol que corresponde.
+- **Inventario:** productos con stock mínimo, alertas automáticas de reposición y ajustes de stock con control de concurrencia.
+- **Ventas y compras:** clientes con límite de crédito y saldo pendiente, proveedores, órdenes de compra y recepción de mercancía.
+- **Pagos:** integración con Stripe (modo test).
+- **Notificaciones** por rol y **correos transaccionales** (bienvenida, recuperación de contraseña) con plantillas HTML.
+- **Seguridad:** límite de intentos por IP en login y recuperación de contraseña, Swagger y actuator cerrados por defecto, sin secretos en el repositorio.
+- **Base de datos versionada** con Flyway.
 
-```
-http://3.83.244.10:8080/api
-```
+## 🧰 Tecnologías
 
-### Endpoints públicos para probar:
-
-| Endpoint | URL |
-|----------|-----|
-| Health Check | [/api/actuator/health](http://3.83.244.10:8080/api/actuator/health) |
-| Registro | POST `/api/auth/register` |
-| Login | POST `/api/auth/login` |
-
----
-
-## ✨ Características Principales
-
-### 🔐 Gestión de Usuarios y Roles
-- Sistema completo de autenticación con JWT
-- 5 roles disponibles: ADMIN, MANAGER, SALES, WAREHOUSE, USER
-- Panel de administración para gestionar usuarios (solo ADMIN)
-- Activar/desactivar usuarios
-- Cambiar roles dinámicamente
-- Protección del último administrador del sistema
-
-### 📧 Sistema de Email
-- Email de bienvenida automático al registrarse
-- Recuperación de contraseña mediante token temporal (1 hora)
-- Notificaciones de cambios importantes
-- Tokens seguros de un solo uso
-- Protección contra enumeración de emails
-
-### 📦 Gestión de Inventario
-- Control de productos con stock en tiempo real
-- Recepción de mercancía de proveedores
-- Órdenes de venta con validación de stock
-- Auditoría completa de movimientos
-
-### 👥 Gestión de Clientes
-- Registro de clientes con límite de crédito
-- Control de saldo pendiente
-- Historial de órdenes por cliente
-
-### 💳 Sistema de Pagos con Stripe
-- Integración completa con Stripe para pagos seguros
-- Procesamiento de tarjetas de crédito/débito
-- Estados de pago en tiempo real (pendiente, procesando, exitoso, fallido)
-- Reembolsos automáticos para devoluciones
-- Validación automática de fondos y seguridad PCI DSS
-- Historial completo de transacciones por cliente
-
-### 🔔 Sistema de Notificaciones
-- Alertas automáticas de inventario bajo
-- Notificaciones específicas por roles (ADMIN, WAREHOUSE, etc.)
-- Estados de lectura y timestamps
-- Scheduler automático cada 6 horas
-- API REST completa para gestión de notificaciones
-- Integración con productos que necesitan reabastecimiento
-
----
-
-## 🚀 Tecnologías
-
-| Categoría | Tecnología |
-|-----------|------------|
-| **Lenguaje** | Java 21 |
-| **Framework** | Spring Boot 3.2.2 |
-| **Seguridad** | Spring Security + JWT |
-| **Persistencia** | Spring Data JPA |
-| **Base de Datos** | PostgreSQL 15 (prod) / H2 (dev) |
-| **Documentación** | SpringDoc OpenAPI (Swagger) |
-| **Testing** | JUnit 5, Testcontainers, Spring Security Test |
-| **Build** | Maven |
-| **Contenedores** | Docker |
-| **Deploy** | AWS EC2 |
-
----
+| Área | Tecnología |
+|---|---|
+| Lenguaje y framework | Java 21, Spring Boot 3.2.2 (Web, Security, Data JPA, Validation, Mail) |
+| Persistencia | PostgreSQL 15, Flyway, Spring Data JPA |
+| Caché y sesiones | Redis 7 (lista negra de tokens JWT) |
+| Seguridad | Spring Security, JJWT 0.12 |
+| Pagos | Stripe Java 24 |
+| Documentación | SpringDoc OpenAPI 2.2 (Swagger UI) |
+| Pruebas y calidad | JUnit 5, Mockito, Testcontainers, JaCoCo, SonarCloud |
+| Observabilidad | Micrometer + Prometheus, Grafana |
+| Infraestructura | Docker, Docker Compose, GitHub Actions, GHCR |
 
 ## 🏗️ Arquitectura
 
-El proyecto implementa **Arquitectura Hexagonal** (Ports & Adapters):
+El dominio no depende de ningún framework: los controladores y los adaptadores de infraestructura dependen del dominio, nunca al revés.
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                      CONTROLLERS                             │
-│                   (Adaptadores de Entrada)                   │
-└─────────────────────────┬───────────────────────────────────┘
-                          │
-┌─────────────────────────▼───────────────────────────────────┐
-│                      APPLICATION                             │
-│              (DTOs, Mappers, Servicios de App)               │
-└─────────────────────────┬───────────────────────────────────┘
-                          │
-┌─────────────────────────▼───────────────────────────────────┐
-│                        DOMAIN                                │
-│            (Modelos, Servicios, Puertos/Interfaces)          │
-└─────────────────────────┬───────────────────────────────────┘
-                          │
-┌─────────────────────────▼───────────────────────────────────┐
-│                    INFRASTRUCTURE                            │
-│         (JPA Entities, Repositories, Security, Adapters)     │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart LR
+    Cliente["Cliente / Frontend"] -->|HTTP + JWT| Ctrl
+
+    subgraph API["Droguería Bellavista (Spring Boot)"]
+        direction LR
+        Ctrl["controller<br/>REST + validación"] --> App["application<br/>DTOs y mappers"]
+        App --> Dom["domain<br/>modelos, servicios<br/>y puertos (repository)"]
+        Infra["infrastructure<br/>adaptadores JPA, seguridad,<br/>scheduler"] -. implementa puertos .-> Dom
+    end
+
+    Infra --> PG[("PostgreSQL")]
+    Infra --> Redis[("Redis<br/>lista negra JWT")]
+    App --> SMTP["Servidor SMTP"]
+    App --> Stripe["Stripe"]
+    API -.->|/actuator/prometheus| Prom["Prometheus / Grafana"]
 ```
 
-### Principios aplicados:
+```
+src/main/java/com/drogueria/bellavista
+├── controller/      Endpoints REST
+├── application/     DTOs (records), mappers, casos de uso
+├── domain/          Modelos, servicios de negocio y puertos (interfaces de repositorio)
+├── infrastructure/  Adaptadores JPA, entidades, seguridad (JWT, rate limit), scheduler
+├── config/          Seguridad, OpenAPI, Redis, async
+└── exception/       Excepciones de negocio y manejo global de errores
+```
 
-- ✅ **Independencia de frameworks**: El dominio no depende de Spring
-- ✅ **Testeable**: Fácil de hacer unit tests sin infraestructura
-- ✅ **Mantenible**: Separación clara de responsabilidades
-- ✅ **Flexible**: Fácil cambiar BD o exponer otra API
-- ✅ **Escalable**: Cada capa puede evolucionar independientemente
+## 🚀 Cómo ejecutarlo
 
----
+### Requisitos
 
-## 💻 Instalación Local
+- Docker y Docker Compose v2
+- (Opcional, sin Docker) Java 21 y Maven 3.8+
 
-### Prerrequisitos
+### Opción A — Demo completa con Docker Compose (recomendada)
 
-- Java 21
-- Maven 3.8+
-- Docker (para PostgreSQL)
-
-### Pasos
-
-**1. Clonar el repositorio**
+Levanta la API, PostgreSQL, Redis y **Mailpit** (una bandeja local donde ves los correos que envía la app, sin proveedor SMTP real):
 
 ```bash
 git clone https://github.com/Dan17i/softwareDrogueria.git
 cd softwareDrogueria
+
+cp .env.example .env        # edita DB_PASSWORD y APP_JWT_SECRET (mínimo 32 caracteres)
+
+docker compose -f docker-compose.yml -f docker-compose.demo.yml up --build
 ```
 
-**2. Levantar PostgreSQL con Docker**
+| Servicio | URL |
+|---|---|
+| API | http://localhost:8080/api |
+| Swagger UI | http://localhost:8080/api/swagger-ui/index.html |
+| Mailpit (correos) | http://localhost:8025 |
+| Health check | http://localhost:8080/api/actuator/health |
+
+Para apagar y borrar los datos: `docker compose -f docker-compose.yml -f docker-compose.demo.yml down -v`.
+
+### Opción B — Con un servidor SMTP real
+
+Completa `MAIL_*` en `.env` con tu proveedor (Resend, Brevo, AWS SES…) y ejecuta solo `docker compose up --build`. Swagger queda cerrado salvo que pongas `APP_DOCS_PUBLIC=true`.
+
+### Opción C — Desarrollo local con Maven
+
+Necesitas un PostgreSQL local en el puerto `5433` (base `drogueria_bellavista`) y Redis en `6379`:
 
 ```bash
-docker compose up -d
-```
-
-**3. Configurar variable de entorno JWT**
-
-```bash
-# Windows (PowerShell)
-$env:APP_JWT_SECRET="dev-secret-key-with-at-least-32-characters"
-
-# Linux / macOS
-export APP_JWT_SECRET="dev-secret-key-with-at-least-32-characters"
-```
-
-**4. Ejecutar la aplicación**
-
-```bash
+export DEV_DB_PASSWORD=tu_password_postgres_local
 mvn spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
-**5. Verificar**
-
-Abrir: http://localhost:8080/api/actuator/health
-
-### Desarrolladores
-
-En modo desarrollo (`dev`), tienes acceso adicional a:
-
-- **H2 Console**: http://localhost:8080/h2-console
-  - JDBC URL: `jdbc:h2:mem:testdb`
-  - User: `sa`
-  - Password: (vacío)
-- **Swagger UI**: http://localhost:8080/swagger-ui.html
-- **OpenAPI Spec**: http://localhost:8080/v3/api-docs
-
----
-
-## ⚙️ Configuración
-
-### Perfiles disponibles
-
-| Perfil | Base de Datos | Uso |
-|--------|---------------|-----|
-| `dev` | PostgreSQL (localhost:5433) | Desarrollo local |
-| `prod` | PostgreSQL (AWS EC2) | Producción |
-
-### Variables de entorno
-
-| Variable | Descripción | Requerida |
-|----------|-------------|-----------|
-| `APP_JWT_SECRET` | Clave secreta para JWT (mín. 32 caracteres) | ✅ Sí |
-| `MAIL_HOST` | Servidor SMTP (ej: smtp.gmail.com) | ✅ Sí |
-| `MAIL_PORT` | Puerto SMTP (ej: 587) | ✅ Sí |
-| `MAIL_USERNAME` | Usuario del servidor de email | ✅ Sí |
-| `MAIL_PASSWORD` | Contraseña del servidor de email | ✅ Sí |
-| `MAIL_FROM` | Email remitente | ✅ Sí |
-| `FRONTEND_URL` | URL del frontend (para links en emails) | ✅ Sí |
-| `STRIPE_SECRET_KEY` | Clave secreta de Stripe (`sk_test_...` o `sk_live_...`) | ✅ Sí |
-| `STRIPE_PUBLIC_KEY` | Clave publicable de Stripe (`pk_test_...` o `pk_live_...`) | ✅ Sí |
-| `SPRING_DATASOURCE_URL` | URL de conexión JDBC | Solo en prod |
-| `SPRING_DATASOURCE_USERNAME` | Usuario de BD | Solo en prod |
-| `SPRING_DATASOURCE_PASSWORD` | Contraseña de BD | Solo en prod |
-| `PORT` | Puerto del servidor | Solo en prod |
-
----
-
-## 💳 Configuración de Stripe
-
-### Modo Test vs Producción
-
-| Modo | Prefijo de claves | Descripción |
-|------|-------------------|-------------|
-| Test | `sk_test_` / `pk_test_` | Sin cobros reales. Usar en desarrollo. |
-| Live | `sk_live_` / `pk_live_` | Cobros reales. Solo en producción. |
-
-### Variables de entorno requeridas
+### Pruebas
 
 ```bash
-# Backend (clave secreta — nunca exponer al frontend)
-STRIPE_SECRET_KEY=sk_test_...
-
-# Frontend (clave publicable — puede ser pública)
-STRIPE_PUBLIC_KEY=pk_test_...
+mvn verify        # pruebas unitarias e integración (necesita Docker para Testcontainers) + informe JaCoCo
 ```
 
-### Configuración local (desarrollo)
+## ⚙️ Variables de entorno
 
-Las claves se cargan desde el archivo `.env` en la raíz del proyecto (gitignoreado). Copia la plantilla y rellena tus valores:
+Copia `.env.example` a `.env` (el archivo `.env` está ignorado por git).
+
+| Variable | Obligatoria | Descripción |
+|---|---|---|
+| `DB_USER`, `DB_PASSWORD` | Sí | Credenciales de PostgreSQL |
+| `APP_JWT_SECRET` | Sí | Clave de firma JWT, mínimo 32 caracteres (`openssl rand -base64 48`) |
+| `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM` | Sí | SMTP. `MAIL_FROM` debe estar verificado en tu proveedor |
+| `STRIPE_SECRET_KEY`, `STRIPE_PUBLIC_KEY` | Para pagos | Claves de Stripe en modo test |
+| `FRONTEND_URL` | No | URL del frontend (enlaces de correos). Por defecto `http://localhost:5173` |
+| `APP_DOCS_PUBLIC` | No | `true` abre Swagger UI sin login (solo demos). Por defecto `false` |
+| `DEV_DB_PASSWORD` | Solo perfil `dev` | Contraseña del PostgreSQL local |
+
+Propiedades opcionales del límite de intentos: `app.rate-limit.enabled`, `login-max`, `forgot-password-max`, `register-max`.
+
+## 📡 Ejemplos de endpoints
+
+Todas las rutas cuelgan de `/api`. Hay más de 70 endpoints; el catálogo completo está en Swagger UI.
+
+| Recurso | Ruta base | Roles |
+|---|---|---|
+| Autenticación | `/auth` | Público (`login`, `register`, recuperación) |
+| Usuarios | `/users` | `ADMIN` |
+| Productos | `/products` | Lectura: autenticado · Escritura: `ADMIN`, `WAREHOUSE` |
+| Clientes | `/customers` | `ADMIN`, `MANAGER`, `SALES` |
+| Proveedores | `/suppliers` | `ADMIN`, `MANAGER`, `WAREHOUSE` |
+| Órdenes | `/orders` | `ADMIN`, `MANAGER`, `SALES` (+ lectura `WAREHOUSE`) |
+| Recepciones | `/goods-receipts` | Lectura: `ADMIN`, `MANAGER`, `WAREHOUSE` · Escritura: `ADMIN`, `WAREHOUSE` |
+| Notificaciones | `/api/notifications` (relativa al context path) | Por rol |
+
+**1. Registrar un usuario**
 
 ```bash
-cp .env.example .env
-# Edita .env con tus claves reales de Stripe
-```
-
-Para que Spring Boot cargue el `.env` al ejecutar con Maven:
-
-```bash
-# Windows (PowerShell)
-Get-Content .env | ForEach-Object { $var = $_ -split '=', 2; [System.Environment]::SetEnvironmentVariable($var[0], $var[1]) }
-mvn spring-boot:run -Dspring-boot.run.profiles=dev
-
-# Linux / macOS
-export $(cat .env | xargs)
-mvn spring-boot:run -Dspring-boot.run.profiles=dev
-```
-
-### Configuración por perfil
-
-| Perfil | Archivo | Comportamiento |
-|--------|---------|----------------|
-| `dev` | `application-dev.yml` | Usa valores por defecto del YAML (clave test embebida) |
-| `prod` | `application-prod.yml` | Lee obligatoriamente desde variables de entorno |
-
-> **Seguridad:** `application-dev.yml` está en `.gitignore` para evitar exponer claves en el repositorio.
-
-### Mejores prácticas
-
-- En producción, usa siempre una **Clave Restringida** (`rk_live_...`) con solo los permisos necesarios (Payments, Checkout Sessions, Customers) en lugar de la clave secreta estándar.
-- Nunca cometas claves `sk_live_` ni `rk_live_` en el código fuente.
-- En producción (AWS EC2), configura las variables de entorno directamente en el servidor o en el `docker-compose.yml` usando un archivo `.env` que esté en `.gitignore`.
-
-### Tarjetas de prueba (modo test)
-
-| Número | Resultado |
-|--------|-----------|
-| `4242 4242 4242 4242` | Pago exitoso |
-| `4000 0000 0000 0002` | Tarjeta rechazada |
-| `4000 0025 0000 3155` | Requiere autenticación 3D Secure |
-
-Fecha: cualquier fecha futura. CVC: cualquier 3 dígitos.
-
----
-
-## ⏰ Tareas Programadas
-
-El sistema incluye tareas automáticas que se ejecutan periódicamente:
-
-### Scheduler de Notificaciones
-- **Frecuencia**: Cada 6 horas
-- **Función**: Verifica automáticamente el inventario de productos
-- **Acción**: Crea notificaciones de alerta para productos con stock bajo
-- **Configuración**: `@EnableScheduling` en `BellavistaApplication.java`
-- **Productos monitoreados**: Aquellos con `minStockLevel` definido y stock actual ≤ nivel mínimo
-
----
-
-## 📚 API Endpoints
-
-### Autenticación (públicos)
-
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| POST | `/api/auth/register` | Registrar usuario (rol USER por defecto) |
-| POST | `/api/auth/login` | Iniciar sesión (retorna JWT) |
-| POST | `/api/auth/forgot-password` | Solicitar recuperación de contraseña |
-| POST | `/api/auth/reset-password` | Restablecer contraseña con token |
-| POST | `/api/auth/dev-create-admin` | Crear admin por defecto (solo desarrollo) |
-
-### Gestión de Usuarios (solo ADMIN)
-
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| GET | `/api/users` | Listar todos los usuarios |
-| GET | `/api/users/{id}` | Obtener usuario por ID |
-| PATCH | `/api/users/{id}/role` | Cambiar rol de usuario |
-| PATCH | `/api/users/{id}/status` | Activar/desactivar usuario |
-| DELETE | `/api/users/{id}` | Eliminar usuario |
-
-### Productos (protegidos)
-
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| GET | `/api/products` | Listar todos los productos |
-| GET | `/api/products?active=true` | Listar solo productos activos |
-| GET | `/api/products/{id}` | Obtener producto por ID |
-| GET | `/api/products/code/{code}` | Obtener producto por código |
-| GET | `/api/products/search?name=xxx` | Buscar productos por nombre |
-| GET | `/api/products/category/{category}` | Listar productos por categoría |
-| GET | `/api/products/restock-needed` | Productos que necesitan reabastecimiento |
-| POST | `/api/products` | Crear producto |
-| PUT | `/api/products/{id}` | Actualizar producto |
-| POST | `/api/products/{id}/reduce-stock` | Reducir stock |
-| POST | `/api/products/{id}/increase-stock` | Aumentar stock |
-| PATCH | `/api/products/{id}/toggle-status` | Cambiar estado (activo/inactivo) |
-| DELETE | `/api/products/{id}` | Eliminar producto |
-
-### Clientes (protegidos)
-
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| GET | `/api/customers` | Listar todos los clientes |
-| GET | `/api/customers/{id}` | Obtener cliente por ID |
-| POST | `/api/customers` | Crear cliente |
-| PUT | `/api/customers/{id}` | Actualizar cliente |
-| DELETE | `/api/customers/{id}` | Eliminar cliente |
-
-### Proveedores (protegidos)
-
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| GET | `/api/suppliers` | Listar todos los proveedores |
-| GET | `/api/suppliers/{id}` | Obtener proveedor por ID |
-| POST | `/api/suppliers` | Crear proveedor |
-| PUT | `/api/suppliers/{id}` | Actualizar proveedor |
-| DELETE | `/api/suppliers/{id}` | Eliminar proveedor |
-
-### Órdenes (protegidos)
-
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| GET | `/api/orders` | Listar todas las órdenes |
-| GET | `/api/orders/{id}` | Obtener orden por ID |
-| GET | `/api/orders/number/{orderNumber}` | Obtener orden por número |
-| GET | `/api/orders/customer/{customerId}` | Órdenes de un cliente |
-| GET | `/api/orders/status/{status}` | Órdenes por estado |
-| GET | `/api/orders/customer/{customerId}/pending` | Órdenes pendientes de un cliente |
-| GET | `/api/orders/search?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD` | Órdenes por rango de fechas |
-| POST | `/api/orders` | Crear orden |
-| PATCH | `/api/orders/{id}/complete` | Completar orden |
-| PATCH | `/api/orders/{id}/cancel` | Cancelar orden |
-
-### Recepción de Mercancía (protegidos)
-
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| GET | `/api/goods-receipts` | Listar todas las recepciones |
-| GET | `/api/goods-receipts/{id}` | Obtener recepción por ID |
-| GET | `/api/goods-receipts/number/{receiptNumber}` | Obtener por número de recepción |
-| GET | `/api/goods-receipts/order/{orderId}` | Recepciones de una orden |
-| GET | `/api/goods-receipts/supplier/{supplierId}` | Recepciones de un proveedor |
-| GET | `/api/goods-receipts/status/{status}` | Recepciones por estado |
-| GET | `/api/goods-receipts/pending` | Recepciones pendientes |
-| POST | `/api/goods-receipts` | Crear recepción |
-| PATCH | `/api/goods-receipts/{id}/receive` | Confirmar recepción |
-| PATCH | `/api/goods-receipts/{id}/reject` | Rechazar recepción |
-| DELETE | `/api/goods-receipts/{id}` | Eliminar recepción (solo PENDING) |
-
-### 💳 Pagos (protegidos)
-
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| POST | `/api/payments/process` | Procesar pago con Stripe |
-| GET | `/api/payments/{intentId}` | Verificar estado de pago |
-
-### 🔔 Notificaciones (protegidos)
-
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| GET | `/api/notifications` | Listar todas las notificaciones |
-| GET | `/api/notifications/unread` | Listar notificaciones no leídas |
-| GET | `/api/notifications/{id}` | Obtener notificación por ID |
-| GET | `/api/notifications/role/{role}` | Notificaciones por rol |
-| PATCH | `/api/notifications/{id}/read` | Marcar notificación como leída |
-| PATCH | `/api/notifications/mark-all-read` | Marcar todas como leídas |
-| DELETE | `/api/notifications/{id}` | Eliminar notificación |
-| POST | `/api/notifications/check-inventory` | Verificar inventario y crear alertas |
-
-### Monitoreo y Documentación
-
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| GET | `/api/actuator/health` | Estado de salud de la aplicación |
-| GET | `/api/swagger-ui.html` | Documentación interactiva de la API |
-| GET | `/api/v3/api-docs` | Especificación OpenAPI JSON |
-
----
-
-## 🔐 Seguridad
-
-### Autenticación JWT
-
-Todos los endpoints protegidos requieren el header:
-
-```
-Authorization: Bearer <token>
-```
-
-### Flujo de autenticación
-
-```
-1. POST /api/auth/register  →  Crear cuenta
-2. POST /api/auth/login     →  Obtener token JWT
-3. Usar token en headers    →  Acceder a endpoints protegidos
-```
-
-### Roles disponibles
-
-| Rol | Descripción |
-|-----|-------------|
-| `ADMIN` | Acceso completo |
-| `MANAGER` | Reportes y gestión |
-| `SALES` | Ventas y clientes |
-| `WAREHOUSE` | Inventario |
-| `USER` | Acceso básico |
-
-### Ejemplo de uso
-
-```bash
-# 1. Registrar
-curl -X POST http://3.83.244.10:8080/api/auth/register \
+curl -X POST http://localhost:8080/api/auth/register \
   -H "Content-Type: application/json" \
-  -d '{"username":"admin","email":"admin@test.com","password":"password123","firstName":"Admin","lastName":"User"}'
+  -d '{"username":"demo","email":"demo@ejemplo.com","password":"Demo1234!","firstName":"Demo","lastName":"Usuario"}'
+```
 
-# 2. Login
-curl -X POST http://3.83.244.10:8080/api/auth/login \
+**2. Iniciar sesión** (devuelve `token`, `userId`, `username` y `role`)
+
+```bash
+curl -X POST http://localhost:8080/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"username":"admin","password":"password123"}'
-
-# 3. Usar token
-curl http://3.83.244.10:8080/api/products \
-  -H "Authorization: Bearer <tu-token>"
+  -d '{"username":"demo","password":"Demo1234!"}'
 ```
 
----
-
-### Resumen de cobertura
-## 🧪 Testing
-
-### Resumen de cobertura
-
-| Tipo | Tests | Estado |
-|------|-------|--------|
-| Integration Tests | 60 | ✅ |
-| Domain Services | 140 | ✅ |
-| Controllers | 41 | ✅ |
-| Domain Models/Conditions | 241 | ✅ |
-| Infrastructure | 49 | ✅ |
-| Application Layer | 32 | ✅ |
-| Configuration | 2 | ✅ |
-| **Total** | **565** | ✅ |
-
-### Desglose por categoría
-
-<details>
-<summary><b>Integration Tests (60 tests)</b></summary>
-
-| Test Suite | Tests |
-|-------------|-------|
-| ProductIntegrationTest | 17 |
-| UserManagementIntegrationTest | 14 |
-| SecurityIntegrationTest | 13 |
-| NotificationIntegrationTest | 11 |
-| AuthOrderIntegrationTest | 3 |
-| AdminCreationTest | 2 |
-
-</details>
-
-<details>
-<summary><b>Tests de mayor cobertura</b></summary>
-
-| Test Suite | Tests | Categoría |
-|-------------|-------|-----------|
-| NotificationDTOConditionsTest | 61 | Validaciones |
-| PaymentConditionsTest | 47 | Validaciones |
-| PaymentEntityConditionsTest | 45 | Validaciones |
-| NotificationConditionsTest | 41 | Validaciones |
-| NotificationEntityConditionsTest | 38 | Validaciones |
-| AuthServiceTest | 26 | Servicios |
-| PaymentServiceTest | 20 | Servicios |
-| GoodsReceiptControllerTest | 20 | Controllers |
-
-</details>
-
-### Ejecutar tests
+**3. Dar rol de administrador al usuario de la demo** (los usuarios nuevos son `USER`; el primer `ADMIN` se asigna en la base de datos)
 
 ```bash
-# Todos los tests
-mvn test
-
-# Test específico
-mvn -Dtest=SecurityIntegrationTest test
-
-# Con reporte de cobertura
-mvn test jacoco:report
+docker exec -it drogueria_db psql -U "$DB_USER" -d drogueria_bellavista \
+  -c "UPDATE users SET role='ADMIN' WHERE username='demo';"
 ```
 
-### Tests de integración
+Vuelve a iniciar sesión para obtener un token con el rol nuevo.
 
-Utilizan **Testcontainers** con PostgreSQL 15 para simular el entorno de producción.
-
-
-## 🚀 Despliegue
-
-### Plataforma: AWS EC2
-
-La aplicación está desplegada en una instancia **AWS EC2 t2.micro** (Ubuntu 24.04) usando Docker Compose:
-
-- **App**: Spring Boot en contenedor Docker (JRE 21 Alpine)
-- **Base de datos**: PostgreSQL 15 en contenedor local (sin RDS)
-- **Cache/Blacklist**: Redis 7 en contenedor local
-
-### Archivos de configuración
-
-| Archivo | Descripción |
-|---------|-------------|
-| `Dockerfile` | Build multi-stage con Maven + JRE Alpine |
-| `docker-compose.yml` | Orquestación de servicios (app, postgres, redis) |
-| `scripts/deploy-aws.sh` | Script de instalación y despliegue automático en EC2 |
-| `docs/AWS_DEPLOYMENT.md` | Guía completa de arquitectura y despliegue |
-
-### URL de producción
-
-```
-http://3.83.244.10:8080/api
-```
-
-### Desplegar cambios
+**4. Crear un producto** (requiere `ADMIN` o `WAREHOUSE`)
 
 ```bash
-cd ~/softwareDrogueria
-git pull
-docker compose up -d --build app
+curl -X POST http://localhost:8080/api/products \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"code":"P-001","name":"Acetaminofén 500 mg","description":"Caja x 100","price":12500.00,"stock":200,"minStock":20,"category":"ANALGESICO"}'
 ```
 
----
+**5. Listar productos activos y los que necesitan reposición**
 
-## 📚 Documentación
-
-La documentación completa del proyecto está organizada en varios archivos especializados:
-
-### 📋 Documentos Principales
-
-| Documento | Descripción |
-|-----------|-------------|
-| **[README.md](README.md)** | Guía de inicio rápido y referencia general |
-| **[QUICKSTART.md](QUICKSTART.md)** | Inicio rápido en 5 minutos |
-| **[ARCHITECTURE.md](docs/Arquitectura%20y%20proyecto/ARCHITECTURE.md)** | Arquitectura hexagonal detallada |
-
-### 🗄️ Base de Datos
-
-| Documento | Descripción |
-|-----------|-------------|
-| **[DATABASE.md](docs/DATABASE.md)** | Esquema completo, relaciones y migraciones |
-| **[schema.sql](src/main/resources/schema.sql)** | Script de creación de tablas |
-| **[data.sql](src/main/resources/data.sql)** | Datos de prueba |
-
-### 🔧 Operaciones y Mantenimiento
-
-| Documento | Descripción |
-|-----------|-------------|
-| **[OPERATIONS.md](docs/OPERATIONS.md)** | Monitoreo, troubleshooting y mantenimiento |
-| **[IMPLEMENTACION_METRICAS_COMPLETADA.md](docs/IMPLEMENTACIONES%20COMPLETADAS/IMPLEMENTACION_METRICAS_COMPLETADA.md)** | Métricas de calidad implementadas |
-| **[TASK_COMPLETED_USER_MANAGEMENT.md](docs/IMPLEMENTACIONES%20COMPLETADAS/TASK_COMPLETED_USER_MANAGEMENT.md)** | Gestión de usuarios completada |
-| **[IMPLEMENTACION_METRICAS_COMPLETADA.md](docs/IMPLEMENTACIONES%20COMPLETADAS/IMPLEMENTACION_METRICAS_COMPLETADA.md)** | Métricas de calidad implementadas |
-| **[TASK_COMPLETED_USER_MANAGEMENT.md](docs/IMPLEMENTACIONES%20COMPLETADAS/TASK_COMPLETED_USER_MANAGEMENT.md)** | Gestión de usuarios completada |
-| **[CAMBIO_4_SISTEMA_EMAIL.md](docs/IMPLEMENTACIONES%20COMPLETADAS/CAMBIO_4_SISTEMA_EMAIL.md)** | Sistema de email implementado |
-| **[PAGOS_STRIPE_IMPLEMENTACION.md](docs/IMPLEMENTACIONES%20COMPLETADAS/PAGOS_STRIPE_IMPLEMENTACION.md)** | Implementación completa de pagos con Stripe |
-| **[IMPLEMENTACION_PAGOS_COMPLETA.md](docs/IMPLEMENTACION_PAGOS_COMPLETA.md)** | Guía detallada de sistema de pagos |
-
-### 🎨 Frontend
-
-| Documento | Descripción |
-|-----------|-------------|
-| **[FRONTEND_INTEGRATION.md](docs/FRONTEND_INTEGRATION.md)** | Guía completa de integración frontend |
-| **[Postman_Collection.json](Postman_Collection.json)** | Colección de Postman con ejemplos |
-| **[Postman_Collection_Metricas.json](Postman_Collection_Metricas.json)** | Colección para pruebas de métricas |
-
-### 🔒 Seguridad y Calidad
-
-| Documento | Descripción |
-|-----------|-------------|
-| **[Plan_de_Gestion_de_la_Calidad_FINAL.md](docs/Arquitectura%20y%20proyecto/Plan_de_Gestion_de_la_Calidad_FINAL.md)** | Plan de calidad completo |
-| **[SOLID_AND_PATTERNS_ANALYSIS.md](docs/Arquitectura%20y%20proyecto/SOLID_AND_PATTERNS_ANALYSIS.md)** | Análisis SOLID y patrones |
-| **[1. Invetoryrx - Plan de Gestión de la Calidad del Proyecto.pdf](docs/1.%20Invetoryrx%20-%20Plan%20de%20Gesti%C3%B3n%20de%20la%20Calidad%20del%20Proyecto.pdf)** | Documento PDF del plan de calidad |
-
-### 🚀 Despliegue y Configuración
-
-| Documento | Descripción |
-|-----------|-------------|
-| **[render.yaml](infra/render.yaml)** | Configuración de despliegue en Render |
-| **[Dockerfile](Dockerfile)** | Configuración de Docker |
-| **[docker-compose.yml](docker-compose.yml)** | Configuración local con Docker |
-| **[DEPLOY_RENDER.md](docs/DESPLIEGUE%20Y%20CONFIGURACIÓN/DEPLOY_RENDER.md)** | Guía de despliegue en Render (histórico) |
-| **[AWS_DEPLOYMENT.md](docs/AWS_DEPLOYMENT.md)** | Arquitectura y guía de despliegue en AWS EC2 |
-| **[CONFIGURAR_GMAIL_RAPIDO.md](docs/DESPLIEGUE%20Y%20CONFIGURACIÓN/CONFIGURAR_GMAIL_RAPIDO.md)** | Configuración rápida de Gmail |
-
-### 🧪 Testing y Calidad
-
-| Documento | Descripción |
-|-----------|-------------|
-| **[Configuracion_SonarCloud.md](docs/Pruebas%20y%20Calidad/Configuracion_SonarCloud.md)** | Configuración de análisis de vulnerabilidades |
-| **[Configuracion_Uptime_Monitoring.md](docs/Pruebas%20y%20Calidad/Configuracion_Uptime_Monitoring.md)** | Monitoreo de disponibilidad |
-| **[INSTRUCCIONES_SONARCLOUD.md](docs/Pruebas%20y%20Calidad/INSTRUCCIONES_SONARCLOUD.md)** | Guía completa de SonarCloud |
-
----
-
-## 📁 Estructura del Proyecto
-
-<details>
-<summary>Click para expandir</summary>
-
-```
-softwareDrogueria/
-├── src/
-│   ├── main/
-│   │   ├── java/com/drogueria/bellavista/
-│   │   │   ├── domain/
-│   │   │   │   ├── model/          # Entidades de dominio
-│   │   │   │   ├── repository/     # Puertos (interfaces)
-│   │   │   │   └── service/        # Lógica de negocio
-│   │   │   │
-│   │   │   ├── application/
-│   │   │   │   ├── dto/            # Data Transfer Objects
-│   │   │   │   ├── mapper/         # Mappers DTO ↔ Domain
-│   │   │   │   └── service/        # Servicios de aplicación
-│   │   │   │
-│   │   │   ├── infrastructure/
-│   │   │   │   ├── persistence/    # Entidades JPA + Repositorios
-│   │   │   │   ├── adapter/        # Implementación de puertos
-│   │   │   │   ├── mapper/         # Mappers Entity ↔ Domain
-│   │   │   │   └── security/       # JWT Filter + Utils
-│   │   │   │
-│   │   │   ├── controller/         # REST Controllers
-│   │   │   ├── config/             # Configuraciones
-│   │   │   └── exception/          # Excepciones personalizadas
-│   │   │
-│   │   └── resources/
-│   │       ├── application.yml
-│   │       ├── application-dev.yml
-│   │       └── application-prod.yml
-│   │
-│   └── test/
-│       └── java/.../integration/   # Tests de integración
-│
-├── http/                           # Archivos .http para pruebas
-├── Dockerfile
-├── infra/
-│   └── render.yaml
-├── scripts/
-│   ├── deploy-aws.sh
-│   ├── run-dev.sh
-│   └── reset-admin.sql
-├── docker-compose.yml
-├── pom.xml
-└── README.md
+```bash
+curl -H "Authorization: Bearer $TOKEN" "http://localhost:8080/api/products?active=true"
+curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/products/restock-needed
 ```
 
-</details>
+**6. Crear una orden** (el cliente, el proveedor y los productos deben existir)
 
----
+```bash
+curl -X POST http://localhost:8080/api/orders \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"customerId":1,"supplierId":1,"items":[{"productId":1,"quantity":10}],"notes":"Entrega prioritaria"}'
+```
 
-## 📄 Licencia
+Más ejemplos listos para usar en [`http/`](http/) (REST Client) y en [`docs/Postman_Collection.json`](docs/Postman_Collection.json).
 
-Este proyecto es propiedad de **Droguería Bellavista** - Proyecto Académico.
+## ✅ Calidad
 
----
+- **Pruebas:** más de 580 (unitarias, controladores, mappers e integración con PostgreSQL real vía Testcontainers).
+- **SonarCloud:** análisis en cada push y Quality Gate sobre código nuevo (ver badges).
+- **Migraciones:** `src/main/resources/db/migration`. Un test verifica que el esquema de Flyway coincide con las entidades JPA, así que un cambio de entidad sin migración rompe el build.
+- **CI/CD:** GitHub Actions ejecuta las pruebas, publica la imagen en GHCR y, si hay servidor configurado (`DEPLOY_ENABLED`), despliega por SSH.
 
-## 📧 Contacto
+## 📚 Más documentación
 
-Para más información o soporte, contacta al equipo de desarrollo.
+La carpeta [`docs/`](docs/) incluye guías de inicio rápido, seguridad, pagos con Stripe, integración con el frontend, operaciones y el plan de gestión de la calidad del proyecto.
 
----
+## 👤 Autor
 
-<p align="center">
-  Desarrollado con ❤️ usando Spring Boot
-</p>
+**Daniel Jurado** — [github.com/Dan17i](https://github.com/Dan17i)
