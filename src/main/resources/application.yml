@@ -48,3 +48,11 @@ app:
     from: ${MAIL_FROM:noreply@bellavista.com}
   frontend:
     url: ${FRONTEND_URL:http://localhost:5173}
+
+# Documentación OpenAPI / Swagger UI  →  /api/swagger-ui/index.html
+springdoc:
+  default-produces-media-type: application/json
+  swagger-ui:
+    operations-sorter: method
+    tags-sorter: alpha
+    persist-authorization: true

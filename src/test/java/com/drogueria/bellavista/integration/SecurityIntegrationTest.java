@@ -204,6 +204,17 @@ public class SecurityIntegrationTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
+    @Test
+    @Order(9)
+    @DisplayName("Swagger UI y api-docs requieren autenticación por defecto (app.docs.public=false)")
+    void swaggerShouldBeClosedByDefault() {
+        ResponseEntity<String> docs = restTemplate.getForEntity(baseUrl() + "/v3/api-docs", String.class);
+        ResponseEntity<String> ui = restTemplate.getForEntity(baseUrl() + "/swagger-ui/index.html", String.class);
+
+        assertThat(docs.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(ui.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
     // ============================================
     // ENDPOINTS PÚBLICOS
     // ============================================
