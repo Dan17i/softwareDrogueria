@@ -46,3 +46,13 @@ application-prod.yml
 *.zip
 mvn_output.log
 *.pdf
+
+# Secretos y copias locales (nunca versionar)
+.env.*
+!.env.example
+*.save
+
+# Copias antiguas / worktrees de herramientas
+bin/
+.kilo/
+.claude/settings.local.json

@@ -38,7 +38,8 @@
 - [x] Tests: `FlywayMigrationTest` (BD vacía y BD existente) + `SchemaMatchesEntitiesTest` (esquema Flyway pasa `ddl-auto=validate`; falla si cambias una entidad sin migración)
 - [ ] Antes del 1er deploy con Flyway: respaldar BD prod (`pg_dump`) y comparar esquema real vs V1 (`pg_dump -s`); luego cambiar prod a `ddl-auto: validate`
 - [ ] REGLA: todo cambio de entidad → nuevo `V{n}__desc.sql` (nunca editar V1)
-- [ ] Limpieza: `application-dev.yml` tiene password de BD hardcodeado; carpeta `bin/` está versionada con copias viejas (`bin/.kilo/worktrees/...`)
+- [x] Limpieza: `application-dev.yml` sin secretos (usa `DEV_DB_PASSWORD`, `MAIL_USERNAME/PASSWORD/FROM`, `APP_JWT_SECRET` con default solo-dev); `bin/` (580 archivos), `infra/.env.save`, `infra/docker-compose.yml.save` y `.claude/settings.local.json` des-versionados (siguen en disco); `.gitignore` cubre `.env.*`, `*.save`, `bin/`, `.kilo/`
+- [ ] **URGENTE — ROTAR credenciales filtradas en el historial de git** (`infra/.env.save` y `application-dev.yml`): contraseña BD prod (`DB_PASSWORD`, cambiar también en Postgres), `APP_JWT_SECRET` de prod, contraseña de aplicación de Gmail (revocar en la cuenta Google), contraseña BD dev. Opcional: purgar historial con `git filter-repo` (reescribe historia + force-push: coordinar)
 ### P3 — Consistencia
 - [x] Lombok eliminado: 22 clases (domain/model + entities) con getters/setters/equals/hashCode/toString/Builder manuales, 2 mappers con constructor, `pom.xml` limpio. Quitados 4 tests `canEqual` (método solo de Lombok)
 ### P4 — Calidad/CI
@@ -55,6 +56,7 @@
 `mvn verify` (necesita Docker Desktop activo para Testcontainers).
 
 ## Bitácora (más reciente arriba)
+- 2026-10-06 — Limpieza de secretos y archivos basura versionados (ver P2/Limpieza). Se detectó `infra/.env.save` con credenciales de prod en el historial. Sin commit.
 - 2026-10-06 — P1 rate limit auth: RateLimitFilter + tests unit/integración. `mvn verify` OK. Sin commit.
 - 2026-10-06 — P2 Flyway: V1 baseline + config prod + 3 tests. `mvn verify`: 546 OK. Sin commit.
 - 2026-10-06 — P4 tests: +4 ControllerTest (Customer, Order, Product, Supplier). `mvn verify`: 543 OK. Sin commit.

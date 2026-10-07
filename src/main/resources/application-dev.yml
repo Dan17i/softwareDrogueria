@@ -2,7 +2,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5433/drogueria_bellavista
     username: postgres
-    password: JUNIORDIAZ
+    password: ${DEV_DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -18,12 +18,12 @@ spring:
     init:
       mode: never
 
-  # Configuración de email para desarrollo (REEMPLAZA CON TUS DATOS)
+  # Email dev: credenciales por variables de entorno (nunca en el repo)
   mail:
     host: smtp.gmail.com
     port: 587
-    username: invetoryrx@gmail.com  # ← CAMBIA ESTO
-    password: zkck bmav klok qbum    # ← CAMBIA ESTO
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
     properties:
       mail:
         smtp:
@@ -37,9 +37,9 @@ spring:
 
 app:
   jwt:
-    secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+    secret: ${APP_JWT_SECRET:dev-only-secret-not-for-production-0123456789}
   mail:
-    from: invetoryrx@gmail.com  # ← ACTUALIZADO
+    from: ${MAIL_FROM:noreply@localhost}
   frontend:
     url: http://localhost:5173
   stripe:
