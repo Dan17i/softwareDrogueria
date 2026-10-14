@@ -29,7 +29,8 @@ export default function Orders() {
   }, [])
   useEffect(load, [load])
 
-  // El backend aún no devuelve el nombre del cliente en las órdenes: se resuelve con la lista de clientes (si el rol puede leerla).
+  // Respaldo: el backend guarda el nombre del cliente al crear la orden (y V2 rellena las antiguas);
+  // si algún dato viene vacío se resuelve con la lista de clientes (si el rol puede leerla).
   useEffect(() => {
     if (session && canManageCustomers(session.role)) api.customers().then(setCustomers).catch(() => setCustomers([]))
   }, [session])

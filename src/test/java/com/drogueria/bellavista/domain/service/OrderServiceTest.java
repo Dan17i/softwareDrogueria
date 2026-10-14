@@ -54,6 +54,8 @@ class OrderServiceTest {
 
         customer = Customer.builder()
                 .id(1L)
+                .code("CLI-001")
+                .name("Farmacia Central")
                 .active(true)
                 .creditLimit(new BigDecimal("1000"))
                 .pendingBalance(BigDecimal.ZERO)
@@ -102,6 +104,19 @@ class OrderServiceTest {
         verify(customerService).increasePendingBalance(eq(1L), any());
 
         log.info("✅ Orden creada correctamente");
+    }
+
+    @Test
+    @DisplayName("Debe guardar código y nombre del cliente en la orden")
+    void shouldStoreCustomerSnapshotOnOrder() {
+        when(customerService.getCustomerById(1L)).thenReturn(customer);
+        when(productService.getProductsByIds(any())).thenReturn(List.of(product));
+        when(orderRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        Order result = orderService.createOrder(order);
+
+        assertEquals("CLI-001", result.getCustomerCode());
+        assertEquals("Farmacia Central", result.getCustomerName());
     }
 
     // =============================

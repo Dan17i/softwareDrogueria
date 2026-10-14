@@ -107,7 +107,9 @@ public class OrderService {
                 + ", Requerido: " + order.getTotal());
         }
         
-        // Establecer valores
+        // Establecer valores (código y nombre del cliente quedan en la orden como foto al momento de crearla)
+        order.setCustomerCode(customer.getCode());
+        order.setCustomerName(customer.getName());
         order.setOrderNumber(generateOrderNumber());
         order.setStatus(STATUS_PENDING);
         order.setOrderDate(LocalDateTime.now());

@@ -54,17 +54,17 @@ class FlywayMigrationTest {
     }
 
     @Test
-    @DisplayName("BD vacía - ejecuta V1 y crea las 11 tablas")
+    @DisplayName("BD vacía - ejecuta V1 y V2 y crea las 11 tablas")
     void shouldCreateSchemaOnEmptyDatabase() throws Exception {
         MigrateResult result = flyway("empty_db").migrate();
 
         assertThat(result.success).isTrue();
-        assertThat(result.migrationsExecuted).isEqualTo(1);
+        assertThat(result.migrationsExecuted).isEqualTo(2);
         assertThat(countTables("empty_db")).isEqualTo(11);
     }
 
     @Test
-    @DisplayName("BD existente sin historial - baselinea en V1 sin re-ejecutar el script")
+    @DisplayName("BD existente sin historial - baselinea en V1 sin re-ejecutar el script y aplica V2")
     void shouldBaselineExistingDatabase() throws Exception {
         String ddl = StreamUtils.copyToString(
                 new ClassPathResource("db/migration/V1__baseline_schema.sql").getInputStream(), StandardCharsets.UTF_8);
@@ -79,8 +79,36 @@ class FlywayMigrationTest {
         MigrateResult result = flyway.migrate();
 
         assertThat(result.success).isTrue();
-        assertThat(result.migrationsExecuted).isZero();
-        assertThat(flyway.info().current().getVersion()).isEqualTo(MigrationVersion.fromVersion("1"));
+        assertThat(result.migrationsExecuted).isEqualTo(1);
+        assertThat(flyway.info().current().getVersion()).isEqualTo(MigrationVersion.fromVersion("2"));
         assertThat(countTables("existing_db")).isEqualTo(11);
+    }
+
+    @Test
+    @DisplayName("V2 rellena código y nombre del cliente en órdenes existentes")
+    void shouldBackfillCustomerNamesOnExistingOrders() throws Exception {
+        String ddl = StreamUtils.copyToString(
+                new ClassPathResource("db/migration/V1__baseline_schema.sql").getInputStream(), StandardCharsets.UTF_8);
+        try (Connection c = DriverManager.getConnection(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
+             Statement st = c.createStatement()) {
+            st.execute("CREATE SCHEMA backfill_db");
+            st.execute("SET search_path TO backfill_db");
+            st.execute(ddl);
+            st.execute("INSERT INTO customers (active, created_at, code, name) VALUES (true, now(), 'CLI-001', 'Farmacia Central')");
+            st.execute("INSERT INTO orders (created_at, customer_id, status, order_number) "
+                    + "SELECT now(), id, 'PENDING', 'ORD-1' FROM customers WHERE code = 'CLI-001'");
+        }
+
+        MigrateResult result = flyway("backfill_db").migrate();
+        assertThat(result.success).isTrue();
+
+        try (Connection c = DriverManager.getConnection(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
+             Statement st = c.createStatement()) {
+            st.execute("SET search_path TO backfill_db");
+            var rs = st.executeQuery("SELECT customer_code, customer_name FROM orders WHERE order_number = 'ORD-1'");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("customer_code")).isEqualTo("CLI-001");
+            assertThat(rs.getString("customer_name")).isEqualTo("Farmacia Central");
+        }
     }
 }
