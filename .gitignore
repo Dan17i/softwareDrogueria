@@ -61,3 +61,8 @@ bin/
 claude.md
 CLAUDE.md
 PROGRESS.md
+
+# Skills de diseño (solo local)
+.claude/
+.agents/
+.impeccable.md
