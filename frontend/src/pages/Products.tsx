@@ -56,10 +56,13 @@ export default function Products() {
     setSort((s) => (s?.key === key ? (s.dir === 1 ? { key, dir: -1 } : null) : { key, dir: 1 }))
   }
 
-  function saved(p: Product, message: string) {
+  const upsert = (p: Product) =>
     setProducts((prev) => (prev?.some((x) => x.id === p.id) ? prev.map((x) => (x.id === p.id ? p : x)) : [p, ...(prev ?? [])]))
+
+  function saved(p: Product, message: string) {
+    upsert(p)
     setSelected(p)
-    toast.success(message)
+    if (message) toast.success(message)
   }
 
   if (error) return <p className="error-text" role="alert">{error}</p>
@@ -156,6 +159,7 @@ export default function Products() {
           editable={editable}
           onClose={() => setSelected(null)}
           onSaved={saved}
+          onUndone={upsert}
         />
       )}
     </>

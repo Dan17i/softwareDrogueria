@@ -9,6 +9,8 @@ interface Props {
   initialFocus?: 'stock'
   onClose: () => void
   onSaved: (p: Product, message: string) => void
+  /** Un ajuste de stock fue revertido desde el toast (el panel ya puede estar cerrado). */
+  onUndone: (p: Product) => void
 }
 
 interface Form {
@@ -35,7 +37,7 @@ const toForm = (p: Product | null): Form => ({
 
 const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled])'
 
-export default function ProductPanel({ product, editable, initialFocus, onClose, onSaved }: Props) {
+export default function ProductPanel({ product, editable, initialFocus, onClose, onSaved, onUndone }: Props) {
   const [form, setForm] = useState<Form>(() => toForm(product))
   const [qty, setQty] = useState('1')
   const [busy, setBusy] = useState(false)
@@ -113,8 +115,31 @@ export default function ProductPanel({ product, editable, initialFocus, onClose,
     const quantity = Number(qty)
     void run(
       () => api.adjustStock(product.id, kind, quantity),
-      (p) => onSaved(p, kind === 'increase' ? `Entraron ${quantity} unidades` : `Salieron ${quantity} unidades`),
+      (p) => {
+        onSaved(p, '')
+        const inverse = kind === 'increase' ? 'reduce' : 'increase'
+        toast.success(kind === 'increase' ? `Entraron ${quantity} unidades` : `Salieron ${quantity} unidades`, {
+          duration: 8000,
+          action: {
+            label: 'Deshacer',
+            onClick: () =>
+              api.adjustStock(p.id, inverse, quantity).then(
+                (back) => {
+                  onUndone(back)
+                  toast('Ajuste deshecho')
+                },
+                (err: Error) => toast.error(err.message),
+              ),
+          },
+        })
+      },
     )
+  }
+
+  // Enter en la cantidad registra una entrada (el caso más común en reposición).
+  function submitStock(e: FormEvent) {
+    e.preventDefault()
+    if (quantity >= 1 && !busy) adjust('increase')
   }
 
   const dis = !editable || busy
@@ -137,7 +162,7 @@ export default function ProductPanel({ product, editable, initialFocus, onClose,
         {product && editable && (
           <section className="stock-adjust" aria-label="Ajustar stock">
             <h3>Stock actual: {product.stock}</h3>
-            <div className="actions">
+            <form className="actions" onSubmit={submitStock}>
               <input
                 ref={qtyRef}
                 className="input"
@@ -149,13 +174,14 @@ export default function ProductPanel({ product, editable, initialFocus, onClose,
                 onChange={(e) => setQty(e.target.value)}
                 aria-label="Cantidad"
               />
-              <button className="btn btn-primary" disabled={busy || !(quantity >= 1)} onClick={() => adjust('increase')}>
+              <button className="btn btn-primary" disabled={busy || !(quantity >= 1)}>
                 Entrada
               </button>
-              <button className="btn" disabled={busy || !(quantity >= 1) || tooMany} onClick={() => adjust('reduce')}>
+              <button type="button" className="btn" disabled={busy || !(quantity >= 1) || tooMany} onClick={() => adjust('reduce')}>
                 Salida
               </button>
-            </div>
+            </form>
+            <p className="hint">Entrada: llegó mercancía. Salida: se vendió o se retiró.</p>
             {tooMany && <p className="hint">Solo hay {product.stock} en stock, no se pueden sacar {quantity}.</p>}
           </section>
         )}
