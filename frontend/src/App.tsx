@@ -4,6 +4,8 @@ import { useAuth } from './auth'
 import Layout from './components/Layout'
 import Dashboard from './pages/Dashboard'
 import Login from './pages/Login'
+import Customers from './pages/Customers'
+import Orders from './pages/Orders'
 import Products from './pages/Products'
 
 const Recover = lazy(() => import('./pages/Recover').then((m) => ({ default: m.Recover })))
@@ -25,6 +27,8 @@ export default function App() {
       <Route element={<Protected />}>
         <Route index element={<Dashboard />} />
         <Route path="productos" element={<Products />} />
+        <Route path="ordenes" element={<Orders />} />
+        <Route path="clientes" element={<Customers />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

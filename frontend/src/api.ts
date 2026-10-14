@@ -20,6 +20,55 @@ export interface Product {
 
 export type ProductInput = Omit<Product, 'id' | 'active'> & { active?: boolean }
 
+export type OrderStatus = 'PENDING' | 'COMPLETED' | 'CANCELLED'
+
+export interface OrderItem {
+  id: number
+  productId: number
+  productCode: string
+  productName: string
+  unitPrice: number
+  quantity: number
+  subtotal: number
+}
+
+export interface Order {
+  id: number
+  orderNumber: string
+  customerId: number
+  customerCode: string
+  customerName: string
+  status: OrderStatus
+  total: number
+  items: OrderItem[]
+  notes: string | null
+  orderDate: string
+}
+
+export interface OrderInput {
+  customerId: number
+  items: { productId: number; quantity: number }[]
+  notes: string | null
+}
+
+export type CustomerType = 'MINORISTA' | 'MAYORISTA'
+
+export interface Customer {
+  id: number
+  code: string
+  name: string
+  email: string | null
+  phone: string | null
+  address: string | null
+  city: string | null
+  customerType: CustomerType
+  creditLimit: number | null
+  pendingBalance?: number
+  active: boolean
+}
+
+export type CustomerInput = Omit<Customer, 'id' | 'active'> & { active?: boolean }
+
 const KEY = 'bellavista.session'
 
 export function loadSession(): Session | null {
@@ -107,7 +156,21 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ quantity }),
     }),
+  orders: () => request<Order[]>('/orders'),
+  createOrder: (o: OrderInput) => request<Order>('/orders', { method: 'POST', body: JSON.stringify(o) }),
+  completeOrder: (id: number) => request<Order>(`/orders/${id}/complete`, { method: 'PATCH' }),
+  cancelOrder: (id: number) => request<Order>(`/orders/${id}/cancel`, { method: 'PATCH' }),
+  customers: () => request<Customer[]>('/customers'),
+  createCustomer: (c: CustomerInput) =>
+    request<Customer>('/customers', { method: 'POST', body: JSON.stringify(c) }),
+  updateCustomer: (id: number, c: CustomerInput & { active: boolean }) =>
+    request<Customer>(`/customers/${id}`, { method: 'PUT', body: JSON.stringify(c) }),
   toggleProduct: (id: number) => request<Product>(`/products/${id}/toggle-status`, { method: 'PATCH' }),
 }
 
 export const canEditInventory = (role: Role) => role === 'ADMIN' || role === 'WAREHOUSE'
+
+export const canReadOrders = (role: Role) => role !== 'USER'
+export const canWriteOrders = (role: Role) => role === 'ADMIN' || role === 'MANAGER' || role === 'SALES'
+// Clientes: mismos roles que escriben órdenes (el backend los restringe igual)
+export const canManageCustomers = canWriteOrders

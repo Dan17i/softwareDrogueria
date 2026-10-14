@@ -4,8 +4,9 @@ import { api, canEditInventory, type Product } from '../api'
 import { useAuth } from '../auth'
 import ProductPanel from '../components/ProductPanel'
 import StockStatus from '../components/StockStatus'
+import { money } from '../format'
 
-const money = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
+
 
 type SortKey = 'name' | 'price' | 'stock'
 

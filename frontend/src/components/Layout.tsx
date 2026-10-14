@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
+import { canManageCustomers, canReadOrders } from '../api'
 import { useAuth } from '../auth'
 
 export default function Layout({ children }: { children: ReactNode }) {
@@ -27,6 +28,16 @@ export default function Layout({ children }: { children: ReactNode }) {
           <NavLink to="/productos" className="nav-link">
             Productos
           </NavLink>
+          {session && canReadOrders(session.role) && (
+            <NavLink to="/ordenes" className="nav-link">
+              Órdenes
+            </NavLink>
+          )}
+          {session && canManageCustomers(session.role) && (
+            <NavLink to="/clientes" className="nav-link">
+              Clientes
+            </NavLink>
+          )}
         </div>
         <div className="nav-user">
           <span>

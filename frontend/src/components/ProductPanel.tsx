@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { toast } from 'sonner'
 import { api, type Product } from '../api'
+import SidePanel from './SidePanel'
 
 interface Props {
   product: Product | null
@@ -33,48 +34,12 @@ const toForm = (p: Product | null): Form => ({
   active: p?.active ?? true,
 })
 
-const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled])'
-
 export default function ProductPanel({ product, editable, onClose, onSaved, onUndone }: Props) {
   const [form, setForm] = useState<Form>(() => toForm(product))
   const [qty, setQty] = useState('1')
   const [busy, setBusy] = useState(false)
-  const panelRef = useRef<HTMLDivElement>(null)
-  const qtyRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => setForm(toForm(product)), [product])
-
-  // Foco: entra al panel al abrir, queda atrapado mientras está abierto y vuelve al disparador al cerrar.
-  useEffect(() => {
-    const opener = document.activeElement as HTMLElement | null
-    const panel = panelRef.current
-    // La cantidad es la acción más frecuente: si existe, el foco entra ahí (con 'stock' o sin él).
-    const target = qtyRef.current ?? panel?.querySelector<HTMLElement>('input:not([disabled]), textarea:not([disabled])')
-    target?.focus()
-    if (target instanceof HTMLInputElement && target === qtyRef.current) target.select()
-
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') return onClose()
-      if (e.key !== 'Tab' || !panel) return
-      const items = Array.from(panel.querySelectorAll<HTMLElement>(FOCUSABLE))
-      if (items.length === 0) return
-      const first = items[0]
-      const last = items[items.length - 1]
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault()
-        last.focus()
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault()
-        first.focus()
-      }
-    }
-    window.addEventListener('keydown', onKey)
-    return () => {
-      window.removeEventListener('keydown', onKey)
-      opener?.focus?.()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   const set = (k: keyof Form) => (e: { target: { value: string } }) => setForm((f) => ({ ...f, [k]: e.target.value }))
 
@@ -175,16 +140,7 @@ export default function ProductPanel({ product, editable, onClose, onSaved, onUn
   const tooMany = product ? quantity > product.stock : false
 
   return (
-    <>
-      <div className="scrim" onClick={onClose} />
-      <div ref={panelRef} className="panel" role="dialog" aria-modal="true" aria-label={product ? product.name : 'Nuevo producto'}>
-        <div className="panel-head">
-          <h2>{product ? product.name : 'Nuevo producto'}</h2>
-          <button className="btn btn-ghost" onClick={onClose}>
-            Cerrar
-          </button>
-        </div>
-
+    <SidePanel title={product ? product.name : 'Nuevo producto'} onClose={onClose}>
         {!editable && <p className="hint">Tu rol puede consultar, pero no modificar el inventario.</p>}
 
         {product && editable && (
@@ -192,7 +148,7 @@ export default function ProductPanel({ product, editable, onClose, onSaved, onUn
             <h3>Stock actual: {product.stock}</h3>
             <form className="actions" onSubmit={submitStock}>
               <input
-                ref={qtyRef}
+                data-autofocus
                 className="input"
                 type="number"
                 inputMode="numeric"
@@ -268,7 +224,6 @@ export default function ProductPanel({ product, editable, onClose, onSaved, onUn
             </div>
           )}
         </form>
-      </div>
-    </>
+    </SidePanel>
   )
 }
