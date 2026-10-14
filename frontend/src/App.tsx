@@ -1,10 +1,13 @@
+import { lazy, Suspense } from 'react'
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom'
 import { useAuth } from './auth'
 import Layout from './components/Layout'
 import Dashboard from './pages/Dashboard'
 import Login from './pages/Login'
 import Products from './pages/Products'
-import { Recover, ResetPassword } from './pages/Recover'
+
+const Recover = lazy(() => import('./pages/Recover').then((m) => ({ default: m.Recover })))
+const ResetPassword = lazy(() => import('./pages/Recover').then((m) => ({ default: m.ResetPassword })))
 
 function Protected() {
   const { session } = useAuth()
@@ -14,6 +17,7 @@ function Protected() {
 export default function App() {
   const { session } = useAuth()
   return (
+    <Suspense fallback={null}>
     <Routes>
       <Route path="/login" element={session ? <Navigate to="/" replace /> : <Login />} />
       <Route path="/recuperar" element={<Recover />} />
@@ -24,5 +28,6 @@ export default function App() {
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </Suspense>
   )
 }

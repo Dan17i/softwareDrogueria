@@ -104,7 +104,7 @@ export default function Products() {
       </div>
 
       {!products ? (
-        <div className="skeleton" style={{ height: 280 }} aria-label="Cargando" />
+        <div className="skeleton" style={{ height: 280 }} role="status" aria-label="Cargando" />
       ) : visible.length === 0 ? (
         <div className="empty">
           <h3>{products.length === 0 ? 'Aún no hay productos' : 'Sin resultados'}</h3>
@@ -130,13 +130,11 @@ export default function Products() {
                 <tr
                   key={p.id}
                   className={p.active === false ? 'inactive' : ''}
-                  tabIndex={0}
                   onClick={() => setSelected(p)}
-                  onKeyDown={(e) => e.key === 'Enter' && setSelected(p)}
                 >
                   <td>
                     <div className="cell-name">
-                      <strong>{p.name}</strong>
+                      <button className="row-link" onClick={(e) => { e.stopPropagation(); setSelected(p) }}>{p.name}</button>
                       <span>{p.code}{p.active === false ? ' · inactivo' : ''}</span>
                     </div>
                   </td>

@@ -39,7 +39,7 @@ export default function ProductPanel({ product, editable, initialFocus, onClose,
   const [form, setForm] = useState<Form>(() => toForm(product))
   const [qty, setQty] = useState('1')
   const [busy, setBusy] = useState(false)
-  const panelRef = useRef<HTMLElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
   const qtyRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => setForm(toForm(product)), [product])
@@ -124,7 +124,7 @@ export default function ProductPanel({ product, editable, initialFocus, onClose,
   return (
     <>
       <div className="scrim" onClick={onClose} />
-      <aside ref={panelRef} className="panel" role="dialog" aria-modal="true" aria-label={product ? product.name : 'Nuevo producto'}>
+      <div ref={panelRef} className="panel" role="dialog" aria-modal="true" aria-label={product ? product.name : 'Nuevo producto'}>
         <div className="panel-head">
           <h2>{product ? product.name : 'Nuevo producto'}</h2>
           <button className="btn btn-ghost" onClick={onClose}>
@@ -213,7 +213,7 @@ export default function ProductPanel({ product, editable, initialFocus, onClose,
             </div>
           )}
         </form>
-      </aside>
+      </div>
     </>
   )
 }

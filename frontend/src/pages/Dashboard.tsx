@@ -60,7 +60,7 @@ export default function Dashboard() {
       </div>
 
       {!products ? (
-        <div className="skeleton" style={{ height: 160 }} aria-label="Cargando" />
+        <div className="skeleton" style={{ height: 160 }} role="status" aria-label="Cargando" />
       ) : restock.length === 0 ? (
         <div className="empty">
           <h3>Todo al día</h3>
@@ -80,10 +80,10 @@ export default function Dashboard() {
             </thead>
             <tbody className="stagger">
               {restock.map((p) => (
-                <tr key={p.id} tabIndex={0} onClick={() => setSelected(p)} onKeyDown={(e) => e.key === 'Enter' && setSelected(p)}>
+                <tr key={p.id} onClick={() => setSelected(p)}>
                   <td>
                     <div className="cell-name">
-                      <strong>{p.name}</strong>
+                      <button className="row-link" onClick={(e) => { e.stopPropagation(); setSelected(p) }}>{p.name}</button>
                       <span>{p.code} · mínimo {p.minStock}</span>
                     </div>
                   </td>

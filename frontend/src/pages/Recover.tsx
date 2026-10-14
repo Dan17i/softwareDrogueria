@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { api } from '../api'
-import { AuthShell } from './Login'
+import AuthShell from '../components/AuthShell'
 
 export function Recover() {
   const [email, setEmail] = useState('')

@@ -2,26 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../auth'
 import { ApiError } from '../api'
-
-export function AuthShell({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="login">
-      <section className="login-brand">
-        <span className="login-kicker">Droguería · Inventario</span>
-        <div>
-          <p className="wordmark" aria-hidden="true">Bella&shy;vista</p>
-          <h1>Lo que falta en el estante, primero.</h1>
-        </div>
-      </section>
-      <div className="login-side">
-        <div className="login-form">
-          <h2>{title}</h2>
-          {children}
-        </div>
-      </div>
-    </div>
-  )
-}
+import AuthShell from '../components/AuthShell'
 
 export default function Login() {
   const { login } = useAuth()
