@@ -5,8 +5,6 @@ import { api, type Product } from '../api'
 interface Props {
   product: Product | null
   editable: boolean
-  /** 'stock' abre directo en la cantidad (flujo de reposición). */
-  initialFocus?: 'stock'
   onClose: () => void
   onSaved: (p: Product, message: string) => void
   /** Un ajuste de stock fue revertido desde el toast (el panel ya puede estar cerrado). */
@@ -37,7 +35,7 @@ const toForm = (p: Product | null): Form => ({
 
 const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled])'
 
-export default function ProductPanel({ product, editable, initialFocus, onClose, onSaved, onUndone }: Props) {
+export default function ProductPanel({ product, editable, onClose, onSaved, onUndone }: Props) {
   const [form, setForm] = useState<Form>(() => toForm(product))
   const [qty, setQty] = useState('1')
   const [busy, setBusy] = useState(false)
@@ -50,8 +48,10 @@ export default function ProductPanel({ product, editable, initialFocus, onClose,
   useEffect(() => {
     const opener = document.activeElement as HTMLElement | null
     const panel = panelRef.current
-    const target = initialFocus === 'stock' && qtyRef.current ? qtyRef.current : panel?.querySelector<HTMLElement>(FOCUSABLE)
+    // La cantidad es la acción más frecuente: si existe, el foco entra ahí (con 'stock' o sin él).
+    const target = qtyRef.current ?? panel?.querySelector<HTMLElement>('input:not([disabled]), textarea:not([disabled])')
     target?.focus()
+    if (target instanceof HTMLInputElement && target === qtyRef.current) target.select()
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') return onClose()
@@ -101,9 +101,37 @@ export default function ProductPanel({ product, editable, initialFocus, onClose,
       category: form.category.trim() || null,
     }
     if (product) {
+      const before = product
       void run(
         () => api.updateProduct(product.id, { ...body, active: form.active }),
-        (p) => onSaved(p, 'Producto actualizado'),
+        (p) => {
+          onSaved(p, '')
+          toast.success('Producto actualizado', {
+            duration: 8000,
+            action: {
+              label: 'Deshacer',
+              onClick: () =>
+                api
+                  .updateProduct(p.id, {
+                    code: before.code,
+                    name: before.name,
+                    description: before.description,
+                    price: before.price,
+                    stock: p.stock,
+                    minStock: before.minStock,
+                    category: before.category,
+                    active: before.active,
+                  })
+                  .then(
+                    (back) => {
+                      onUndone(back)
+                      toast('Cambios deshechos')
+                    },
+                    (err: Error) => toast.error(err.message),
+                  ),
+            },
+          })
+        },
       )
     } else {
       void run(() => api.createProduct(body), (p) => onSaved(p, 'Producto creado'))
@@ -172,6 +200,7 @@ export default function ProductPanel({ product, editable, initialFocus, onClose,
                 step="1"
                 value={qty}
                 onChange={(e) => setQty(e.target.value)}
+                onFocus={(e) => e.target.select()}
                 aria-label="Cantidad"
               />
               <button className="btn btn-primary" disabled={busy || !(quantity >= 1)}>

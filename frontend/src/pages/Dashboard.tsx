@@ -135,7 +135,6 @@ export default function Dashboard() {
         <ProductPanel
           product={selected}
           editable={editable}
-          initialFocus="stock"
           onClose={() => setSelected(null)}
           onSaved={() => {
             setSelected(null)

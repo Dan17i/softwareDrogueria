@@ -104,6 +104,7 @@ export default function Products() {
           <input type="checkbox" checked={onlyLow} onChange={(e) => setOnlyLow(e.target.checked)} />
           Solo stock bajo
         </label>
+        <span className="hint kbd-hint">Pulsa <kbd>/</kbd> para buscar</span>
       </div>
 
       {!products ? (
@@ -159,7 +160,10 @@ export default function Products() {
           editable={editable}
           onClose={() => setSelected(null)}
           onSaved={saved}
-          onUndone={upsert}
+          onUndone={(p) => {
+            upsert(p)
+            setSelected((s) => (s && s !== 'new' && s.id === p.id ? p : s))
+          }}
         />
       )}
     </>
