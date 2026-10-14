@@ -1,9 +1,18 @@
-import type { ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../auth'
 
 export default function Layout({ children }: { children: ReactNode }) {
   const { session, logout } = useAuth()
+  const [confirming, setConfirming] = useState(false)
+
+  // La confirmación expira sola: un toque accidental no deja la sesión "armada".
+  useEffect(() => {
+    if (!confirming) return
+    const t = setTimeout(() => setConfirming(false), 4000)
+    return () => clearTimeout(t)
+  }, [confirming])
+
   return (
     <div className="shell">
       <nav className="nav" aria-label="Principal">
@@ -23,8 +32,12 @@ export default function Layout({ children }: { children: ReactNode }) {
           <span>
             <strong>{session?.username}</strong> · {session?.role}
           </span>
-          <button className="btn btn-ghost" onClick={logout}>
-            Salir
+          <button
+            className={confirming ? 'btn btn-danger' : 'btn btn-ghost'}
+            onClick={() => (confirming ? logout() : setConfirming(true))}
+            aria-live="polite"
+          >
+            {confirming ? 'Confirmar salida' : 'Salir'}
           </button>
         </div>
       </nav>

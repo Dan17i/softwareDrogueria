@@ -171,7 +171,7 @@ textarea.input { padding: var(--space-sm) var(--space-md); min-height: 72px; res
 .login {
   min-height: 100dvh;
   display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 4fr);
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
 }
 .login-brand {
   background: var(--brand);
@@ -352,7 +352,7 @@ tr.inactive td { color: var(--muted); }
 .sort:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 .row-action { color: var(--brand); font-weight: 600; font-size: var(--text-sm); }
 .login-kicker { font-size: var(--text-sm); letter-spacing: 0.04em; text-transform: uppercase; opacity: 0.8; }
-.wordmark { font: 700 clamp(3.5rem, 9vw, 7.5rem) / 0.95 var(--font-display); letter-spacing: -0.03em; margin: 0 0 var(--space-lg); }
+.wordmark { font: 700 clamp(3rem, 6.4vw, 6rem) / 0.95 var(--font-display); letter-spacing: -0.03em; margin: 0 0 var(--space-lg); }
 .login-brand h1 { font-size: var(--text-lg); font-weight: 500; max-width: 24ch; opacity: 0.9; }
 .login-side { display: grid; align-items: center; }
 .page-head .summary { margin: 0; }
@@ -369,4 +369,13 @@ tbody tr:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; 
   .check { min-height: 44px; }
   .check input { width: 24px; height: 24px; }
   .row-link { padding: var(--space-xs) 0; }
+}
+
+.btn-danger { background: var(--danger); border-color: var(--danger); color: var(--brand-ink); }
+@media (hover: hover) and (pointer: fine) { .btn-danger:hover:not(:disabled) { filter: brightness(0.92); } }
+.nearing { margin-top: var(--space-3xl); display: grid; gap: var(--space-sm); }
+.nearing .hint { margin-bottom: var(--space-sm); }
+@media (max-width: 760px) {
+  /* "Salir" separado de la navegación para evitar toques accidentales */
+  .nav-user { padding-left: var(--space-md); border-left: 1px solid var(--line); }
 }

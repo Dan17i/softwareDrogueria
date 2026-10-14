@@ -28,6 +28,11 @@ export default function Dashboard() {
 
   const active = products?.filter((p) => p.active !== false).length ?? 0
   const value = products?.reduce((sum, p) => sum + p.price * p.stock, 0) ?? 0
+  // Productos que aún no están bajos pero se acercan al mínimo: dan margen para reponer antes de quedarse sin stock.
+  const nearing = (products ?? [])
+    .filter((p) => p.active !== false && p.minStock > 0 && p.stock > p.minStock && p.stock <= p.minStock * 1.5)
+    .sort((a, b) => a.stock / a.minStock - b.stock / b.minStock)
+    .slice(0, 5)
   const showValue = session?.role === 'ADMIN' || session?.role === 'MANAGER'
 
   return (
@@ -99,6 +104,31 @@ export default function Dashboard() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {products && nearing.length > 0 && (
+        <section className="nearing" aria-labelledby="nearing-title">
+          <h2 id="nearing-title">Próximos a bajar</h2>
+          <p className="hint">Siguen sobre su mínimo, pero por poco.</p>
+          <div className="table-wrap">
+            <table>
+              <tbody>
+                {nearing.map((p) => (
+                  <tr key={p.id} onClick={() => setSelected(p)}>
+                    <td>
+                      <div className="cell-name">
+                        <button className="row-link" onClick={(e) => { e.stopPropagation(); setSelected(p) }}>{p.name}</button>
+                        <span>{p.code}</span>
+                      </div>
+                    </td>
+                    <td className="num"><StockStatus stock={p.stock} minStock={p.minStock} /></td>
+                    <td className="num hide-sm">mínimo {p.minStock}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
       )}
 
       {selected && (
