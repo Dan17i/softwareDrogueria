@@ -17,7 +17,9 @@ import java.util.List;
  * REST controller for Notification operations.
  */
 @RestController
-@RequestMapping("/api/notifications")
+// /notifications es la ruta correcta (queda en /api/notifications con el context-path).
+// /api/notifications se conserva solo por compatibilidad: con el context-path resulta en /api/api/notifications.
+@RequestMapping({"/notifications", "/api/notifications"})
 @Tag(name = "Notifications", description = "Notification management API")
 public class NotificationController {
 

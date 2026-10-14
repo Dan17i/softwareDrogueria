@@ -2,11 +2,13 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { canManageCustomers, canReadOrders, canReadReceipts } from '../api'
 import { useAuth } from '../auth'
+import useUnreadCount from './useUnreadCount'
 
 export default function Layout({ children }: { children: ReactNode }) {
   const { session, logout } = useAuth()
   const [confirming, setConfirming] = useState(false)
   const { pathname } = useLocation()
+  const unread = useUnreadCount(session?.role)
 
   // En móvil la barra se desplaza: mantiene a la vista la sección activa
   useEffect(() => {
@@ -54,6 +56,15 @@ export default function Layout({ children }: { children: ReactNode }) {
               Proveedores
             </NavLink>
           )}
+          <NavLink to="/notificaciones" className="nav-link">
+            Notificaciones
+            {unread > 0 && (
+              <span className="badge">
+                {unread > 99 ? '99+' : unread}
+                <span className="sr-only"> sin leer</span>
+              </span>
+            )}
+          </NavLink>
         </div>
         <div className="nav-user">
           <span>

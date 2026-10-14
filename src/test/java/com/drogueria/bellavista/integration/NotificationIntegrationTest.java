@@ -40,6 +40,19 @@ public class NotificationIntegrationTest {
 
     @Test
     @WithMockUser(roles = "USER")
+    public void testGetNotificationsOnCanonicalPath() throws Exception {
+        // Ruta sin el prefijo /api duplicado: en producción queda en /api/notifications
+        mockMvc.perform(get("/notifications")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+        mockMvc.perform(get("/notifications/unread")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = "USER")
     public void testGetUnreadNotifications() throws Exception {
         mockMvc.perform(get("/api/notifications/unread")
                 .contentType(MediaType.APPLICATION_JSON))

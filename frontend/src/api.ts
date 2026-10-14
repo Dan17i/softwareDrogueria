@@ -118,6 +118,21 @@ export interface ReceiptInput {
   notes: string | null
 }
 
+export type NotificationType = 'INVENTORY_ALERT' | 'ORDER_ALERT' | 'SYSTEM_ALERT' | 'USER_ALERT'
+
+export interface AppNotification {
+  id: number
+  title: string
+  message: string
+  type: NotificationType
+  isRead: boolean
+  requiredRole: string | null
+  createdAt: string
+  readAt: string | null
+  relatedEntityId: string | null
+  relatedEntityType: string | null
+}
+
 const KEY = 'bellavista.session'
 
 export function loadSession(): Session | null {
@@ -222,6 +237,11 @@ export const api = {
   createReceipt: (x: ReceiptInput) => request<Receipt>('/goods-receipts', { method: 'POST', body: JSON.stringify(x) }),
   receiveReceipt: (id: number) => request<Receipt>(`/goods-receipts/${id}/receive`, { method: 'PATCH' }),
   rejectReceipt: (id: number) => request<Receipt>(`/goods-receipts/${id}/reject`, { method: 'PATCH' }),
+  notifications: () => request<AppNotification[]>('/notifications'),
+  allNotifications: () => request<AppNotification[]>('/notifications/admin'),
+  markNotificationRead: (id: number) => request<void>(`/notifications/${id}/read`, { method: 'PUT' }),
+  generateInventoryAlerts: () => request<void>('/notifications/generate-inventory-alerts', { method: 'POST' }),
+  deleteNotification: (id: number) => request<void>(`/notifications/${id}`, { method: 'DELETE' }),
   toggleProduct: (id: number) => request<Product>(`/products/${id}/toggle-status`, { method: 'PATCH' }),
 }
 
@@ -236,3 +256,12 @@ export const canManageCustomers = canWriteOrders
 export const canReadReceipts = (role: Role) => role === 'ADMIN' || role === 'MANAGER' || role === 'WAREHOUSE'
 export const canWriteReceipts = (role: Role) => role === 'ADMIN' || role === 'WAREHOUSE'
 export const canReadSuppliers = canReadReceipts
+
+// Las notificaciones son por rol: ADMIN no recibe las de WAREHOUSE salvo por el listado completo de /admin.
+export const loadNotifications = (role: Role) => (role === 'ADMIN' ? api.allNotifications() : api.notifications())
+
+// El backend manda la hora local con una "Z" literal: se interpreta como hora local, igual que el resto de fechas.
+export const parseLocal = (iso: string) => new Date(iso.replace(/Z$/, ''))
+
+export const NOTIFICATIONS_CHANGED = 'notifications:changed'
+export const notifyChanged = () => window.dispatchEvent(new Event(NOTIFICATIONS_CHANGED))

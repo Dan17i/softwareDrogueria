@@ -5,6 +5,7 @@ import Layout from './components/Layout'
 import Dashboard from './pages/Dashboard'
 import Login from './pages/Login'
 import Customers from './pages/Customers'
+import Notifications from './pages/Notifications'
 import Orders from './pages/Orders'
 import Products from './pages/Products'
 import Receipts from './pages/Receipts'
@@ -33,6 +34,7 @@ export default function App() {
         <Route path="clientes" element={<Customers />} />
         <Route path="recepciones" element={<Receipts />} />
         <Route path="proveedores" element={<Suppliers />} />
+        <Route path="notificaciones" element={<Notifications />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
