@@ -107,7 +107,7 @@ export default function Products() {
                     </td>
                     <td className="hide-sm">{p.category ?? '—'}</td>
                     <td className="num">{money.format(p.price)}</td>
-                    <td className="num">
+                    <td className="num" data-label="Stock">
                       <span className={low ? 'pill pill-warn' : 'pill pill-ok'}>{p.stock}</span>
                     </td>
                   </tr>

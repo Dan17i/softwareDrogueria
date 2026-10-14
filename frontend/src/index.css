@@ -228,6 +228,7 @@ textarea.input { padding: var(--space-sm) var(--space-md); min-height: 72px; res
 }
 .nav-user { margin-top: auto; display: grid; gap: var(--space-sm); font-size: var(--text-sm); color: var(--muted); }
 .nav-user strong { color: var(--text); font-weight: 600; }
+.nav-user .btn { justify-self: start; padding: 0 var(--space-md); }
 
 .main { padding: var(--space-2xl) clamp(var(--space-lg), 4vw, var(--space-3xl)); min-width: 0; }
 .page-head {
@@ -306,6 +307,8 @@ tr.inactive td { color: var(--muted); }
   td { display: block; padding: 0; border: 0; }
   td.num { text-align: right; }
   td.hide-sm { display: none; }
+  td[data-label]::before { content: attr(data-label) ' '; font-size: var(--text-xs); color: var(--muted); }
+  .toolbar .input { max-width: none; }
 }
 
 /* ---------- Panel lateral ---------- */

@@ -76,8 +76,8 @@ export default function Dashboard() {
                       <span>{p.code}</span>
                     </div>
                   </td>
-                  <td className="num"><span className="pill pill-warn">{p.stock}</span></td>
-                  <td className="num">{p.minStock}</td>
+                  <td className="num" data-label="Stock"><span className="pill pill-warn">{p.stock}</span></td>
+                  <td className="num" data-label="Mínimo">{p.minStock}</td>
                 </tr>
               ))}
             </tbody>
