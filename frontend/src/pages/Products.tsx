@@ -1,10 +1,13 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { api, canEditInventory, type Product } from '../api'
 import { useAuth } from '../auth'
 import ProductPanel from '../components/ProductPanel'
+import StockStatus from '../components/StockStatus'
 
 const money = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
+
+type SortKey = 'name' | 'price' | 'stock'
 
 export default function Products() {
   const { session } = useAuth()
@@ -13,21 +16,45 @@ export default function Products() {
   const [error, setError] = useState('')
   const [query, setQuery] = useState('')
   const [onlyLow, setOnlyLow] = useState(false)
+  const [sort, setSort] = useState<{ key: SortKey; dir: 1 | -1 } | null>(null)
   const [selected, setSelected] = useState<Product | 'new' | null>(null)
+  const searchRef = useRef<HTMLInputElement>(null)
 
   const load = useCallback(() => {
     api.products().then(setProducts).catch((e: Error) => setError(e.message))
   }, [])
   useEffect(load, [load])
 
+  // "/" lleva al buscador, como en cualquier herramienta de uso diario.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement
+      if (e.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(t.tagName) && !selected) {
+        e.preventDefault()
+        searchRef.current?.focus()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [selected])
+
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase()
-    return (products ?? []).filter(
+    const rows = (products ?? []).filter(
       (p) =>
         (!onlyLow || p.stock <= p.minStock) &&
         (!q || p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q) || (p.category ?? '').toLowerCase().includes(q)),
     )
-  }, [products, query, onlyLow])
+    if (!sort) return rows
+    const { key, dir } = sort
+    return [...rows].sort((a, b) =>
+      key === 'name' ? dir * a.name.localeCompare(b.name, 'es') : dir * (a[key] - b[key]),
+    )
+  }, [products, query, onlyLow, sort])
+
+  function toggleSort(key: SortKey) {
+    setSort((s) => (s?.key === key ? (s.dir === 1 ? { key, dir: -1 } : null) : { key, dir: 1 }))
+  }
 
   function saved(p: Product, message: string) {
     setProducts((prev) => (prev?.some((x) => x.id === p.id) ? prev.map((x) => (x.id === p.id ? p : x)) : [p, ...(prev ?? [])]))
@@ -36,6 +63,15 @@ export default function Products() {
   }
 
   if (error) return <p className="error-text" role="alert">{error}</p>
+
+  const th = (key: SortKey, label: string, cls = '') => (
+    <th className={cls} aria-sort={sort?.key === key ? (sort.dir === 1 ? 'ascending' : 'descending') : 'none'}>
+      <button className="sort" onClick={() => toggleSort(key)}>
+        {label}
+        <span aria-hidden="true">{sort?.key === key ? (sort.dir === 1 ? ' ↑' : ' ↓') : ''}</span>
+      </button>
+    </th>
+  )
 
   return (
     <>
@@ -53,9 +89,10 @@ export default function Products() {
 
       <div className="toolbar">
         <input
+          ref={searchRef}
           className="input"
           type="search"
-          placeholder="Buscar por nombre, código o categoría"
+          placeholder="Buscar por nombre, código o categoría  ( / )"
           aria-label="Buscar productos"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -82,37 +119,34 @@ export default function Products() {
           <table>
             <thead>
               <tr>
-                <th>Producto</th>
+                {th('name', 'Producto')}
                 <th className="hide-sm">Categoría</th>
-                <th className="num">Precio</th>
-                <th className="num">Stock</th>
+                {th('price', 'Precio', 'num')}
+                {th('stock', 'Stock', 'num')}
               </tr>
             </thead>
             <tbody>
-              {visible.map((p) => {
-                const low = p.stock <= p.minStock
-                return (
-                  <tr
-                    key={p.id}
-                    className={p.active === false ? 'inactive' : ''}
-                    tabIndex={0}
-                    onClick={() => setSelected(p)}
-                    onKeyDown={(e) => e.key === 'Enter' && setSelected(p)}
-                  >
-                    <td>
-                      <div className="cell-name">
-                        <strong>{p.name}</strong>
-                        <span>{p.code}{p.active === false ? ' · inactivo' : ''}</span>
-                      </div>
-                    </td>
-                    <td className="hide-sm">{p.category ?? '—'}</td>
-                    <td className="num">{money.format(p.price)}</td>
-                    <td className="num" data-label="Stock">
-                      <span className={low ? 'pill pill-warn' : 'pill pill-ok'}>{p.stock}</span>
-                    </td>
-                  </tr>
-                )
-              })}
+              {visible.map((p) => (
+                <tr
+                  key={p.id}
+                  className={p.active === false ? 'inactive' : ''}
+                  tabIndex={0}
+                  onClick={() => setSelected(p)}
+                  onKeyDown={(e) => e.key === 'Enter' && setSelected(p)}
+                >
+                  <td>
+                    <div className="cell-name">
+                      <strong>{p.name}</strong>
+                      <span>{p.code}{p.active === false ? ' · inactivo' : ''}</span>
+                    </div>
+                  </td>
+                  <td className="hide-sm">{p.category ?? '—'}</td>
+                  <td className="num">{money.format(p.price)}</td>
+                  <td className="num" data-label="Stock">
+                    <StockStatus stock={p.stock} minStock={p.minStock} />
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

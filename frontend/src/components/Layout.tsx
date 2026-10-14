@@ -13,7 +13,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         </div>
         <div className="nav-links">
           <NavLink to="/" end className="nav-link">
-            Resumen
+            Reposición
           </NavLink>
           <NavLink to="/productos" className="nav-link">
             Productos

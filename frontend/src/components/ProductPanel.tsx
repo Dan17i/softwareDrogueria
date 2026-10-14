@@ -1,10 +1,12 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { toast } from 'sonner'
 import { api, type Product } from '../api'
 
 interface Props {
   product: Product | null
   editable: boolean
+  /** 'stock' abre directo en la cantidad (flujo de reposición). */
+  initialFocus?: 'stock'
   onClose: () => void
   onSaved: (p: Product, message: string) => void
 }
@@ -31,17 +33,46 @@ const toForm = (p: Product | null): Form => ({
   active: p?.active ?? true,
 })
 
-export default function ProductPanel({ product, editable, onClose, onSaved }: Props) {
+const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled])'
+
+export default function ProductPanel({ product, editable, initialFocus, onClose, onSaved }: Props) {
   const [form, setForm] = useState<Form>(() => toForm(product))
   const [qty, setQty] = useState('1')
   const [busy, setBusy] = useState(false)
+  const panelRef = useRef<HTMLElement>(null)
+  const qtyRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => setForm(toForm(product)), [product])
+
+  // Foco: entra al panel al abrir, queda atrapado mientras está abierto y vuelve al disparador al cerrar.
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
+    const opener = document.activeElement as HTMLElement | null
+    const panel = panelRef.current
+    const target = initialFocus === 'stock' && qtyRef.current ? qtyRef.current : panel?.querySelector<HTMLElement>(FOCUSABLE)
+    target?.focus()
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') return onClose()
+      if (e.key !== 'Tab' || !panel) return
+      const items = Array.from(panel.querySelectorAll<HTMLElement>(FOCUSABLE))
+      if (items.length === 0) return
+      const first = items[0]
+      const last = items[items.length - 1]
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
     window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      opener?.focus?.()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const set = (k: keyof Form) => (e: { target: { value: string } }) => setForm((f) => ({ ...f, [k]: e.target.value }))
 
@@ -87,19 +118,47 @@ export default function ProductPanel({ product, editable, onClose, onSaved }: Pr
   }
 
   const dis = !editable || busy
+  const quantity = Number(qty)
+  const tooMany = product ? quantity > product.stock : false
 
   return (
     <>
       <div className="scrim" onClick={onClose} />
-      <aside className="panel" role="dialog" aria-modal="true" aria-label={product ? product.name : 'Nuevo producto'}>
+      <aside ref={panelRef} className="panel" role="dialog" aria-modal="true" aria-label={product ? product.name : 'Nuevo producto'}>
         <div className="panel-head">
           <h2>{product ? product.name : 'Nuevo producto'}</h2>
-          <button className="btn btn-ghost" onClick={onClose} aria-label="Cerrar">
+          <button className="btn btn-ghost" onClick={onClose}>
             Cerrar
           </button>
         </div>
 
         {!editable && <p className="hint">Tu rol puede consultar, pero no modificar el inventario.</p>}
+
+        {product && editable && (
+          <section className="stock-adjust" aria-label="Ajustar stock">
+            <h3>Stock actual: {product.stock}</h3>
+            <div className="actions">
+              <input
+                ref={qtyRef}
+                className="input"
+                type="number"
+                inputMode="numeric"
+                min="1"
+                step="1"
+                value={qty}
+                onChange={(e) => setQty(e.target.value)}
+                aria-label="Cantidad"
+              />
+              <button className="btn btn-primary" disabled={busy || !(quantity >= 1)} onClick={() => adjust('increase')}>
+                Entrada
+              </button>
+              <button className="btn" disabled={busy || !(quantity >= 1) || tooMany} onClick={() => adjust('reduce')}>
+                Salida
+              </button>
+            </div>
+            {tooMany && <p className="hint">Solo hay {product.stock} en stock, no se pueden sacar {quantity}.</p>}
+          </section>
+        )}
 
         <form onSubmit={submit}>
           <div className="row-2">
@@ -127,7 +186,8 @@ export default function ProductPanel({ product, editable, onClose, onSaved }: Pr
             </div>
             <div className="field">
               <label htmlFor="minStock">Stock mínimo</label>
-              <input id="minStock" className="input" type="number" inputMode="numeric" min="0" step="1" value={form.minStock} onChange={set('minStock')} required disabled={dis} />
+              <input id="minStock" className="input" type="number" inputMode="numeric" min="0" step="1" value={form.minStock} onChange={set('minStock')} required disabled={dis} aria-describedby="minStock-hint" />
+              <span id="minStock-hint" className="hint">Se marca “Bajo” cuando el stock llega a este número.</span>
             </div>
           </div>
           {!product && (
@@ -153,23 +213,6 @@ export default function ProductPanel({ product, editable, onClose, onSaved }: Pr
             </div>
           )}
         </form>
-
-        {product && editable && (
-          <section className="stock-adjust" aria-label="Ajustar stock">
-            <h3>
-              Stock actual: {product.stock}
-            </h3>
-            <div className="actions">
-              <input className="input" type="number" inputMode="numeric" min="1" step="1" value={qty} onChange={(e) => setQty(e.target.value)} aria-label="Cantidad" />
-              <button className="btn" disabled={busy || Number(qty) < 1} onClick={() => adjust('increase')}>
-                Entrada
-              </button>
-              <button className="btn" disabled={busy || Number(qty) < 1 || Number(qty) > product.stock} onClick={() => adjust('reduce')}>
-                Salida
-              </button>
-            </div>
-          </section>
-        )}
       </aside>
     </>
   )

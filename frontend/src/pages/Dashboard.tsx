@@ -1,14 +1,20 @@
 import NumberFlow from '@number-flow/react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { api, type Product } from '../api'
+import { api, canEditInventory, type Product } from '../api'
+import { useAuth } from '../auth'
+import ProductPanel from '../components/ProductPanel'
+import StockStatus from '../components/StockStatus'
 
 export default function Dashboard() {
+  const { session } = useAuth()
+  const editable = session ? canEditInventory(session.role) : false
   const [products, setProducts] = useState<Product[] | null>(null)
   const [restock, setRestock] = useState<Product[]>([])
   const [error, setError] = useState('')
+  const [selected, setSelected] = useState<Product | null>(null)
 
-  useEffect(() => {
+  const load = useCallback(() => {
     Promise.all([api.products(), api.restockNeeded()])
       .then(([all, low]) => {
         setProducts(all)
@@ -16,39 +22,43 @@ export default function Dashboard() {
       })
       .catch((e: Error) => setError(e.message))
   }, [])
+  useEffect(load, [load])
 
   if (error) return <p className="error-text" role="alert">{error}</p>
 
   const active = products?.filter((p) => p.active !== false).length ?? 0
   const value = products?.reduce((sum, p) => sum + p.price * p.stock, 0) ?? 0
+  const showValue = session?.role === 'ADMIN' || session?.role === 'MANAGER'
 
   return (
     <>
       <div className="page-head">
         <div>
-          <h1>Resumen</h1>
-          <p>Estado del inventario ahora mismo.</p>
+          <h1>Por reponer</h1>
+          <p>
+            {products === null
+              ? 'Cargando…'
+              : restock.length === 0
+                ? 'Todo al día.'
+                : `${restock.length} ${restock.length === 1 ? 'producto está' : 'productos están'} en o bajo su mínimo.`}
+          </p>
         </div>
+        <dl className="summary">
+          <div>
+            <dt>Activos</dt>
+            <dd><NumberFlow value={active} /></dd>
+          </div>
+          {showValue && (
+            <div>
+              <dt>Valor en stock</dt>
+              <dd>
+                <NumberFlow value={value} format={{ style: 'currency', currency: 'COP', maximumFractionDigits: 0 }} locales="es-CO" />
+              </dd>
+            </div>
+          )}
+        </dl>
       </div>
 
-      <dl className="summary">
-        <div>
-          <dt>Por reponer</dt>
-          <dd className={restock.length ? 'alert' : ''}><NumberFlow value={restock.length} /></dd>
-        </div>
-        <div>
-          <dt>Productos activos</dt>
-          <dd><NumberFlow value={active} /></dd>
-        </div>
-        <div>
-          <dt>Valor en stock</dt>
-          <dd>
-            <NumberFlow value={value} format={{ style: 'currency', currency: 'COP', maximumFractionDigits: 0 }} locales="es-CO" />
-          </dd>
-        </div>
-      </dl>
-
-      <h2 style={{ marginBottom: 'var(--space-md)' }}>Por reponer</h2>
       {!products ? (
         <div className="skeleton" style={{ height: 160 }} aria-label="Cargando" />
       ) : restock.length === 0 ? (
@@ -64,25 +74,44 @@ export default function Dashboard() {
               <tr>
                 <th>Producto</th>
                 <th className="num">Stock</th>
-                <th className="num">Mínimo</th>
+                <th className="num hide-sm">Mínimo</th>
+                {editable && <th className="num hide-sm"><span className="sr-only">Acción</span></th>}
               </tr>
             </thead>
             <tbody className="stagger">
               {restock.map((p) => (
-                <tr key={p.id}>
+                <tr key={p.id} tabIndex={0} onClick={() => setSelected(p)} onKeyDown={(e) => e.key === 'Enter' && setSelected(p)}>
                   <td>
                     <div className="cell-name">
                       <strong>{p.name}</strong>
-                      <span>{p.code}</span>
+                      <span>{p.code} · mínimo {p.minStock}</span>
                     </div>
                   </td>
-                  <td className="num" data-label="Stock"><span className="pill pill-warn">{p.stock}</span></td>
-                  <td className="num" data-label="Mínimo">{p.minStock}</td>
+                  <td className="num"><StockStatus stock={p.stock} minStock={p.minStock} /></td>
+                  <td className="num hide-sm">{p.minStock}</td>
+                  {editable && (
+                    <td className="num hide-sm">
+                      <span className="row-action">Registrar entrada</span>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+      )}
+
+      {selected && (
+        <ProductPanel
+          product={selected}
+          editable={editable}
+          initialFocus="stock"
+          onClose={() => setSelected(null)}
+          onSaved={() => {
+            setSelected(null)
+            load()
+          }}
+        />
       )}
     </>
   )

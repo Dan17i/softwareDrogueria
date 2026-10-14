@@ -91,6 +91,10 @@ export const api = {
       { method: 'POST', body: JSON.stringify({ username, password }) },
       false,
     ),
+  forgotPassword: (email: string) =>
+    request<void>('/auth/forgot-password', { method: 'POST', body: JSON.stringify({ email }) }, false),
+  resetPassword: (token: string, newPassword: string) =>
+    request<void>('/auth/reset-password', { method: 'POST', body: JSON.stringify({ token, newPassword }) }, false),
   logout: () => request<void>('/auth/logout', { method: 'POST' }).catch(() => undefined),
   products: () => request<Product[]>('/products'),
   restockNeeded: () => request<Product[]>('/products/restock-needed'),

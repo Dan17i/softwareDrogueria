@@ -4,6 +4,7 @@ import Layout from './components/Layout'
 import Dashboard from './pages/Dashboard'
 import Login from './pages/Login'
 import Products from './pages/Products'
+import { Recover, ResetPassword } from './pages/Recover'
 
 function Protected() {
   const { session } = useAuth()
@@ -15,6 +16,8 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={session ? <Navigate to="/" replace /> : <Login />} />
+      <Route path="/recuperar" element={<Recover />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route element={<Protected />}>
         <Route index element={<Dashboard />} />
         <Route path="productos" element={<Products />} />
