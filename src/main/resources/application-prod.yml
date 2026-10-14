@@ -55,6 +55,8 @@ spring:
 
 server:
   port: ${PORT:8080}
+  # Detrás de nginx (frontend): toma la IP real de X-Forwarded-For (solo de proxies privados) para el rate limit
+  forward-headers-strategy: native
   servlet:
     context-path: /api
 

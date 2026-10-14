@@ -78,7 +78,7 @@ src/main/java/com/drogueria/bellavista
 
 ### Opción A — Demo completa con Docker Compose (recomendada)
 
-Levanta la API, PostgreSQL, Redis y **Mailpit** (una bandeja local donde ves los correos que envía la app, sin proveedor SMTP real):
+Levanta el frontend, la API, PostgreSQL, Redis y **Mailpit** (una bandeja local donde ves los correos que envía la app, sin proveedor SMTP real):
 
 ```bash
 git clone https://github.com/Dan17i/softwareDrogueria.git
@@ -91,6 +91,7 @@ docker compose -f docker-compose.yml -f docker-compose.demo.yml up --build
 
 | Servicio | URL |
 |---|---|
+| **Frontend** | http://localhost |
 | API | http://localhost:8080/api |
 | Swagger UI | http://localhost:8080/api/swagger-ui/index.html |
 | Mailpit (correos) | http://localhost:8025 |
@@ -111,6 +112,18 @@ export DEV_DB_PASSWORD=tu_password_postgres_local
 mvn spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
+### Frontend (React + Vite + TypeScript)
+
+Vive en `frontend/`. En producción lo sirve nginx y reenvía `/api` al backend (mismo origen, sin CORS). En desarrollo:
+
+```bash
+cd frontend
+npm install
+npm run dev        # http://localhost:5173, proxy de /api a localhost:8080
+```
+
+Pantallas actuales: login y recuperación de contraseña, reposición y productos (buscar, ordenar, entradas/salidas de stock con deshacer).
+
 ### Pruebas
 
 ```bash
@@ -127,7 +140,7 @@ Copia `.env.example` a `.env` (el archivo `.env` está ignorado por git).
 | `APP_JWT_SECRET` | Sí | Clave de firma JWT, mínimo 32 caracteres (`openssl rand -base64 48`) |
 | `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM` | Sí | SMTP. `MAIL_FROM` debe estar verificado en tu proveedor |
 | `STRIPE_SECRET_KEY`, `STRIPE_PUBLIC_KEY` | Para pagos | Claves de Stripe en modo test |
-| `FRONTEND_URL` | No | URL del frontend (enlaces de correos). Por defecto `http://localhost:5173` |
+| `FRONTEND_URL` | No | URL del frontend (enlaces de correos). Por defecto `http://localhost` (nginx del front). En desarrollo con `npm run dev` usa `http://localhost:5173` |
 | `APP_DOCS_PUBLIC` | No | `true` abre Swagger UI sin login (solo demos). Por defecto `false` |
 | `DEV_DB_PASSWORD` | Solo perfil `dev` | Contraseña del PostgreSQL local |
 

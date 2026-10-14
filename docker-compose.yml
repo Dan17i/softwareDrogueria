@@ -43,7 +43,7 @@ services:
       MAIL_USERNAME: ${MAIL_USERNAME:?MAIL_USERNAME requerido (usuario SMTP)}
       MAIL_PASSWORD: ${MAIL_PASSWORD:?MAIL_PASSWORD requerido (password SMTP)}
       MAIL_FROM: ${MAIL_FROM:?MAIL_FROM requerido (remitente verificado)}
-      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_PUBLIC_KEY: ${STRIPE_PUBLIC_KEY:-}
       APP_DOCS_PUBLIC: ${APP_DOCS_PUBLIC:-false}
@@ -53,6 +53,20 @@ services:
       - drogueria_net
     mem_limit: 512m
     mem_reservation: 256m
+
+  frontend:
+    # Nginx: sirve el front y reenvía /api al backend (mismo origen, sin CORS)
+    build: ./frontend
+    image: ghcr.io/dan17i/softwaredrogueria-frontend:latest
+    container_name: drogueria_frontend
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "${FRONTEND_PORT:-80}:80"
+    networks:
+      - drogueria_net
+    mem_limit: 64m
 
   redis:
     image: redis:7-alpine
