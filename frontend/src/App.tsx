@@ -7,6 +7,8 @@ import Login from './pages/Login'
 import Customers from './pages/Customers'
 import Orders from './pages/Orders'
 import Products from './pages/Products'
+import Receipts from './pages/Receipts'
+import Suppliers from './pages/Suppliers'
 
 const Recover = lazy(() => import('./pages/Recover').then((m) => ({ default: m.Recover })))
 const ResetPassword = lazy(() => import('./pages/Recover').then((m) => ({ default: m.ResetPassword })))
@@ -29,6 +31,8 @@ export default function App() {
         <Route path="productos" element={<Products />} />
         <Route path="ordenes" element={<Orders />} />
         <Route path="clientes" element={<Customers />} />
+        <Route path="recepciones" element={<Receipts />} />
+        <Route path="proveedores" element={<Suppliers />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

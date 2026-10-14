@@ -38,6 +38,7 @@ export interface Order {
   customerId: number
   customerCode: string
   customerName: string
+  supplierId: number | null
   status: OrderStatus
   total: number
   items: OrderItem[]
@@ -47,6 +48,7 @@ export interface Order {
 
 export interface OrderInput {
   customerId: number
+  supplierId: number | null
   items: { productId: number; quantity: number }[]
   notes: string | null
 }
@@ -68,6 +70,53 @@ export interface Customer {
 }
 
 export type CustomerInput = Omit<Customer, 'id' | 'active'> & { active?: boolean }
+
+export interface Supplier {
+  id: number
+  code: string
+  name: string
+  email: string | null
+  phone: string | null
+  address: string | null
+  city: string | null
+  leadTimeDays: number | null
+  averagePaymentDelay: number | null
+  active: boolean
+}
+
+export type SupplierInput = Omit<Supplier, 'id' | 'active'> & { active?: boolean }
+
+export type ReceiptStatus = 'PENDING' | 'RECEIVED' | 'PARTIALLY_RECEIVED' | 'REJECTED'
+
+export interface ReceiptItem {
+  id: number
+  productId: number
+  productCode: string
+  productName: string
+  orderedQuantity: number
+  receivedQuantity: number
+  differenceQuantity: number
+}
+
+export interface Receipt {
+  id: number
+  receiptNumber: string
+  orderId: number
+  orderNumber: string
+  supplierId: number
+  supplierName: string
+  status: ReceiptStatus
+  notes: string | null
+  createdAt: string
+  totalReceivedQuantity: number
+  items: ReceiptItem[]
+}
+
+export interface ReceiptInput {
+  orderId: number
+  items: { productId: number; productCode: string; productName: string; orderedQuantity: number; receivedQuantity: number }[]
+  notes: string | null
+}
 
 const KEY = 'bellavista.session'
 
@@ -165,6 +214,14 @@ export const api = {
     request<Customer>('/customers', { method: 'POST', body: JSON.stringify(c) }),
   updateCustomer: (id: number, c: CustomerInput & { active: boolean }) =>
     request<Customer>(`/customers/${id}`, { method: 'PUT', body: JSON.stringify(c) }),
+  suppliers: () => request<Supplier[]>('/suppliers'),
+  createSupplier: (x: SupplierInput) => request<Supplier>('/suppliers', { method: 'POST', body: JSON.stringify(x) }),
+  updateSupplier: (id: number, x: SupplierInput & { active: boolean }) =>
+    request<Supplier>(`/suppliers/${id}`, { method: 'PUT', body: JSON.stringify(x) }),
+  receipts: () => request<Receipt[]>('/goods-receipts'),
+  createReceipt: (x: ReceiptInput) => request<Receipt>('/goods-receipts', { method: 'POST', body: JSON.stringify(x) }),
+  receiveReceipt: (id: number) => request<Receipt>(`/goods-receipts/${id}/receive`, { method: 'PATCH' }),
+  rejectReceipt: (id: number) => request<Receipt>(`/goods-receipts/${id}/reject`, { method: 'PATCH' }),
   toggleProduct: (id: number) => request<Product>(`/products/${id}/toggle-status`, { method: 'PATCH' }),
 }
 
@@ -174,3 +231,8 @@ export const canReadOrders = (role: Role) => role !== 'USER'
 export const canWriteOrders = (role: Role) => role === 'ADMIN' || role === 'MANAGER' || role === 'SALES'
 // Clientes: mismos roles que escriben órdenes (el backend los restringe igual)
 export const canManageCustomers = canWriteOrders
+
+// Recepciones y proveedores: el backend los abre a ADMIN, MANAGER y WAREHOUSE (escribir recepciones: ADMIN y WAREHOUSE)
+export const canReadReceipts = (role: Role) => role === 'ADMIN' || role === 'MANAGER' || role === 'WAREHOUSE'
+export const canWriteReceipts = (role: Role) => role === 'ADMIN' || role === 'WAREHOUSE'
+export const canReadSuppliers = canReadReceipts

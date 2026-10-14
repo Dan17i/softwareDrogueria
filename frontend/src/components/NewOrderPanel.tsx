@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { toast } from 'sonner'
-import { api, type Customer, type Order, type Product } from '../api'
+import { api, canReadSuppliers, type Customer, type Order, type Product, type Supplier } from '../api'
+import { useAuth } from '../auth'
 import { money } from '../format'
 import SidePanel from './SidePanel'
 
@@ -14,6 +15,9 @@ let seq = 0
 const newLine = (): Line => ({ key: ++seq, productId: '', quantity: '1' })
 
 export default function NewOrderPanel({ onClose, onCreated }: { onClose: () => void; onCreated: (o: Order) => void }) {
+  const { session } = useAuth()
+  const [suppliers, setSuppliers] = useState<Supplier[]>([])
+  const [supplierId, setSupplierId] = useState('')
   const [customers, setCustomers] = useState<Customer[] | null>(null)
   const [products, setProducts] = useState<Product[]>([])
   const [loadError, setLoadError] = useState('')
@@ -30,6 +34,11 @@ export default function NewOrderPanel({ onClose, onCreated }: { onClose: () => v
       })
       .catch((e: Error) => setLoadError(e.message))
   }, [])
+
+  // El proveedor es opcional, pero sin él la orden no admite recepción de mercancía.
+  useEffect(() => {
+    if (session && canReadSuppliers(session.role)) api.suppliers().then((l) => setSuppliers(l.filter((x) => x.active !== false))).catch(() => setSuppliers([]))
+  }, [session])
 
   const byId = useMemo(() => new Map(products.map((p) => [String(p.id), p])), [products])
   const total = lines.reduce((sum, l) => sum + (byId.get(l.productId)?.price ?? 0) * (Number(l.quantity) || 0), 0)
@@ -52,6 +61,7 @@ export default function NewOrderPanel({ onClose, onCreated }: { onClose: () => v
     try {
       const o = await api.createOrder({
         customerId: Number(customerId),
+        supplierId: supplierId ? Number(supplierId) : null,
         items: lines.map((l) => ({ productId: Number(l.productId), quantity: Number(l.quantity) })),
         notes: notes.trim() || null,
       })
@@ -89,6 +99,21 @@ export default function NewOrderPanel({ onClose, onCreated }: { onClose: () => v
               ))}
             </select>
           </div>
+
+          {suppliers.length > 0 && (
+            <div className="field">
+              <label htmlFor="supplier">Proveedor (opcional)</label>
+              <select id="supplier" className="input" value={supplierId} onChange={(e) => setSupplierId(e.target.value)} aria-describedby="supplier-hint">
+                <option value="">Sin proveedor</option>
+                {suppliers.map((sp) => (
+                  <option key={sp.id} value={sp.id}>
+                    {sp.name} · {sp.code}
+                  </option>
+                ))}
+              </select>
+              <span id="supplier-hint" className="hint">Necesario para registrar después la recepción de mercancía.</span>
+            </div>
+          )}
 
           <fieldset className="lines">
             <legend>Productos</legend>

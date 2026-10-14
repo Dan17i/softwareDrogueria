@@ -260,7 +260,10 @@ textarea.input { padding: var(--space-sm) var(--space-md); min-height: 72px; res
   }
   .brand,
   .nav-user span { display: none; }
-  .nav-links { grid-auto-flow: column; grid-auto-columns: 1fr; flex: 1; min-width: 0; }
+  /* Con 5-6 secciones no caben: la barra se desplaza y el enlace cortado del borde invita a deslizar */
+  .nav-links { grid-auto-flow: column; grid-auto-columns: max-content; flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: none; scroll-snap-type: x proximity; }
+  .nav-links::-webkit-scrollbar { display: none; }
+  .nav-link { scroll-snap-align: start; white-space: nowrap; }
   .nav-link { justify-content: center; padding: 0 var(--space-xs); font-size: var(--text-sm); }
   .nav-user .btn { padding: 0 var(--space-sm); font-size: var(--text-sm); }
   .nav-user { margin: 0; }
@@ -404,3 +407,6 @@ kbd { font: 600 var(--text-xs) var(--font-body); padding: 1px 6px; border: 1px s
 .line { display: grid; grid-template-columns: 1fr 84px auto; gap: var(--space-sm); align-items: center; }
 .line-hint { grid-column: 1 / -1; color: var(--danger); }
 @media (max-width: 760px) { .line { grid-template-columns: 1fr 76px; } .line .btn-ghost { grid-column: 1 / -1; justify-self: start; } }
+
+.receipt-line { display: grid; grid-template-columns: 1fr 96px; gap: var(--space-sm); align-items: center; }
+.diff { color: var(--warn); font-size: var(--text-xs); }

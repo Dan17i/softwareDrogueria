@@ -1,11 +1,17 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import { NavLink } from 'react-router-dom'
-import { canManageCustomers, canReadOrders } from '../api'
+import { NavLink, useLocation } from 'react-router-dom'
+import { canManageCustomers, canReadOrders, canReadReceipts } from '../api'
 import { useAuth } from '../auth'
 
 export default function Layout({ children }: { children: ReactNode }) {
   const { session, logout } = useAuth()
   const [confirming, setConfirming] = useState(false)
+  const { pathname } = useLocation()
+
+  // En móvil la barra se desplaza: mantiene a la vista la sección activa
+  useEffect(() => {
+    document.querySelector('.nav-link.active')?.scrollIntoView({ inline: 'center', block: 'nearest' })
+  }, [pathname])
 
   // La confirmación expira sola: un toque accidental no deja la sesión "armada".
   useEffect(() => {
@@ -36,6 +42,16 @@ export default function Layout({ children }: { children: ReactNode }) {
           {session && canManageCustomers(session.role) && (
             <NavLink to="/clientes" className="nav-link">
               Clientes
+            </NavLink>
+          )}
+          {session && canReadReceipts(session.role) && (
+            <NavLink to="/recepciones" className="nav-link">
+              Recepciones
+            </NavLink>
+          )}
+          {session && canReadReceipts(session.role) && (
+            <NavLink to="/proveedores" className="nav-link">
+              Proveedores
             </NavLink>
           )}
         </div>
