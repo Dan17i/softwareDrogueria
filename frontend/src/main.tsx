@@ -4,6 +4,8 @@ import { BrowserRouter } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import App from './App'
 import { AuthProvider } from './auth'
+import '@fontsource-variable/bricolage-grotesque/opsz.css'
+import '@fontsource-variable/hanken-grotesk/wght.css'
 import './index.css'
 
 createRoot(document.getElementById('root')!).render(

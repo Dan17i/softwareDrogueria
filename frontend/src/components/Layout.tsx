@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { canManageCustomers, canReadOrders, canReadReceipts } from '../api'
 import { useAuth } from '../auth'
+import LegalLinks from './LegalLinks'
 import useUnreadCount from './useUnreadCount'
 
 export default function Layout({ children }: { children: ReactNode }) {
@@ -24,6 +25,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 
   return (
     <div className="shell">
+      <a className="skip-link" href="#contenido">Saltar al contenido</a>
       <nav className="nav" aria-label="Principal">
         <div className="brand">
           Bellavista
@@ -79,7 +81,10 @@ export default function Layout({ children }: { children: ReactNode }) {
           </button>
         </div>
       </nav>
-      <main className="main">{children}</main>
+      <main className="main" id="contenido" tabIndex={-1}>
+        {children}
+        <LegalLinks />
+      </main>
     </div>
   )
 }

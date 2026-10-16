@@ -11,6 +11,8 @@ import Products from './pages/Products'
 import Receipts from './pages/Receipts'
 import Suppliers from './pages/Suppliers'
 
+const Privacy = lazy(() => import('./pages/Legal').then((m) => ({ default: m.Privacy })))
+const Cookies = lazy(() => import('./pages/Legal').then((m) => ({ default: m.Cookies })))
 const Recover = lazy(() => import('./pages/Recover').then((m) => ({ default: m.Recover })))
 const ResetPassword = lazy(() => import('./pages/Recover').then((m) => ({ default: m.ResetPassword })))
 
@@ -25,6 +27,8 @@ export default function App() {
     <Suspense fallback={null}>
     <Routes>
       <Route path="/login" element={session ? <Navigate to="/" replace /> : <Login />} />
+      <Route path="/privacidad" element={<Privacy />} />
+      <Route path="/cookies" element={<Cookies />} />
       <Route path="/recuperar" element={<Recover />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route element={<Protected />}>

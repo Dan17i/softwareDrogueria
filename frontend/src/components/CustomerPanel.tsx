@@ -80,23 +80,23 @@ export default function CustomerPanel({ customer, onClose, onSaved }: Props) {
         </div>
         <div className="field">
           <label htmlFor="c-name">Nombre</label>
-          <input id="c-name" className="input" value={form.name} onChange={set('name')} required minLength={3} maxLength={100} />
+          <input id="c-name" className="input" autoComplete="off" value={form.name} onChange={set('name')} required minLength={3} maxLength={100} />
           <span className="hint">Mínimo 3 caracteres.</span>
         </div>
         <div className="row-2">
           <div className="field">
-            <label htmlFor="c-email">Correo</label>
-            <input id="c-email" className="input" type="email" value={form.email} onChange={set('email')} />
+            <label htmlFor="c-email">Correo <span className="hint">(opcional)</span></label>
+            <input id="c-email" className="input" autoComplete="off" type="email" value={form.email} onChange={set('email')} />
           </div>
           <div className="field">
-            <label htmlFor="c-phone">Teléfono</label>
-            <input id="c-phone" className="input" type="tel" value={form.phone} onChange={set('phone')} maxLength={20} />
+            <label htmlFor="c-phone">Teléfono <span className="hint">(opcional)</span></label>
+            <input id="c-phone" className="input" autoComplete="off" type="tel" value={form.phone} onChange={set('phone')} maxLength={20} />
           </div>
         </div>
         <div className="row-2">
           <div className="field">
-            <label htmlFor="c-city">Ciudad</label>
-            <input id="c-city" className="input" value={form.city} onChange={set('city')} maxLength={100} />
+            <label htmlFor="c-city">Ciudad <span className="hint">(opcional)</span></label>
+            <input id="c-city" className="input" autoComplete="off" value={form.city} onChange={set('city')} maxLength={100} />
           </div>
           <div className="field">
             <label htmlFor="c-credit">Cupo de crédito</label>
@@ -105,8 +105,8 @@ export default function CustomerPanel({ customer, onClose, onSaved }: Props) {
           </div>
         </div>
         <div className="field">
-          <label htmlFor="c-address">Dirección</label>
-          <input id="c-address" className="input" value={form.address} onChange={set('address')} maxLength={255} />
+          <label htmlFor="c-address">Dirección <span className="hint">(opcional)</span></label>
+          <input id="c-address" className="input" autoComplete="off" value={form.address} onChange={set('address')} maxLength={255} />
         </div>
         {customer && (
           <label className="check">
